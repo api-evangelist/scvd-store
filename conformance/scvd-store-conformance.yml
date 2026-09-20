@@ -1,0 +1,234 @@
+generated: '2026-09-19'
+method: searched
+source: https://scvd.store/.well-known/trust.json
+derived_from: openapi/scvd-store-openapi.json
+docs:
+- https://scvd.store/developers
+- https://scvd.store/auth.md
+- https://scvd.store/deprecation
+- https://scvd.store/.well-known/api-catalog
+summary: >-
+  SCVD General Store's conformance profile is the agentic-commerce protocol stack, implemented unusually
+  completely and declared in the contract itself rather than only in prose: x402 v2 with the Signed Offers &
+  Receipts extension (JWS EdDSA over Ed25519, kid as a did:web URL) on every one of 39 402-bearing operations;
+  RFC 9728 protected-resource metadata that honestly declares no authorization server; RFC 9457 problem
+  objects declared on every 4xx/5xx; an RFC 9727 API catalog; RFC 9116 security.txt; RFC 8594 Sunset and
+  Deprecation headers as written policy (nothing is deprecated today, so none are sent today); the IETF
+  RateLimit header fields on the five metered doors; MCP 2025-06-18 with MCP Apps ui:// templates; an A2A 0.3.0
+  card graded conformant; a UCP 2026-08-25 business profile; ARD 1.0; did:web; Web Bot Auth key directory
+  (RFC 9421); ERC-8004; Atom feeds; llms.txt, agents.md and SKILL.md conventions. It declares no OAuth, no
+  OIDC, no SOC 2/ISO/PCI — trust.json lists "no third-party security audit of anything here, and no plans for
+  one" under not_claimed — so no Compliance pointer is emitted. The x402 declaration is the market's
+  domain-standard signature and is recorded as such.
+standards:
+- id: x402
+  name: x402 HTTP payment protocol
+  version: '2'
+  conforms: true
+  domain_standard_signature: true
+  verification: observed
+  evidence: >-
+    CONTRACT: openapi/scvd-store-openapi.json declares 402 responses on 39 operations (35 GET /api/buy/{item}
+    doors, /api/practice/{scenario}, the almanac and open-for-business pages) each with x-payment-info
+    {protocol: x402, x402Version: 2, scheme: exact, accepts[] per rail} and components.headers
+    PAYMENT-REQUIRED / WWW-Authenticate; components.parameters.IdempotencyKey. LIVE: GET
+    https://scvd.store/api/buy/small_blessing on 2026-09-19 returned HTTP 402 with a base64 PAYMENT-REQUIRED
+    header decoding to {"x402Version":2,"accepts":[5 entries: eip155:8453, eip155:137, eip155:42161,
+    eip155:480, solana:5eykt…; scheme exact, amount "5000", asset USDC contract, payTo, maxTimeoutSeconds 300,
+    extra.assetTransferMethod eip3009],"extensions":{"bazaar":…,"offer-receipt":{offers:[5 JWS]}}} and a
+    PaymentRequiredChallenge body with idempotency.suggested_key. DISCOVERY: /.well-known/x402.json (43
+    resources), /.well-known/oauth-protected-resource x402 block.
+  note: The 402 is the provider's product as well as its paywall — it runs a free conformance battery (31 named defect classes, errors/scvd-store-defects.json) against OTHER x402 endpoints.
+- id: x402-offer-receipt
+  name: x402 Signed Offers & Receipts extension
+  conforms: true
+  domain_standard_signature: true
+  evidence: >-
+    The live 402 carried extensions.offer-receipt.info.offers[] — one compact JWS per accepts entry, alg EdDSA,
+    kid did:web:scvd.store#key-2, committing resourceUrl, scheme, network, asset, payTo, amount and validUntil
+    before payment. trust.json standards.what_is_implemented names the extension and PAYMENT-RESPONSE
+    receipts; /.well-known/conformance/offer-receipt-vectors.json (200, 14,608 bytes) publishes deterministic
+    vectors; POST /api/conformance/v1 verifies any issuer's artifact.
+- id: mpp
+  name: 'Machine Payments Protocol (payment challenge via WWW-Authenticate: Payment)'
+  conforms: true
+  verification: observed
+  evidence: >-
+    The live 402 also carried `WWW-Authenticate: Payment id=…, realm="scvd.store", method="evm",
+    intent="charge", request=<base64>, expires=…, opaque=…`; the OpenAPI's x-scvd-native-checkout block and
+    per-operation x-payment-info.protocols list {mpp: {method: evm, intent: charge}} beside x402; the homepage
+    counts purchases "via x402" and "via mpp" separately. trust.json discovery_by_protocol lists MPP as
+    "inspection" scope with a MPPScan listing confirmed 2026-09-19.
+- id: rfc9728-protected-resource
+  name: OAuth 2.0 Protected Resource Metadata
+  conforms: true
+  verification: observed
+  evidence: >-
+    GET /.well-known/oauth-protected-resource -> 200 application/json with resource, resource_name,
+    resource_documentation, resource_policy_uri, resource_tos_uri, bearer_methods_supported [],
+    scopes_supported []. authorization_servers is ABSENT on purpose (no OAuth server exists; auth.md explains
+    the omission). Every 402 carries WWW-Authenticate naming resource_metadata per the spec's own header
+    description.
+  note: Present and well-formed, but it advertises no authorization server, no dynamic client registration and no delegated identity — the document's job here is to say "anonymous or x402" in machine form.
+- id: oauth2
+  conforms: false
+  evidence: >-
+    No oauth2 securityScheme; /.well-known/oauth-authorization-server 404; auth.md says "No account, no API
+    key, no OAuth, no signup."
+- id: oidc
+  conforms: false
+  evidence: /.well-known/openid-configuration 404.
+- id: rfc9457-problem-details
+  name: RFC 9457 Problem Details
+  conforms: true
+  verification: partial
+  evidence: >-
+    CONTRACT: components.schemas.Problem (type, title, status, detail, instance + the legacy `error` field,
+    required [error]); 23 responses declare application/problem+json and every 4xx/5xx references the Problem
+    schema through components.responses BadRequest/NotFound/TooManyRequests/ServerError; auth.md: "Every 4xx
+    and 5xx from this store is an RFC 9457 problem object with a human-readable error field beside it".
+    LIVE: the two error bodies observed on 2026-09-19 (400 on POST /api/preflight/v2 with an empty body; 404 on
+    GET /api/verify/{nonexistent}) were served as application/json with `error`, `code`/`next_action`/
+    `documentation_url` or `valid`/`freshly_minted_note` fields and WITHOUT type/title/status/instance — the
+    Problem schema's required set is only [error], so they validate against it, but they are not
+    problem+json on the wire.
+  note: Declared everywhere; the observed responses carry the store's own envelope with the RFC fields optional. Recorded as partial rather than claiming full wire conformance.
+- id: rfc9727-api-catalog
+  name: RFC 9727 api-catalog well-known URI
+  conforms: true
+  verification: observed
+  evidence: GET /.well-known/api-catalog -> 200 with Content-Type application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727", an RFC 9264 linkset of 22 items with service-desc/service-doc/service-meta/status relations. Saved as well-known/scvd-store-api-catalog.json.
+- id: rfc9116-security-txt
+  conforms: true
+  verification: observed
+  evidence: /.well-known/security.txt 200 with Contact, Expires (2027-03-20), Canonical, Policy, Preferred-Languages. Saved as well-known/scvd-store-security.txt.
+- id: rfc8594-sunset
+  name: RFC 8594 Sunset header + Deprecation header
+  conforms: true
+  verification: policy-only
+  evidence: >-
+    x-versioning.deprecation in the OpenAPI and https://scvd.store/deprecation: "A version being retired
+    serves the RFC 8594 Deprecation and Sunset headers on every response for at least 90 days before it stops
+    answering, and the date is published at /developers before the headers appear"; headers named Sunset,
+    Deprecation, Link rel="sunset", Link rel="successor-version". currently_deprecated is [] and a HEAD on the
+    deprecated /zodiac route on 2026-09-19 returned no Deprecation/Sunset header — consistent with the policy
+    ("Nothing is deprecated today, so nothing sends them today"), so the headers themselves were not observed.
+- id: ietf-ratelimit-headers
+  name: IETF RateLimit header fields (draft-ietf-httpapi-ratelimit-headers)
+  conforms: true
+  verification: declared
+  evidence: >-
+    components.headers RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, RateLimit-Policy and RateLimit
+    (structured-field form with "isolate";q=N;w=60 and "global";q=N;w=60) declared on the 200 and 429 of the
+    five metered doors (x-rate-limiting.limited_paths); a 2026-09-15 correction removed them from the 400,
+    which never spends a probe. Not observed live: the only metered call this pass could make without
+    spending the provider's outbound probe on a third-party host was refused with 400 (a Worker cannot fetch
+    its own hostname), which by design carries no RateLimit fields.
+- id: idempotency-key
+  name: Idempotency-Key request header (draft-ietf-httpapi-idempotency-key-header shape)
+  conforms: true
+  evidence: components.parameters.IdempotencyKey (header, 16–128 chars) referenced on every 402-bearing purchase operation; `_meta['x402/idempotency-key']` over MCP; suggested_key in every 402 body; 24-hour replay cache keyed by paying wallet (trust.json wallet_safety). See conventions/scvd-store-conventions.yml.
+- id: mcp
+  name: Model Context Protocol
+  version: '2025-06-18'
+  conforms: true
+  verification: observed
+  evidence: 'initialize on /mcp, /mcp/verifier and /mcp/docs each returned protocolVersion "2025-06-18", serverInfo version 0.5.0; tools/list returned 20 / 5 / 1 tools with inputSchema and annotations; resources/list returned 9 / — / 7. The server card declares 2026-07-28, 2025-11-25 and 2025-03-26 as well.'
+- id: mcp-apps
+  name: MCP Apps (SEP-1865, io.modelcontextprotocol/ui extension)
+  conforms: true
+  verification: observed
+  evidence: 'initialize capabilities.extensions {"io.modelcontextprotocol/ui": {mimeTypes: ["text/html;profile=mcp-app"]}}; resources/list lists ui://scvd-general-store/preflight-card.html and verify-card.html; preflight_endpoint and verify_artifact carry _meta.ui.'
+- id: a2a
+  name: Agent2Agent protocol
+  version: '0.3.0'
+  conforms: true
+  verification: observed
+  evidence: a2a/scvd-store-agent-card.json (protocolVersion 0.3.0, JSONRPC, capabilities object, 3 skills); POST https://scvd.store/a2a tasks/get -> -32001 Task not found. Graded conformant in a2a/scvd-store-a2a.yml.
+- id: json-rpc-2.0
+  conforms: true
+  evidence: /mcp, /mcp/verifier, /mcp/docs and /a2a all answer {"jsonrpc":"2.0", …}.
+- id: ucp
+  name: Universal Commerce Protocol business profile
+  version: '2026-08-25'
+  conforms: true
+  verification: declared
+  evidence: /.well-known/ucp (and .json) 200 — dev.ucp.shopping REST service at https://scvd.store/ucp/v1, catalog.search / catalog.lookup / checkout / order capabilities, a custom store.scvd.shopping.inputs capability and five store.scvd.payment.usdc x402 handlers. The OpenAPI x-scvd-ucp says checkout "advertised". trust.json cites a UCP Checker report of 2026-09-19 with schema warnings. The /ucp/v1 endpoint was not exercised.
+- id: ard
+  name: Agentic Resource Discovery
+  version: '1.0'
+  conforms: true
+  verification: observed
+  evidence: /.well-known/ard.json 200 (specVersion 1.0, host did:web identifier, JWS-signed trustManifest, entries[]); robots.txt Agentmap directive; predecessor /.well-known/ai-catalog.json also served.
+- id: did-web
+  conforms: true
+  verification: observed
+  evidence: /.well-known/did.json 200 application/did+json, id did:web:scvd.store, JsonWebKey2020 Ed25519 key; kid in every JWS offer is did:web:scvd.store#key-2.
+- id: rfc9421-web-bot-auth
+  name: HTTP Message Signatures key directory (Web Bot Auth)
+  conforms: true
+  verification: observed
+  evidence: /.well-known/http-message-signatures-directory 200 application/http-message-signatures-directory+json; the store also runs a free Web Bot Auth check (POST /api/bot-auth/check).
+- id: erc-8004
+  name: ERC-8004 on-chain agent registration
+  conforms: true
+  verification: declared
+  evidence: /.well-known/agent-registration.json 200; x402.json chain_identity block names the registry, agent_id and chain. Not verified on chain in this pass.
+- id: rfc8785-jcs
+  name: RFC 8785 JSON Canonicalization Scheme
+  conforms: true
+  evidence: BuyerProof schema ("RFC 8785 JSON"), pricing.md signature "over their RFC 8785 canonical form", ARD trustManifest verificationMethods JWS-EdDSA-RFC8785.
+- id: caip-2
+  conforms: true
+  evidence: 'accepts[].network values eip155:8453, eip155:137, eip155:42161, eip155:480, solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp.'
+- id: eip-3009
+  conforms: true
+  evidence: accepts[].extra.assetTransferMethod "eip3009" on every EVM rail; bounty payouts are "a signed EIP-3009 authorization".
+- id: opentimestamps
+  conforms: true
+  verification: declared
+  evidence: corpus snapshots and the anchor log are OTS-stamped into Bitcoin (corpus.json, /.well-known/anchor-log.json, the bitcoin_anchor door).
+- id: atom
+  name: Atom Syndication Format (RFC 4287)
+  conforms: true
+  verification: observed
+  evidence: /feeds/corrections.xml 200 application/atom+xml (75 entries); /feeds lists four feeds plus per-host feeds.
+- id: llms-txt
+  conforms: true
+  verification: observed
+  evidence: /llms.txt 200 text/plain (26,185 bytes; saved), /llms-full.txt referenced (not saved — gitignored class), /agents.md and /index.md markdown twins, markdown negotiation by Accept on many pages.
+- id: agent-skills
+  name: Agent Skills (SKILL.md frontmatter)
+  conforms: true
+  verification: observed
+  evidence: /skill.md (name scvd-general-store, version 3.18.0) and /skills/execution-contract.md served with SKILL.md frontmatter; repo skills/ directory; saved under skills/.
+- id: content-signal
+  conforms: true
+  evidence: 'robots.txt Content-Signal: search=yes, ai-train=yes, ai-input=yes.'
+- id: openapi-3.1
+  conforms: true
+  version: 3.1.0
+  evidence: openapi/scvd-store-openapi.json openapi "3.1.0"; parses; 180 paths, 196 operations, 100% operationIds and summaries, 16 component schemas, 6 shared responses, 7 headers, 1 parameter, 1 securityScheme.
+  gaps:
+  - No tags declared or applied (196 tagless operations).
+  - No examples in any response content (0 of 196 operations); worked calls live in openapi-tools.json and the 402 bodies instead.
+  - info has no termsOfService or license (rights live at /rights and /pricing).
+  - Three deprecated operations (/zodiac*) carry deprecated: true but x-versioning.currently_deprecated is [] — the archive routes are flagged in-spec without a sunset date.
+- id: soc2
+  conforms: false
+  evidence: 'trust.json not_claimed: "No third-party security audit of anything here, and no plans for one." No certification of any kind is claimed; the trust page is explicit about it.'
+- id: pci-dss
+  conforms: false
+  evidence: Not a card acquirer; settlement is wallet-to-wallet USDC through the Coinbase CDP facilitator. Not claimed.
+- id: scim
+  conforms: false
+- id: fhir-r4
+  conforms: false
+- id: odata
+  conforms: false
+- id: json-api
+  conforms: false
+- id: acp
+  name: Agentic Commerce Protocol
+  conforms: false
+  evidence: /.well-known/acp.json 404; not claimed anywhere on the site.

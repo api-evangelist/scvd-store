@@ -1,0 +1,59 @@
+generated: '2026-09-19'
+method: searched
+source: https://github.com/seancrecord/scvd-general-store-repo/blob/main/cli/README.md
+docs:
+- https://scvd.store/developers
+- https://www.npmjs.com/package/scvd-cli
+description: >-
+  `scvd` — the official command line for scvd.store. Zero dependencies, Node 18.17+, MIT, published from CI
+  with npm provenance. It holds no key and signs nothing, so it cannot spend money; every verdict it prints is
+  one the store served (`--json` prints the store's response verbatim). The package is scvd-cli and the
+  command is scvd (npm's typosquat guard refused the bare name). The package itself is catalogued in
+  packages/scvd-store-packages.yml; this artifact is its command surface.
+repo: https://github.com/seancrecord/scvd-general-store-repo/tree/main/cli
+package: scvd-cli
+version: 0.3.0
+published: '2026-09-10'
+install:
+  npm: npm i -g scvd-cli
+  no_install: node cli/scvd.mjs preflight <url>   # the whole tool is one file, from a clone
+  github_action: 'uses: seancrecord/scvd-general-store-repo/action/preflight@main (input: urls)'
+global_flags: ['--json (print the store''s own response verbatim)', '--week <week>']
+commands:
+  x402_instruments:
+  - {name: 'preflight <url>', description: 'Does that x402 door answer a well-formed 402? One probe, every check named, testnet traps flagged.', rest: post_api_preflight_v2}
+  - {name: 'conformance <file|->', description: 'Is that compact-JWS signed offer or receipt well-formed, correctly signed and unexpired? Any issuer''s.', rest: post_api_conformance_v1}
+  - {name: 'receipt <file|->', description: 'Verify any issuer''s receipt JSON and get back a signed verdict.', rest: post_api_verify_receipt}
+  - {name: 'look <url>', description: 'What the store holds about that door: one live preflight beside the signed history, the tier with its fraction. Exits 1 on not_ready.', rest: post_api_look_v1, added: 0.2.0}
+  - {name: 'before-you-pay <url> [--cap <usd>]', description: 'Will a stock x402 client pay that door, and which accept would it sign? A dry run: nothing is signed, nothing is paid.', rest: post_api_before_you_pay_v1, added: 0.2.0}
+  - {name: 'reproduce <url> [--since <week>]', description: 'Probe the door now and set the answer against the signed row: same, moved, instrument_moved, not_comparable or no_such_round.'}
+  - {name: 'onpage <url>', description: 'What that page serves a machine reader: title, description, canonical, headings, JSON-LD.', rest: post_api_onpage_v1}
+  signature_verification:
+  - {name: 'verify <id>', description: 'Verify anything this store ever signed. Free, forever, including artifacts you did not buy.', rest: get_api_verify_id}
+  corpus_and_datasets:
+  - {name: 'corpus [--since <week>]', description: 'The full weekly signed census with timestamp status; with --since, what moved since that week.', rest: [get_corpus_json, get_corpus_diff_json]}
+  - {name: 'corpus-index [--limit <n>] [--cursor <cursor>]', description: 'One compact metadata page including unreadable rows and the next link. No automatic pagination.', rest: get_corpus_index_json, added: 0.3.0}
+  - {name: 'host <host>', description: 'Every signed round that met a host, the gaps by reason, the tier with its fraction, and the citation for the latest row.', rest: get_corpus_host_host_json}
+  - {name: 'cite <host> [--week <week>]', description: 'The citation for a host''s row, as one line, as Markdown and as the JSON shape the citation watch reads.'}
+  - {name: 'fresh-set', description: 'This week''s x402 doors that answered a conformant challenge.', rest: get_fresh_set}
+  - {name: 'month [YYYY-MM]', description: 'The state of x402 for one month.', added: 0.2.0}
+  - {name: 'feeds', description: 'The four Atom feeds by address.', added: 0.2.0}
+  catalog_and_meta:
+  - {name: 'menu', description: 'What is on the shelf, and for how much.', rest: get_menu_json}
+  - {name: 'catalog', description: 'Every developer resource, from the RFC 9727 API catalog.', rest: get_well_known_api_catalog}
+  - {name: 'versions', description: 'Every API version served, its status, and any announced sunset.', rest: get_deprecation}
+exit_codes:
+  0: The instrument ran and the answer was yes (a preflight verdict of unreachable also exits 0, deliberately).
+  1: 'The instrument ran and the answer was no — a not_ready verdict, an invalid artifact, an id that does not verify.'
+  2: You asked for something the store refused as malformed.
+  3: The store, or the network between you and it, did not answer. Also the probe-budget refusal.
+guarantees:
+- It never asks for a credential (no account, key, wallet, seed phrase or secret env var).
+- It cannot spend money (holds no key, signs nothing).
+- It stores nothing (no config file, cache or telemetry).
+remediation_output: Where a report names a failed check the store sends `remediation` rows and the CLI prints them as FIX lines — defect class, definition URL, operator action, buyer action. Printed, never derived locally.
+changelog: https://github.com/seancrecord/scvd-general-store-repo/blob/main/cli/CHANGELOG.md
+sibling_clis:
+- {package: scvd-tab, bins: [scvd-tab, scvd-tab-pager], purpose: local append-only spend/signup ledger MCP server}
+- {package: scvd-preflight, bin: scvd-preflight, purpose: preflight-only client (also Python and Go ports)}
+- {package: x402-verify, bin: scvd-evidence, purpose: offline evidence export and verification}

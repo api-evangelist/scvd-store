@@ -1,0 +1,424 @@
+generated: '2026-09-19'
+method: searched
+source: https://scvd.store/pricing (the signed pricing charter, v1 effective 2026-08-20) and https://scvd.store/menu.json
+  (the live shelf; as_of 2026-09-11, served 2026-09-19)
+docs:
+- https://scvd.store/pricing.md
+- https://scvd.store/menu.json?view=compact
+- https://scvd.store/api/trade/contract
+- https://scvd.store/credit
+plan_count: 35
+currency: USDC
+model: pay-per-call in USDC over x402 v2 (Base, Polygon, Arbitrum, World, Solana) or MPP on Base; no plans, no tiers,
+  no subscription, no account
+summary: 'There are no plans and no tiers here: each door is one price, paid per call, and a door that takes more
+  than one amount says so in its row (pricing.md). The charter is ed25519-signed over its RFC 8785 canonical form
+  and commits to one_price (every wallet sees the same price; no surge, no A/B), floor_stays_low (the cheapest real
+  settlement stays under a penny), tips_are_floors, verification_stays_free (/api/verify, the conformance desk and
+  the preflight are free and stay free), changes_are_dated (the menu lives in a public repository), scarcity_is_labor
+  (only human-fulfilled items carry caps) and no_gate_on_the_door (no membership required). The 35 rows below are
+  the live shelf; every free instrument (preflight, conformance, look, verify, corpus, defects, fresh set, feeds)
+  is free and is not a row. Trade-counter resellers pay a published formula instead: trade_price = ceil_to_cent(retail
+  x (1 + 20% uplift) / (1 - partner_share)), partner share 5% rising to 8% at 1,000 and 12% at 10,000 monthly deliveries,
+  minimum retail $0.50. Regulars'' credit: 5% of every organic purchase banks to the paying wallet, cashes out in
+  USDC at $1, idle balances expire after 90 days.'
+free_tier:
+  price: 0
+  included:
+  - POST /api/preflight/v1 and /v2 (30 probes per isolate per minute, 60 global)
+  - POST /api/conformance/v1
+  - POST /api/look/v1
+  - POST /api/before-you-pay/v1
+  - GET /api/verify/{id} (unlimited, forever)
+  - corpus.json, fresh-set, defects.json, doors.json, ledger, feeds
+  - MCP tools/list, resources/read, 14 free tools, the 5-tool verifier door
+  - 'A2A: all three skills'
+  - POST /api/a2a/check (free A2A card check, shared budget)
+  note: No account, no key, no signup.
+floor_usd: 0.001
+ceiling_usd: 1500
+priced_doors: 35
+doors_above_stock_client_ceiling: 14
+plans:
+- id: spot_check
+  name: Spot Check
+  price: 0.001
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - host
+  listing: https://scvd.store/menu/spot_check
+- id: settlement_attestation
+  name: Settlement Attestation
+  price: 0.004
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - tx_hash
+  listing: https://scvd.store/menu/settlement_attestation
+- id: small_blessing
+  name: A Small Blessing
+  price: 0.005
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  listing: https://scvd.store/menu/small_blessing
+- id: settlement_reconciliation
+  name: Settlement Reconciliation
+  price: 0.006
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - tx_hash
+  listing: https://scvd.store/menu/settlement_reconciliation
+- id: daily_fortune
+  name: The Daily Fortune
+  price: 0.01
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  listing: https://scvd.store/menu/daily_fortune
+- id: the_confession
+  name: The Confession
+  price: 0.01
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - confession
+  listing: https://scvd.store/menu/the_confession
+- id: attestation_bundle
+  name: A Sheaf of Attestations
+  price: 0.05
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - tx_hashes
+  listing: https://scvd.store/menu/attestation_bundle
+- id: the_mandate
+  name: The Mandate
+  price: 0.1
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - mandate
+  listing: https://scvd.store/menu/the_mandate
+- id: the_case_file
+  name: The Case File
+  price: 0.25
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - tx_hash
+  listing: https://scvd.store/menu/the_case_file
+- id: window_pick
+  name: a window pick
+  price: 0.49
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  listing: https://scvd.store/menu/window_pick
+- id: hello
+  name: A Signed Hello
+  price: 0.5
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  listing: https://scvd.store/menu/hello
+- id: good_buyer
+  name: The Good Buyer
+  price: 0.99
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/good_buyer
+- id: signature_agent_card
+  name: The Calling Card
+  price: 0.99
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/signature_agent_card
+- id: the_statement
+  name: The Statement
+  price: 0.99
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - wallet
+  listing: https://scvd.store/menu/the_statement
+- id: luckies
+  name: a lucky
+  price: 0.99
+  currency: USDC
+  period: per call
+  pricing: pay_what_it_deserves
+  fulfillment: instant
+  price_tiers:
+  - 0.99
+  - 1.98
+  - 4.95
+  note: pay what it deserves — the minimum is the price; anything above is recorded as a tip
+  listing: https://scvd.store/menu/luckies
+- id: pack
+  name: a pack of cards
+  price: 0.99
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  listing: https://scvd.store/menu/pack
+- id: coffees_for_closers
+  name: Coffee's for Closers
+  price: 0.99
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - win
+  listing: https://scvd.store/menu/coffees_for_closers
+- id: bitcoin_anchor
+  name: A Bitcoin Anchor
+  price: 1
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - digest
+  listing: https://scvd.store/menu/bitcoin_anchor
+- id: context_anchor
+  name: Context Anchor
+  price: 1
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - summary
+  listing: https://scvd.store/menu/context_anchor
+- id: passport_refresh
+  name: The Refresh
+  price: 1
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/passport_refresh
+- id: graffiti_on_a_train
+  name: Graffiti on a Train
+  price: 1
+  currency: USDC
+  period: per call
+  pricing: pay_what_it_deserves
+  fulfillment: instant
+  price_tiers:
+  - 1
+  - 2
+  - 5
+  note: pay what it deserves — the minimum is the price; anything above is recorded as a tip
+  required_params:
+  - tag
+  listing: https://scvd.store/menu/graffiti_on_a_train
+- id: a2a_repair_kit
+  name: The A2A Repair Kit
+  price: 49
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/a2a_repair_kit
+- id: standing_watch
+  name: The Night Watch
+  price: 5
+  currency: USDC
+  period: term
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/standing_watch
+- id: service_audit
+  name: The Once-Over
+  price: 5
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/service_audit
+- id: conformance_watch
+  name: The Conformance Watch
+  price: 5
+  currency: USDC
+  period: term
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/conformance_watch
+- id: onpage_audit
+  name: The Shop Window
+  price: 3
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/onpage_audit
+- id: launch_check
+  name: The Launch Check
+  price: 5
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/launch_check
+- id: opening_day
+  name: The Opening Day
+  price: 9
+  currency: USDC
+  period: term
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/opening_day
+- id: provenance_check
+  name: The Company an Address Keeps
+  price: 5
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - address
+  listing: https://scvd.store/menu/provenance_check
+- id: recurring_patronage
+  name: Recurring Patronage
+  price: 3
+  currency: USDC
+  period: term
+  pricing: fixed
+  fulfillment: instant
+  listing: https://scvd.store/menu/recurring_patronage
+- id: trust_profile
+  name: The Hosted Profile
+  price: 21
+  currency: USDC
+  period: term
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - url
+  listing: https://scvd.store/menu/trust_profile
+- id: operator_statement
+  name: The Operator's Statement
+  price: 21
+  currency: USDC
+  period: term
+  pricing: fixed
+  fulfillment: instant
+  required_params:
+  - wallet
+  listing: https://scvd.store/menu/operator_statement
+- id: certificate_of_patronage
+  name: Certificate of Patronage
+  price: 20
+  currency: USDC
+  period: per call
+  pricing: pay_what_it_deserves
+  fulfillment: instant
+  price_tiers:
+  - 20
+  - 40
+  - 100
+  note: pay what it deserves — the minimum is the price; anything above is recorded as a tip
+  listing: https://scvd.store/menu/certificate_of_patronage
+- id: aura_walk
+  name: The Aura Walk
+  price: 150
+  currency: USDC
+  period: per call
+  pricing: fixed
+  fulfillment: human_queue
+  sla_hours: 168
+  required_params:
+  - url
+  listing: https://scvd.store/menu/aura_walk
+- id: the_collab
+  name: The Collab
+  price: 300
+  currency: USDC
+  period: per call
+  pricing: pay_what_it_deserves
+  fulfillment: human_queue
+  price_tiers:
+  - 300
+  - 600
+  - 1500
+  note: pay what it deserves — the minimum is the price; anything above is recorded as a tip
+  sla_hours: 168
+  listing: https://scvd.store/menu/the_collab
+reseller_pricing:
+  url: https://scvd.store/api/trade/contract
+  rule: trade_price = ceil_to_cent( retail x (1 + uplift) / (1 - partner_share) )
+  uplift_bps: 2000
+  min_retail_usd: 0.5
+  share_ladder:
+  - from_monthly_deliveries: 0
+    partner_share_bps: 500
+  - from_monthly_deliveries: 1000
+    partner_share_bps: 800
+  - from_monthly_deliveries: 10000
+    partner_share_bps: 1200
+  cadence: One-off, per delivery. Nothing at the counter recurs, and an account is never charged for a delivery
+    that did not happen.
+charter:
+  url: https://scvd.store/pricing
+  version: '1'
+  effective: '2026-08-20'
+  signed: true
+  clauses:
+  - one_price
+  - floor_stays_low
+  - tips_are_floors
+  - verification_stays_free
+  - changes_are_dated
+  - scarcity_is_labor
+  - no_gate_on_the_door
+  - trade_channel

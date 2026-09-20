@@ -1,0 +1,118 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+source: https://scvd.store/privacy
+docs:
+- https://scvd.store/.well-known/trust.json
+- https://scvd.store/rights
+- https://scvd.store/wind-down
+- https://scvd.store/deprecation
+- https://scvd.store/stack
+summary: >-
+  A one-person US LLC (Record Creative Co. LLC, Oak City, North Carolina) that collects almost nothing — no
+  accounts, no cookies, no IP logs — and publishes the horizontal signals it does have as JSON pages rather
+  than legal boilerplate. Four signals carry real substance and are recorded; the rest are honest absences.
+  No accessibility statement, no SBOM, no transparency report, no age signal, no GPC statement and no
+  incident-notification commitment were found at any conventional path (all 404) or in the docs. Nothing
+  here infers which regime reaches the provider.
+signals:
+  subprocessors:
+    url: https://scvd.store/stack
+    also: https://scvd.store/privacy
+    evidence:
+    - source: https://scvd.store/privacy
+      http_status: 200
+      fetched: '2026-09-19'
+      section: Third parties this store depends on
+      quote: 'Cloudflare hosts the store (traffic transits their network). The Coinbase CDP facilitator verifies and settles payments. Public chain RPCs are read to verify settlements. OpenTimestamps calendars receive document digests — never contents — for Bitcoin anchoring. The full dependency list, with what each can see, is published at /stack.'
+    - source: https://scvd.store/.well-known/trust.json
+      http_status: 200
+      fetched: '2026-09-19'
+      section: data_handling.third_party_processors
+      quote: 'Payments settle through the Coinbase CDP facilitator and the chain the buyer selected … Hosting is Cloudflare. Both are listed with their failure modes at /stack. Nothing else receives anything.'
+    - source: https://scvd.store/stack
+      http_status: 200
+      fetched: '2026-09-19'
+      note: A JSON page (7,460 bytes) listing every service the store depends on and does not control, with what each can see and its failure mode.
+    note: A named list of the processors that see request data (Cloudflare, Coinbase CDP, chain RPCs, OpenTimestamps) with what each receives — the substance of a subprocessor disclosure, published as a dependency list rather than under /legal/.
+  data_subject_request:
+    url: https://scvd.store/privacy
+    channel: POST https://scvd.store/api/letter (free, one a day, read by a human)
+    stated_sla: null
+    rights_named: [questions, corrections]
+    evidence:
+    - source: https://scvd.store/privacy
+      http_status: 200
+      fetched: '2026-09-19'
+      section: Questions, corrections, and your rights
+      quote: 'Write the mailbox: POST /api/letter — a person reads every one. What you own after a purchase is written out at /rights. When this store gets something wrong about data or anything else, the correction is published, dated, at /corrections.'
+    - source: https://scvd.store/privacy
+      section: same
+      quote: 'One honest limit, stated rather than buried: a signed public certificate cannot be deleted, because its permanence is what you bought and what everyone relying on it was promised.'
+    note: >-
+      A named channel and a stated limit on deletion, with no response SLA and no enumerated access/erasure
+      rights — the privacy page's position is that there is almost nothing to request ("no accounts, no
+      cookies, no tracking, no kept IP logs"). Recorded because the channel and the deletion limit are
+      published substance; a reader should not take it for a GDPR-style DSR portal.
+  support_lifetime:
+    url: https://scvd.store/deprecation
+    stated_period: 'at least 90 days before it stops answering'
+    evidence:
+    - source: https://scvd.store/deprecation
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: 'A version being retired carries RFC 8594 Sunset and the Deprecation header on every response for at least 90 days before it stops answering, and the date is published on this page before the headers appear.'
+    - source: https://scvd.store/deprecation
+      section: What is not promised
+      quote: 'Permanence. One operator and one key cannot honestly promise that any endpoint runs forever, and /wind-down says what happens to everything this store holds if the lights go off. What is promised is notice, in machine-readable form, at a stated minimum.'
+    note: The stated period is a minimum NOTICE before retirement, copied verbatim; the page explicitly declines to promise a support duration. Not normalised.
+  exit_assistance:
+    url: https://scvd.store/wind-down
+    also: https://scvd.store/rights
+    evidence:
+    - source: https://scvd.store/wind-down
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: 'If this store ever closes for good: what''s already signed stays true, what''s already public stays up, what was told to us in confidence stays with us and nowhere else, and the refund promise gets honored one last time before the lights go off. Decided now, not improvised then.'
+    - source: https://scvd.store/rights
+      http_status: 200
+      fetched: '2026-09-19'
+      section: summary
+      quote: 'buyer_owns_artifact true; transferable true; redistribution_permitted true; attribution_required false; commercial_use_permitted true; additional_licence_or_fee null'
+    - source: https://scvd.store/rights
+      section: honest_limit
+      quote: 'It is a statement of what this store claims and disclaims about things it sold you … not a contract drafted by a lawyer, not a licence with a version number, and not enforceable by anyone but the keeper.'
+    note: >-
+      Portability is structural — every purchased artifact is a bearer object the buyer owns outright and can
+      verify offline with the published key forever — and the wind-down page states, per class of held
+      thing, what survives closure. Recorded as exit assistance in substance; the provider itself labels it
+      "a statement of intent, not a mechanism".
+probed_absent:
+- {url: 'https://scvd.store/accessibility', status: 404}
+- {url: 'https://scvd.store/accessibility/vpat', status: 404}
+- {url: 'https://scvd.store/legal/subprocessors', status: 404}
+- {url: 'https://scvd.store/legal/dpa', status: 404}
+- {url: 'https://scvd.store/privacy/requests', status: 404}
+- {url: 'https://scvd.store/transparency', status: 404}
+- {url: 'https://scvd.store/security/sbom', status: 404}
+- {url: 'https://scvd.store/sbom', status: 404}
+- {url: 'https://scvd.store/.well-known/sbom', status: 404}
+- {url: 'https://scvd.store/docs/data-residency', status: 404}
+- {url: 'https://scvd.store/ai/transparency', status: 404}
+- {url: 'https://scvd.store/legal/report-content', status: 404}
+- {url: 'https://scvd.store/dpa', status: 404}
+- {url: 'https://scvd.store/humans.txt', status: 404}
+not_found:
+  sbom: 'Not published. The repo is public (MIT) with a package-lock.json, but no CycloneDX/SPDX document is served or linked; never derived.'
+  accessibility_conformance: No statement or VPAT.
+  training_data_summary: 'None. robots.txt states a position on being TRAINED ON (ai-train=yes) — that is a content signal about the site, not a summary of data the provider trained a model on; the provider ships no model.'
+  ai_transparency: 'No AI-disclosure page. llms.txt and skill.md describe the keeper as a named human and human-labor items as fulfilled by hand; nothing states whether copy is AI-written.'
+  global_privacy_control: 'No published GPC statement (and no cookies or tracking to opt out of, per privacy). Not set from a header probe.'
+  data_residency: Not stated; hosted on Cloudflare Workers (global edge) per /stack.
+  incident_notification: >-
+    No stated notification SLA. security.txt + trust.json standards say disclosure is "private-first and
+    symmetric: notify the operator before publication, including our own defects" — a disclosure posture, not
+    a customer-notification commitment.
+  age_assurance: None.
+  notice_and_action: None; public visitor entries are stated to be permanent.
+  transparency_report: 'None in the DSA sense. /stats, /pulse, /observatory and /corrections publish live operational counts and a dated record of the store''s own errors — accountability surfaces, not a takedown/request transparency report.'

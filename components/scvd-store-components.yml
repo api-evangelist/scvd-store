@@ -1,0 +1,45 @@
+generated: '2026-09-19'
+method: searched
+source: https://scvd.store/mcp.md
+docs:
+- https://scvd.store/developers
+- https://scvd.store/privacy
+- https://scvd.store/try
+description: >-
+  Client-side and embeddable surfaces distinct from the SDKs in packages/: a WebMCP script that registers the
+  free instruments on document.modelContext for browser-resident agents, a first-party browser till that asks
+  a wallet extension for one x402 signature, two MCP Apps card templates rendered by hosts that support the
+  extension, a WebMCP-declared conformance form, embeddable patron badges and an endpoint-passport freshness
+  chip. All first-party, all served from the apex.
+families:
+- family: WebMCP browser door
+  loader: https://scvd.store/webmcp.js
+  kind: script (document.modelContext tool registration)
+  components:
+  - {name: free instruments as browser tools, tools: [check_a2a_card, check_purchase, read_store_guide, read_binder, look_in_window, preflight_endpoint, look_at_door, check_before_you_pay, check_conformance, verify_artifact, check_order, find_in_catalog]}
+  - {name: quote_store_purchase, description: gets a free x402 quote}
+  - {name: complete_store_purchase, description: 'submits a payment already signed by the buyer''s wallet or payment client; "may transfer USDC and is marked consequential"'}
+  note: '"Discovery is arrival" — no connection to configure. The page carries origin-trial tokens; a browser without the API loads a no-op. The browser API itself supplies no wallet.'
+- family: Browser till
+  loader: https://scvd.store/till.js
+  kind: script (first-party, unminified, byte-identical to the public repo source)
+  components:
+  - {name: the till, description: 'On pages that sell something, asks a compatible EVM wallet extension for one EIP-712/EIP-3009 signature — no gas fee — and retries the door with PAYMENT-SIGNATURE. Sets no cookie, writes nothing to storage, talks only to this origin, never sees a key. Solana signing is not built into the till.'}
+  note: 'With scripting off, the page is unchanged and every instruction on it still works (privacy policy).'
+- family: MCP Apps cards (SEP-1865)
+  loader: served through resources/read on https://scvd.store/mcp (mimeType text/html;profile=mcp-app)
+  components:
+  - {uri: 'ui://scvd-general-store/preflight-card.html', bound_to: preflight_endpoint, renders: 'the verdict, the evidence ladder with un-climbed rungs at the same weight, what a single probe cannot tell you, and the store''s conflict of interest'}
+  - {uri: 'ui://scvd-general-store/verify-card.html', bound_to: verify_artifact}
+  note: 'Display-only by construction and by test — nothing that moves money renders. Observed by the provider rendering in Claude Desktop (stdio) and VS Code Copilot Chat, not over Claude''s remote connector (mcp.md, 2026-08-27/28).'
+- family: WebMCP-declared forms
+  components:
+  - {name: conformance desk form, url: 'https://scvd.store/conformance', description: 'A paste-an-artifact form declared to browser agents with WebMCP toolname attributes and deliberately without toolautosubmit — "an agent may fill it and a human presses submit".'}
+- family: Embeddable badges and chips
+  components:
+  - {name: patron badge, url_template: 'https://scvd.store/badges/{patron_number}.svg', description: 'SVG badge returned as badge_url on every purchase delivery.'}
+  - {name: endpoint-passport freshness chip, description: 'A free embeddable chip that decays with the passport''s freshness state (menu.json passport_refresh listing: "the free embeddable chip that decays with it").'}
+  - {name: hosted trust profile, url_template: 'https://scvd.store/profiles/{host}', description: 'A standing evidence page about a third party''s endpoint at this store''s domain (paid, trust_profile).'}
+distinct_from:
+  sdks: packages/scvd-store-packages.yml
+  mcp_servers: mcp/scvd-store-mcp.yml

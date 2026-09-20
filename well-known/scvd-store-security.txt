@@ -1,0 +1,10 @@
+Contact: https://scvd.store/api/letter
+Contact: mailto:security@scvd.store
+Expires: 2027-03-20T23:40:07.131Z
+Canonical: https://scvd.store/.well-known/security.txt
+Policy: https://scvd.store/.well-known/trust.json
+Preferred-Languages: en
+
+# One operator, one ed25519 key; scope and limits at /attestation.
+# Found something? Either contact above is free and read by a human.
+# What we got wrong before is on the record at /corrections.

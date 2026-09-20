@@ -1,0 +1,55 @@
+generated: '2026-09-19'
+method: searched
+source: https://scvd.store/try
+docs:
+- https://scvd.store/agents.md
+- https://scvd.store/api/trade/contract
+- https://scvd.store/api/conformance/v1/fixtures
+- https://scvd.store/.well-known/conformance/offer-receipt-vectors.json
+probed:
+- {url: 'https://scvd.store/api/buy/small_blessing?src=apievangelist', method: GET, status: 402, fetched: '2026-09-19', note: 'unpaid; the real challenge, no test mode'}
+- {url: 'https://scvd.store/api/preflight/v2', method: POST, body: '{}', status: 400, fetched: '2026-09-19', note: 'validation refusal; no probe spent, no RateLimit headers'}
+- {url: 'https://scvd.store/try', status: 200}
+- {url: 'https://scvd.store/.well-known/conformance/offer-receipt-vectors.json', status: 200, bytes: 14608}
+summary: >-
+  There is no test mode, no sandbox network and no test key — the provider says so on /try ("No test mode.
+  The same code path serves everyone, which is what makes it worth testing against") and the OpenAPI's
+  x402 accepts name only mainnet rails. What it publishes instead is a REAL-money practice counter with a
+  floor of $0.001 (spot_check) / $0.005 (small_blessing), a free payment dry run for any x402 door, a trade
+  counter sandbox account whose HMAC secret is deliberately public, published conformance fixtures and
+  vectors with real production signatures, and a suggested Idempotency-Key in every 402 so a test harness
+  cannot double-charge. Every value below is copied from the provider's pages; nothing is invented.
+test_vs_live:
+  separate_environment: false
+  test_networks: none — 'wrong-network' (a testnet rail in accepts) is one of the 31 defect classes the store's own preflight flags on other doors
+  key_prefixes: not applicable (no keys exist)
+  note: '"The store is a live x402 target. Real settlement, no sandbox, no test mode, no separate code path." (skill.md)'
+practice_counter:
+  url: https://scvd.store/try
+  cheapest_settlement: {item_id: small_blessing, price_usdc: 0.005, buy: 'https://scvd.store/api/buy/small_blessing?src=try', note: 'Half a cent, no arguments needed; ends in a signed certificate with a stable verify URL.'}
+  cheapest_door: {item_id: spot_check, price_usdc: 0.001}
+  deterministic_check: {item_id: daily_fortune, price_usdc: 0.01, note: '"returns the same line to every buyer until midnight UTC with fortune_date beside it — the one purchase whose answer you can check against another buyer''s."'}
+  hello: {item_id: hello, price_usdc: 0.5, example: 'GET /api/buy/hello?agent_name=your-agent', note: 'Proves wallet, signing and retry path against a real counterparty.'}
+  worked_example: https://scvd.store/try#hand-rolling (a hand-rolled EIP-712 payment "including the domain trap that fails silently")
+  safe_retry: 'Echo the 402 body''s idempotency.suggested_key as Idempotency-Key with the payment; a second attempt inside the same minute returns the ORIGINAL purchase from cache — no settlement, no second charge.'
+dry_runs:
+- {operation: post_api_before_you_pay_v1, mcp_tool: check_before_you_pay, cli: 'scvd before-you-pay <url> [--cap <usd>]', description: 'Will a stock x402 client pay that door, and which accept would it sign? Nothing is signed, nothing is paid.'}
+- {operation: 'any /api/buy/{item} without payment', description: 'Asking the price is free; required_params, input_contract_url, payload_template and amount_check come back without charge.'}
+- {operation: get_api_practice_scenario, description: '"The obstacle course" — practice scenarios at /api/practice/{scenario}, some answering 402.'}
+trade_counter_sandbox:
+  account: sandbox
+  key: scvd-trade-sandbox-key
+  secret: scvd-trade-sandbox-secret-anyone-may-use
+  note: 'Published in the trade contract on purpose ("whose secret is published") so any marketplace can exercise the HMAC dialect before an account exists. Not a credential to anything real.'
+  check_desk: {operation: post_api_trade_sandbox_check, url: 'https://scvd.store/api/trade/sandbox/check', description: 'Send the headers and body you would send to the order door; every one of the four signature checks is reported by name plus the signature we expected. Nothing delivered, nothing consumed.'}
+  order_door: {operation: post_api_trade_sandbox_item_id, url: 'https://scvd.store/api/trade/sandbox/{item_id}', description: 'Order one item on the sandbox account; settled_via reads trade_account_test.'}
+  dialect: {headers: [X-Trade-Key, X-Trade-Timestamp, X-Trade-Nonce, X-Trade-Signature], signing_string: timestamp.nonce.body, signature: 'sha256=<lowercase hex HMAC-SHA256(secret, signing_string)>', timestamp: unix seconds, nonce: '^[0-9a-f]{32}$', window_seconds: 300}
+  worked_signers: Node and Python examples in /api/trade/contract how_to_call.signers
+fixtures:
+- {name: conformance desk fixtures, operation: get_api_conformance_v1_fixtures, url: 'https://scvd.store/api/conformance/v1/fixtures', description: 'Complete artifacts with real production signatures (valid, expired, tampered, unknown-signer), the exact canonical string each covers, and the verdict the desk returns for each; re-verified against the live desk on every serve. "Building and testing against us costs nothing."'}
+- {name: offer/receipt conformance vectors, url: 'https://scvd.store/.well-known/conformance/offer-receipt-vectors.json', description: 'Known-good and known-bad JWS artifacts, deterministic and regenerable from a published seed, including the algorithm-confusion case.'}
+- {name: recorded 402 fixtures, url: 'https://scvd.store/fixtures.json', description: 'Recorded 402 doors, MPP challenges and signed-artifact vectors the store tests its own instruments against, with sha256 of the bytes served.'}
+- {name: sample deliveries, url_template: 'https://scvd.store/samples/{item}.json', example: 'https://scvd.store/samples/small-blessing.json', description: 'A free delivery_outline specimen per item (sample_url in every 402 body).'}
+- {name: live sample artifact, id: cert_4dww28dx5j, url: 'https://scvd.store/api/verify/cert_4dww28dx5j'}
+client_ceiling:
+  note: 'The stock @x402/core client applies a default $1 per-payment ceiling BEFORE picking an accept; 14 of 35 doors sit above it. Raise maxAmountPerPayment or pass spendControls: false deliberately — "It is your operator''s safety control and we ship nothing to route around it."'

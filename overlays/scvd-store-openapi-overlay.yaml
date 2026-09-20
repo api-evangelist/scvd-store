@@ -1,0 +1,106 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the SCVD General Store API
+  version: 1.0.0
+extends: ../openapi/scvd-store-openapi.json
+x-generated: '2026-09-19'
+x-method: generated
+x-source: >-
+  Generated from openapi/scvd-store-openapi.json plus the probed and searched artifacts in this repo. Captures
+  API Evangelist annotations without mutating the provider's contract. The provider's spec already carries
+  unique operationIds and summaries on all 196 operations; what it lacks is tags (0 declared), response
+  examples (0) and info.termsOfService/license. Tags proposed below are grouped by path family and are a
+  proposal, not the provider's.
+actions:
+- target: $.info
+  description: Link the provider's other machine-readable surfaces and policies from the contract.
+  update:
+    termsOfService: https://scvd.store/rights
+    x-pricing-charter: https://scvd.store/pricing
+    x-privacy-policy: https://scvd.store/privacy
+    x-deprecation-policy: https://scvd.store/deprecation
+    x-llms-txt: https://scvd.store/llms.txt
+    x-agents-md: https://scvd.store/agents.md
+    x-agent-skill: https://scvd.store/skill.md
+    x-agent-card: https://scvd.store/.well-known/agent-card.json
+    x-mcp-servers: ['https://scvd.store/mcp', 'https://scvd.store/mcp/verifier', 'https://scvd.store/mcp/docs']
+    x-mcp-server-card: https://scvd.store/.well-known/mcp
+    x-ucp-profile: https://scvd.store/.well-known/ucp
+    x-api-catalog: https://scvd.store/.well-known/api-catalog
+    x-protected-resource-metadata: https://scvd.store/.well-known/oauth-protected-resource
+    x-x402-discovery: https://scvd.store/.well-known/x402.json
+    x-signing-key: https://scvd.store/.well-known/scvd-signing-key
+    x-did: did:web:scvd.store
+    x-security-txt: https://scvd.store/.well-known/security.txt
+    x-status: https://scvd.store/.well-known/liveness.json
+    x-source-code: https://github.com/seancrecord/scvd-general-store-repo
+- target: $.info
+  description: State the auth model in one place — the spec's only securityScheme is a narrow bearer token on purchase-status reads.
+  update:
+    x-authentication:
+      identity_types_supported: [anonymous]
+      free_doors: no credential of any kind
+      paid_doors: a signed x402 v2 payment per call in PAYMENT-SIGNATURE (legacy X-PAYMENT honoured); over MCP in _meta['x402/payment']
+      back_office: HTTP Basic on /admin, one human's, not for agents
+      docs: https://scvd.store/auth.md
+- target: $.info
+  description: Record the idempotency contract and the rate-limit contract as first-class summary fields (the spec carries them in a parameter and an x-rate-limiting block).
+  update:
+    x-idempotency:
+      header: Idempotency-Key
+      key_length: 16–128 characters
+      retention: 24 hours, keyed by paying wallet + item + inputs
+      suggested_key: every 402 body carries idempotency.suggested_key (stable for 60 seconds)
+      coverage: all 38 402-bearing operations and the six paid MCP tools; free POSTs carry none
+    x-rate-limits:
+      metered_paths: [/api/preflight/v1, /api/preflight/v2, /api/before-you-pay/v1, /api/look/v1, /api/preflight/batch]
+      limits: 30 probes per isolate per minute, 60 global
+      headers: [RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, RateLimit-Policy, RateLimit, Retry-After]
+- target: $
+  description: Propose a tag set grouped by path family (the provider declares none).
+  update:
+    tags:
+    - name: Free Instruments
+      description: 'preflight, look, before-you-pay, conformance, verify, bot-auth, onpage, a2a check — free, no account'
+    - name: Shelf
+      description: 'GET /api/buy/{item}: the 35 x402-paid doors'
+    - name: Catalog
+      description: 'menu.json, /menu/{item}, /api/catalog/v1, pricing'
+    - name: Orders and Recovery
+      description: 'orders, purchase-status, claims, refunds, patronage'
+    - name: Corpus and Datasets
+      description: 'corpus, ledger, doors, fresh-set, defects, registry, inflows, trajectory, diff'
+    - name: Passports and Profiles
+      description: 'passport, profiles, trust, standing notes, declare-door'
+    - name: Trade Counter
+      description: '/api/trade/* reseller accounts'
+    - name: Paywall
+      description: 'the card game — packs, binders, window, releases, credit desk'
+    - name: Publications
+      description: 'almanac, open-for-business, gazette, zodiac (archived)'
+    - name: Town
+      description: 'bell, guestbook, stamp, tip, letter, request, directory, porch'
+    - name: Discovery
+      description: '/.well-known/*, developers, deprecation, health, MCP'
+- target: $.paths['/api/buy/small_blessing'].get
+  description: Attach the observed 402 as a worked example (fetched 2026-09-19, unpaid).
+  update:
+    x-observed-402:
+      fetched: '2026-09-19'
+      status: 402
+      headers_present: [PAYMENT-REQUIRED, WWW-Authenticate, 'Vary: PAYMENT-SIGNATURE, X-PAYMENT, Authorization, Idempotency-Key, Accept, Accept-Encoding, User-Agent', 'Cache-Control: no-store']
+      accepts_count: 5
+      offer_receipt_offers: 5
+      body_fields: [error, note, item_id, min_price_usdc, pricing, payload_template, amount_check, idempotency, spec, guarantee, verification, wallet_safety, house_rule, extensions]
+- target: $.paths['/zodiac'].get
+  description: Note the deprecated archive routes carry deprecated true but no sunset date; the provider's policy says headers appear when /deprecation gains a row.
+  update:
+    x-deprecation-note: 'Archived publication (Systems Almanac). deprecated: true in-spec; x-versioning.currently_deprecated is []; no Sunset header observed 2026-09-19.'
+- target: $.paths['/zodiac/{address}'].get
+  update: {x-deprecation-note: 'Archived; see /zodiac.'}
+- target: $.paths['/zodiac/archive'].get
+  update: {x-deprecation-note: 'Archived; see /zodiac.'}
+- target: $.components.schemas.Problem
+  description: Record what was observed on the wire against the declared RFC 9457 shape.
+  update:
+    x-observed: 'The 400 and 404 bodies fetched 2026-09-19 carried `error` plus legacy fields (code, next_action, documentation_url / valid, freshly_minted_note) and none of type/title/status/instance; Content-Type application/json. Valid against this schema (only `error` is required) but not problem+json on the wire.'

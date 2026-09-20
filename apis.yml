@@ -1,18 +1,149 @@
 aid: scvd-store
 name: Record Creative Co. LLC
-description: 'Record Creative Co. LLC is a company surfaced via the API Evangelist harvest backlog (source:
-  a2a-registry) and added to the network as a stub for full-pipeline profiling.'
+description: 'Record Creative Co. LLC is the one-person Oak City, North Carolina company that operates scvd.store — "Sean-Claude Van Damme''s General Store", an evidence observatory for agentic commerce
+  and a general store for AI agents. It independently verifies x402 payment endpoints, signed offers and receipts: a free preflight that checks whether any x402 door serves a well-formed, payable v2 challenge,
+  a free conformance desk for any issuer''s JWS-signed offers and receipts, a named 31-class defect vocabulary, and a weekly Bitcoin-anchored, hash-chained corpus of the public x402 web. Paid instruments
+  (35 doors from $0.001 to $1,500) — settlement attestations, endpoint watches, launch checks, conformance audits, A2A repair kits, agent memory anchors and the labor of a named human — are bought per call
+  in USDC over x402 v2 on Base, Polygon, Arbitrum, World or Solana with no account, key or signup; every purchase ends in an Ed25519-signed artifact verifiable free forever. One host publishes the whole
+  surface: a 196-operation OpenAPI 3.1 contract, three remote MCP servers (20 tools, MCP Apps cards), an A2A 0.3.0 agent card, a UCP business profile, an RFC 9727 API catalog, RFC 9728 protected-resource
+  metadata, llms.txt, agents.md, SKILL.md files, an official CLI and nine more open-source packages.'
 url: https://raw.githubusercontent.com/api-evangelist/scvd-store/refs/heads/main/apis.yml
+image: https://scvd.store/og.png
 x-type: company
 x-source: harvest:a2a-registry
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-09-19 (local-v3; was a2a-registry harvest stub)
+x-website-aliases:
+- https://scvd.store
+- Sean-Claude Van Damme's General Store
+- SCVD General Store
 specificationVersion: '0.20'
 created: '2026-09-19'
 modified: '2026-09-19'
 tags:
-- Company
-apis: []
+- Agents
+- Agent Commerce
+- x402
+- Payments
+- Micropayments
+- Stablecoins
+- USDC
+- Verification
+- Conformance
+- Attestation
+- Observability
+- MCP
+- A2A
+- UCP
+- Signatures
+- agent-native
+- United States
+tags_raw:
+- Agents
+- Agent commerce
+- x402
+- Payments
+- Micropayments
+- Stablecoins
+- USDC
+- Verification
+- Conformance
+- Attestation
+- Observability
+- MCP
+- A2A
+- UCP
+- Signatures
+- Agent-native
+- United States
+apis:
+- aid: scvd-store:scvd-general-store-api
+  name: SCVD General Store API
+  description: 'The HTTP contract for scvd.store: 196 operations on 180 paths (OpenAPI 3.1.0, every operation with a unique operationId and summary) covering the free x402 instruments (POST /api/preflight/v1
+    and /v2, /api/look/v1, /api/before-you-pay/v1, /api/conformance/v1, /api/a2a/check, /api/bot-auth/check, /api/onpage/v1, GET /api/verify/{id}), the 35 x402-paid doors at GET /api/buy/{item} (402 with
+    PAYMENT-REQUIRED terms, Idempotency-Key on every one), the signed corpus and datasets (corpus.json, ledger, doors, fresh-set, defects, passports), purchase recovery and refunds, the reseller trade counter,
+    and the discovery documents. Anonymous for free doors; a signed x402 v2 payment per call for paid doors; RFC 9457 problem objects; IETF RateLimit headers on the five metered doors; url-path versioning
+    with an RFC 8594 sunset policy.'
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store
+  tags:
+  - x402
+  - Verification
+  - Agent Commerce
+  - Payments
+  - Attestation
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-openapi.json
+  - type: OpenAPI
+    name: SCVD General Store OpenAPI (provider-hosted)
+    url: https://scvd.store/openapi.json
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: Overlay
+    url: overlays/scvd-store-openapi-overlay.yaml
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    name: RFC 9727 API catalog (provider-hosted)
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-mcp-servers
+  name: SCVD General Store MCP Servers
+  description: Three remote Model Context Protocol servers on the apex host, all Streamable HTTP and all answering initialize, tools/list and resources/list anonymously at protocol version 2025-06-18 (serverInfo
+    0.5.0). https://scvd.store/mcp is the store — 14 free instruments (preflight_endpoint, look_at_door, check_before_you_pay, check_conformance, verify_artifact, check_a2a_card, find_in_catalog …) and
+    six x402-paid buy_* shelves that settle in-band, seven readable scvd:// resources and two MCP Apps ui:// cards. https://scvd.store/mcp/verifier serves the same five verification handlers with no paid
+    tool; https://scvd.store/mcp/docs serves the documentation resources and one read_docs tool. A stdio path exists through the provider's npm package scvd-mcp-starter (verifier only) or the documented
+    mcp-remote bridge. A WebMCP script registers the same free instruments in the browser.
+  humanURL: https://scvd.store/mcp.md
+  baseURL: https://scvd.store/mcp
+  tags:
+  - MCP
+  - agent-native
+  - Agent Commerce
+  - x402
+  properties:
+  - type: MCPServer
+    url: mcp/scvd-store-mcp.yml
+  - type: MCPServer
+    name: SCVD General Store MCP endpoint (Streamable HTTP)
+    url: https://scvd.store/mcp
+  - type: MCPServer
+    name: SCVD x402 Verifier MCP endpoint
+    url: https://scvd.store/mcp/verifier
+  - type: MCPServer
+    name: SCVD Store Docs MCP endpoint
+    url: https://scvd.store/mcp/docs
+  - type: ToolCrosswalk
+    url: mcp/scvd-store-tool-crosswalk.yml
+  - type: Documentation
+    url: https://scvd.store/mcp.md
+  - type: WebMCP
+    url: https://scvd.store/webmcp.js
+- aid: scvd-store:scvd-evidence-agent
+  name: SCVD Evidence Agent (A2A)
+  description: 'Agent2Agent protocol surface: an agent card served from https://scvd.store/.well-known/agent-card.json (and byte-identically at /.well-known/agent.json and /.well-known/a2a.json; protocolVersion
+    0.3.0, JSONRPC, card version 1.1.0, provider Record Creative Co. LLC) advertising three free, read-only, no-account skills — preflight_endpoint, verify_receipt and get_endpoint_readiness — invoked as
+    JSON task messages at https://scvd.store/a2a. Results are retrievable with tasks/get for 24 hours; streaming and push notifications are declared unsupported; securitySchemes is deliberately empty. The
+    endpoint answers JSON-RPC 2.0 (tasks/get on an unknown id returns -32001 Task not found). Graded conformant against A2A 1.0.0. The paid instruments are x402 doors, never A2A tasks.'
+  humanURL: https://scvd.store/a2a
+  baseURL: https://scvd.store/a2a
+  tags:
+  - A2A
+  - agent-native
+  - x402
+  - Verification
+  properties:
+  - type: AgentCard
+    url: a2a/scvd-store-a2a.yml
+  - type: AgentCard
+    name: A2A Agent Card (provider-hosted)
+    url: https://scvd.store/.well-known/agent-card.json
+  - type: Documentation
+    url: https://scvd.store/a2a-desk.json
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -21,3 +152,137 @@ maintainers:
 common:
 - type: Website
   url: https://scvd.store/
+- type: DeveloperPortal
+  url: https://scvd.store/developers
+- type: Documentation
+  url: https://scvd.store/developers
+- type: APIReference
+  url: https://scvd.store/openapi.json
+- type: GettingStarted
+  url: https://scvd.store/agents.md
+- type: Sandbox
+  url: sandbox/scvd-store-sandbox.yml
+- type: Sandbox
+  name: The Practice Counter
+  url: https://scvd.store/try
+- type: Pricing
+  url: https://scvd.store/pricing
+- type: Plans
+  url: plans/scvd-store-plans-pricing.yml
+- type: TermsOfService
+  url: https://scvd.store/rights
+- type: PrivacyPolicy
+  url: https://scvd.store/privacy
+- type: Support
+  url: https://scvd.store/what
+- type: GitHubOrganization
+  url: https://github.com/seancrecord
+- type: SourceCode
+  url: https://github.com/seancrecord/scvd-general-store-repo
+- type: Roadmap
+  url: https://github.com/seancrecord/scvd-general-store-repo/blob/main/ROADMAP.md
+- type: StatusPage
+  url: https://scvd.store/.well-known/liveness.json
+- type: Deprecation
+  url: https://scvd.store/deprecation
+- type: Lifecycle
+  url: lifecycle/scvd-store-lifecycle.yml
+- type: ChangeLog
+  url: changelog/scvd-store-changelog.yml
+- type: ChangeLog
+  name: Corrections (dated Atom feed)
+  url: https://scvd.store/feeds/corrections.xml
+- type: LLMsTxt
+  url: llms/scvd-store-llms.txt
+- type: LLMsTxt
+  name: llms.txt (provider-hosted)
+  url: https://scvd.store/llms.txt
+- type: AgentsMd
+  url: https://scvd.store/agents.md
+- type: AgentSkill
+  url: skills/_index.yml
+- type: AgentSkill
+  name: scvd-general-store SKILL.md (provider-hosted)
+  url: https://scvd.store/skill.md
+- type: AgentCard
+  url: a2a/scvd-store-a2a.yml
+- type: MCPServer
+  url: mcp/scvd-store-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/scvd-store-tool-crosswalk.yml
+- type: WebMCP
+  url: https://scvd.store/webmcp.js
+- type: WellKnown
+  url: well-known/scvd-store-well-known.yml
+- type: SecurityTxt
+  url: well-known/scvd-store-security.txt
+- type: Security
+  url: https://scvd.store/.well-known/security.txt
+- type: VulnerabilityDisclosure
+  url: security/scvd-store-vulnerability-disclosure.yml
+- type: TrustCenter
+  url: security/scvd-store-trust-center.yml
+- type: TrustCenter
+  name: Trust panel (provider-hosted)
+  url: https://scvd.store/trust
+- type: DomainSecurity
+  url: security/scvd-store-domain-security.yml
+- type: APICatalog
+  url: well-known/scvd-store-api-catalog.json
+- type: AIPlugin
+  url: well-known/scvd-store-ai-plugin.json
+- type: ContentSignal
+  url: https://scvd.store/robots.txt
+- type: AgentInstructions
+  url: well-known/scvd-store-agent-instructions.json
+- type: X402
+  url: well-known/scvd-store-x402.json
+- type: UCP
+  url: well-known/scvd-store-ucp.json
+- type: ARD
+  url: well-known/scvd-store-ard.json
+- type: Authentication
+  url: authentication/scvd-store-authentication.yml
+- type: Authentication
+  name: auth.md (provider-hosted)
+  url: https://scvd.store/auth.md
+- type: Conventions
+  url: conventions/scvd-store-conventions.yml
+- type: Idempotency
+  url: conventions/scvd-store-conventions.yml
+- type: ErrorCatalog
+  url: errors/scvd-store-problem-types.yml
+- type: ErrorCatalog
+  name: x402 defect vocabulary
+  url: errors/scvd-store-defects.json
+- type: RateLimits
+  url: rate-limits/scvd-store-rate-limits.yml
+- type: Conformance
+  url: conformance/scvd-store-conformance.yml
+- type: Webhooks
+  url: asyncapi/scvd-store-webhooks.yml
+- type: Packages
+  url: packages/scvd-store-packages.yml
+- type: SDKs
+  url: packages/scvd-store-packages.yml
+- type: CLI
+  url: cli/scvd-store-cli.yml
+- type: Components
+  url: components/scvd-store-components.yml
+- type: DataModel
+  url: data-model/scvd-store-data-model.yml
+- type: AgenticAccess
+  url: agentic-access/scvd-store-agentic-access.yml
+- type: Subprocessors
+  url: https://scvd.store/stack
+- type: DataSubjectRequest
+  url: https://scvd.store/privacy
+- type: SupportLifetime
+  url: https://scvd.store/deprecation
+- type: ExitAssistance
+  url: https://scvd.store/wind-down
+x-enrichment:
+  date: '2026-09-19'
+  status: enriched
+  artifacts_added: 54
+  pass: local-v3

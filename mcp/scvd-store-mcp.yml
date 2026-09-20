@@ -1,0 +1,142 @@
+generated: '2026-09-19'
+method: probed
+status: published
+source: https://scvd.store/mcp
+docs: https://scvd.store/mcp.md
+server_card: https://scvd.store/.well-known/mcp
+summary: >-
+  SCVD General Store operates THREE remote MCP servers on its apex host, all Streamable HTTP (POST), all
+  answering initialize, tools/list and resources/list anonymously, all at serverInfo version 0.5.0 and MCP
+  protocol version 2025-06-18 (the server card additionally declares 2026-07-28, 2025-11-25 and 2025-03-26
+  and a server/discover method). The main door https://scvd.store/mcp serves 20 tools — 14 free instruments
+  and 6 x402-paid buy_* shelves that settle in-band — plus 7 readable scvd:// resources and 2 ui:// MCP Apps
+  card templates (SEP-1865; the io.modelcontextprotocol/ui extension is declared in initialize). The verifier
+  door https://scvd.store/mcp/verifier serves the same 5 free verification handlers under task-shaped names
+  with no paid tool, for clients that must never see a shelf. The documentation door https://scvd.store/mcp/docs
+  serves the 7 resources plus one read_docs tool. A stdio path exists two ways — the provider's own npm
+  package scvd-mcp-starter (a zero-dependency stdio server that forwards to /mcp/verifier) and the documented
+  mcp-remote bridge to /mcp — so deployment mode is `both`. Authorship is the provider's: tool names, the
+  x402 payment profile in error.data and the store's own vocabulary match no shared platform fingerprint,
+  and the server is open source at github.com/seancrecord/scvd-general-store-repo (server.json registers it
+  in the MCP registry as store.scvd/general-store).
+deployment:
+  mode: both
+  endpoint: https://scvd.store/mcp
+  install: npx -y scvd-mcp-starter
+  package: https://www.npmjs.com/package/scvd-mcp-starter
+  auth: none
+  verified: probed
+  note: >-
+    endpoint is the main door; https://scvd.store/mcp/verifier and https://scvd.store/mcp/docs are sibling
+    remote endpoints on the same host (servers[] below). install is verbatim from the scvd-mcp-starter README
+    ("npx scvd-mcp-starter"; client config {"command":"npx","args":["-y","scvd-mcp-starter"]}) — that package
+    reaches ONLY the verifier door. The provider's mcp.md also documents the generic bridge
+    {"command":"npx","args":["-y","mcp-remote","https://scvd.store/mcp"]} for the full door over stdio. auth is
+    "none" in the connection sense: no key, account or OAuth on any of the three doors; the RFC 9728
+    protected-resource document on this host (well-known/scvd-store-oauth-protected-resource.json) says so
+    explicitly and names no authorization_servers by design. Paid buy_* calls are gated by an x402 v2 payment
+    carried in _meta['x402/payment'] (or an MPP credential under org.paymentauth/credential per the OpenAPI's
+    x-scvd-native-checkout block) — an economic gate at invocation, not an authentication scheme.
+servers:
+- id: scvd-general-store
+  name: SCVD General Store
+  endpoint: https://scvd.store/mcp
+  transport: streamable-http
+  http_methods: [POST, GET (SSE stream)]
+  auth: none
+  payment: x402 v2 in USDC (Base, Polygon, Arbitrum, World, Solana) or MPP (evm/charge on Base) per buy_* call; JSON-RPC error 402 with terms in error.data['x402/payment-required'], or result.structuredContent with ?payment=tool-result
+  status: live
+  probe:
+    fetched: '2026-09-19'
+    initialize:
+      http_status: 200
+      protocol_version: '2025-06-18'
+      server_info: {name: scvd-general-store, title: SCVD General Store, version: 0.5.0, websiteUrl: 'https://scvd.store'}
+      capabilities: {tools: {listChanged: false}, resources: {subscribe: false, listChanged: false}, prompts: {listChanged: false}, extensions: {io.modelcontextprotocol/ui: {mimeTypes: ['text/html;profile=mcp-app']}}}
+    tools_list: {http_status: 200, content_type: application/json, tool_count: 20, file: mcp/scvd-store-mcp-tools.json}
+    resources_list: {http_status: 200, resource_count: 9, file: mcp/scvd-store-mcp-resources.json, note: 7 scvd:// documents + 2 ui:// card templates}
+    get_request: {http_status: 200, content_type: text/event-stream, note: A GET opens an SSE stream and holds it open (curl timed out after 20s with 85 bytes received) — Streamable HTTP server-to-client channel, not an error.}
+  authorship: provider
+  tools_free:
+  - {name: check_a2a_card, title: Check A2A Agent Card, read_only: true, inputs: [url], rest: post_api_a2a_check}
+  - {name: check_purchase, title: Check purchase status, read_only: true, inputs: [purchase_id, status_token], rest: get_api_purchase_status_purchase_id}
+  - {name: read_store_guide, title: Store Guide, read_only: true, inputs: [], rest: null, note: 'Returns the same bytes as resource scvd://guide (llms.txt).'}
+  - {name: ring_bell, title: Ring the Bell, read_only: false, inputs: [agent_name, wallet, pass_id], rest: post_api_bell}
+  - {name: read_binder, title: Read a Binder, read_only: true, inputs: [wallet], rest: get_api_paywall_binder_wallet}
+  - {name: look_in_window, title: Look in the Window, read_only: true, inputs: [], rest: get_api_paywall_window}
+  - {name: sign_guestbook, title: Sign the Guestbook, read_only: false, inputs: [name, message, verified_identity, identity_public_key, identity_signature], rest: post_api_guestbook}
+  - {name: preflight_endpoint, title: Preflight an x402 Endpoint, read_only: false, inputs: [url, model, client, operator, operator_kind, came_from, prior_cert_id], rest: post_api_preflight_v2, ui: 'ui://scvd-general-store/preflight-card.html'}
+  - {name: look_at_door, title: 'Look at a Door — what we hold about it', read_only: true, inputs: [url, '…disclosure block', since], rest: post_api_look_v1}
+  - {name: check_before_you_pay, title: 'Will My Client Pay This?', read_only: true, inputs: [url, '…disclosure block', client_profile], rest: post_api_before_you_pay_v1}
+  - {name: check_conformance, title: Conformance Desk, read_only: false, inputs: [artifact, kind, public_key_hex], rest: post_api_conformance_v1}
+  - {name: verify_artifact, title: Verify an Artifact, read_only: false, inputs: [id], rest: get_api_verify_id, ui: 'ui://scvd-general-store/verify-card.html'}
+  - {name: check_order, title: Check an Order, read_only: true, inputs: [order_id], rest: get_api_order_order_id}
+  - {name: find_in_catalog, title: Find Something on the Shelf, read_only: true, inputs: [q, max_price_usdc, item_id], rest: get_api_catalog_v1}
+  tools_paid:
+  - {name: buy_simple, title: The Front Counter, items: [small_blessing, daily_fortune, window_pick, hello, pack]}
+  - {name: buy_signed_record, title: Signed Records, items: [hello, certificate_of_patronage, graffiti_on_a_train, coffees_for_closers, the_confession, recurring_patronage]}
+  - {name: buy_human_task, title: Human Labor, items: [the_collab, aura_walk]}
+  - {name: buy_observation, title: Third-Party Observation, items: [settlement_attestation, settlement_reconciliation, the_case_file, attestation_bundle, standing_watch, service_audit, a2a_repair_kit, good_buyer, conformance_watch, signature_agent_card, onpage_audit, launch_check, opening_day, provenance_check, the_statement, operator_statement, the_mandate, bitcoin_anchor, passport_refresh, trust_profile, spot_check]}
+  - {name: buy_memory_anchor, title: Agent Memory, items: [context_anchor]}
+  - {name: buy_small_pleasure, title: The Penny Shelf, items: [small_blessing, daily_fortune, luckies, pack, window_pick]}
+  resources:
+  - {uri: 'scvd://guide', name: store_guide, note: llms.txt}
+  - {uri: 'scvd://manual', name: transaction_manual, note: agents.md}
+  - {uri: 'scvd://catalog', name: catalog}
+  - {uri: 'scvd://criteria', name: preflight_criteria}
+  - {uri: 'scvd://when', name: which_instrument}
+  - {uri: 'scvd://fresh-set', name: fresh_set}
+  - {uri: 'scvd://payments', name: payment_breakdown}
+  - {uri: 'ui://scvd-general-store/preflight-card.html', name: preflight-card, note: MCP Apps template}
+  - {uri: 'ui://scvd-general-store/verify-card.html', name: verify-card, note: MCP Apps template}
+  annotations: Every tool carries MCP annotations (readOnlyHint, destructiveHint, idempotentHint, openWorldHint) and a provider `reads` field (made_here | our_books | subject_fetch) saying whose data the tool touches.
+- id: scvd-x402-verifier
+  name: SCVD x402 Verifier
+  endpoint: https://scvd.store/mcp/verifier
+  transport: streamable-http
+  http_methods: [POST]
+  auth: none
+  payment: none — "serves 5 free verification tools and sells nothing"
+  status: live
+  probe:
+    fetched: '2026-09-19'
+    initialize: {http_status: 200, protocol_version: '2025-06-18', server_info: {name: scvd-x402-verifier, title: SCVD x402 Verifier, version: 0.5.0}, capabilities: {tools: {listChanged: false}}}
+    tools_list: {http_status: 200, tool_count: 5, file: mcp/scvd-store-mcp-verifier-tools.json}
+  authorship: provider
+  tools:
+  - {name: preflight_x402_endpoint, inputs: [url, '…disclosure block'], rest: post_api_preflight_v2}
+  - {name: verify_x402_receipt, inputs: [artifact, kind, public_key_hex], rest: post_api_conformance_v1}
+  - {name: lookup_endpoint_readiness, inputs: [host], rest: get_corpus_host_host_json}
+  - {name: get_defect_definition, inputs: [id], rest: get_defects_json}
+  - {name: verify_scvd_artifact, inputs: [id], rest: get_api_verify_id}
+  stdio_package: {name: scvd-mcp-starter, version: 0.1.1, published: '2026-09-18', install: 'npx -y scvd-mcp-starter', note: Forwards tools/list and tools/call to this door over HTTPS.}
+- id: scvd-store-docs
+  name: SCVD Store Docs
+  endpoint: https://scvd.store/mcp/docs
+  transport: streamable-http
+  http_methods: [POST]
+  auth: none
+  payment: none
+  status: live
+  probe:
+    fetched: '2026-09-19'
+    initialize: {http_status: 200, protocol_version: '2025-06-18', server_info: {name: scvd-store-docs, title: SCVD Store Docs, version: 0.5.0, websiteUrl: 'https://scvd.store/mcp.md'}, capabilities: {tools: {listChanged: false}, resources: {subscribe: false, listChanged: false}}}
+    tools_list: {http_status: 200, tool_count: 1, file: mcp/scvd-store-mcp-docs-tools.json}
+    resources_list: {http_status: 200, resource_count: 7}
+  authorship: provider
+  tools:
+  - {name: read_docs, inputs: [item_id, view, name], note: 'Returns any of the 7 resources by name for hosts that hide resources; the same door also answers POST at https://scvd.store/mcp.md.'}
+web_mcp:
+  script: https://scvd.store/webmcp.js
+  note: >-
+    The storefront registers the free instruments on document.modelContext for browser-resident agents
+    (mcp.md §3), plus quote_store_purchase and complete_store_purchase, the latter marked consequential;
+    the WebMCP surface is derived from the same catalog. Recorded from the docs, not exercised.
+clients_documented:
+- {client: Claude Desktop (local stdio), cards_render: true, source: 'https://scvd.store/mcp.md, observed by the provider 2026-08-27/28'}
+- {client: VS Code Copilot Chat (stdio), cards_render: true}
+- {client: Claude custom remote connector, cards_render: false, note: 'provider cites anthropics/claude-ai-mcp#471'}
+registry_listings:
+- {registry: MCP registry (server.json), name: store.scvd/general-store, version: 0.2.3}
+- {registry: Glama, file: glama.json in repo}
+- {registry: HOL awesome-ai-plugins, confirmed: '2026-09-19', source: well-known/scvd-store-trust.json external_records}

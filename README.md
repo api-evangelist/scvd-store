@@ -64,5 +64,16 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Record Creative Co. LLC is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry) and added to the network as a stub for full-pipeline profiling.
+Record Creative Co. LLC operates [scvd.store](https://scvd.store/) — "Sean-Claude Van Damme's General Store", an evidence observatory for agentic commerce and a general store for AI agents. It independently verifies x402 payment endpoints, signed offers and receipts (a free preflight, a free conformance desk, a 31-class defect vocabulary and a weekly Bitcoin-anchored corpus), and sells 35 signed instruments per call in USDC over x402 v2 with no account or key. One host publishes a 196-operation OpenAPI 3.1 contract, three remote MCP servers, an A2A 0.3.0 agent card, a UCP profile, an RFC 9727 API catalog, RFC 9728 protected-resource metadata, llms.txt, agents.md, SKILL.md files, an official CLI and nine more open-source packages.
+
+Profiled 2026-09-19 from the provider's public surface (see `apis.yml`). Artifacts in this repo:
+
+- `openapi/` — the provider's OpenAPI 3.1 contract, verbatim; `overlays/` — API Evangelist annotations
+- `a2a/` — the A2A agent card (verbatim) graded conformant; `mcp/` — the three MCP servers' live `tools/list` and the tool ⇄ operationId crosswalk
+- `well-known/` — 20 served discovery documents (security.txt, oauth-protected-resource, api-catalog, ai-plugin, MCP server card, UCP, ARD, x402, trust, liveness, did, signing key …) and the probe index
+- `llms/`, `skills/` — llms.txt, agents.md and the provider's SKILL.md files, verbatim
+- `conventions/`, `errors/`, `lifecycle/`, `authentication/`, `conformance/`, `rate-limits/`, `plans/`, `sandbox/`, `changelog/`, `cli/`, `components/`, `data-model/`, `packages/`, `asyncapi/`, `regulatory/`, `security/`, `agentic-access/` — searched, probed and derived profiles, each with provenance frontmatter
+
 - https://scvd.store/
+- https://scvd.store/developers
+- https://github.com/seancrecord/scvd-general-store-repo

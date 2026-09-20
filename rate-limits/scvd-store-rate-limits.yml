@@ -1,0 +1,72 @@
+generated: '2026-09-19'
+method: searched
+source: https://scvd.store/openapi.json (x-rate-limiting, components.headers)
+docs:
+- https://scvd.store/developers
+- https://scvd.store/auth.md
+- https://scvd.store/api/a2a/check
+limit_count: 4
+summary: >-
+  Application-level rate limits exist on exactly five free doors — the ones that spend an outbound request
+  to a host the caller chooses — and nowhere else: "No other operation enforces an application-level ceiling,
+  and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring
+  none." The metered doors return the IETF RateLimit header fields on every metered answer (200 and 429), so
+  an agent paces against the live number. Paid doors are "bounded by payment"; free doors are never limited
+  by identity because no identity exists. A 429 can also arrive from the Cloudflare edge under abuse
+  conditions on any route. "A refused request is never charged for."
+rate_limits:
+- name: Free preflight / look / before-you-pay — per isolate
+  scope: per isolate (a Cloudflare Worker isolate; there is no per-key or per-account scope because no keys or accounts exist)
+  limit: 30
+  window: 60 seconds
+  metric: probes
+  burst: null
+  applies_to: [post_api_preflight_v1, post_api_preflight_v2, post_api_before_you_pay_v1, post_api_look_v1, post_api_preflight_batch]
+  headers: [RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, RateLimit-Policy, RateLimit, Retry-After (on 429)]
+  exhaustion_status: 429
+  source: openapi x-rate-limiting.note — "30 probes per isolate per minute, 60 global"
+- name: Free preflight / look / before-you-pay — global backstop
+  scope: global (all callers)
+  limit: 60
+  window: 60 seconds
+  metric: probes
+  applies_to: [post_api_preflight_v1, post_api_preflight_v2, post_api_before_you_pay_v1, post_api_look_v1, post_api_preflight_batch]
+  headers: [RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, RateLimit-Policy, RateLimit, Retry-After (on 429)]
+  exhaustion_status: 429
+  note: 'RateLimit-Remaining "is a read-modify-write on eventually consistent storage, so this can read slightly high — never low." RateLimit-Limit/-Remaining/-Reset report whichever of the two buckets is closer to binding; RateLimit and RateLimit-Policy name both ("isolate";q=N;w=60, "global";q=N;w=60).'
+- name: Mailbox
+  scope: per caller (self-described)
+  limit: 1
+  window: 1 day
+  metric: letters
+  applies_to: [post_api_letter]
+  source: 'auth.md: "The mailbox at /api/letter — free, one a day, and a human reads every one."'
+- name: /admin failed logins
+  scope: per address
+  limit: unpublished
+  window: unpublished
+  applies_to: [/admin (not in the contract)]
+  exhaustion_status: 429
+  headers: [Retry-After]
+  source: 'auth.md errors table: "429 — too many failed /admin logins from your address — wait out Retry-After, or ignore — no free or paid door throttles you by identity."'
+budgets:
+- {name: A2A card check, applies_to: [post_api_a2a_check, MCP check_a2a_card], note: 'Uses a shared POST /api/a2a/check budget; limits stated at GET /api/a2a/check and in a2a-desk.json ("limit" field).', exhaustion_status: 429, cli_exit: 3}
+- {name: Trade counter budgets, note: '"No account, cookie, caller identifier or IP-based budget. Budgets bound our cost, not caller rank." — refusal code budget_exhausted.'}
+headers:
+  RateLimit-Limit: The binding bucket's ceiling per 60-second window.
+  RateLimit-Remaining: What is left in the binding bucket (may read slightly high, never low).
+  RateLimit-Reset: Seconds until both buckets roll, at the wall-clock minute.
+  RateLimit-Policy: 'Both policies as structured fields: "isolate";q=N;w=60, "global";q=N;w=60.'
+  RateLimit: 'Both policies'' live state: "isolate";r=N;t=N, "global";r=N;t=N.'
+  Retry-After: On every 429 (store limiter or edge).
+exhaustion:
+  status: 429
+  body: RFC 9457 Problem (components.responses.TooManyRequestsMetered on metered doors, TooManyRequests elsewhere)
+  charged: false
+  note: 'A validation refusal (400) returns BEFORE either bucket is touched and carries no RateLimit fields — a 2026-09-15 correction removed the headers the contract had wrongly declared on the 400. Observed 2026-09-19: POST /api/preflight/v2 with an empty body returned 400 with no RateLimit-* headers, as documented.'
+not_limited:
+- Every dataset read (corpus.json, ledger, doors.json, defects.json, fresh-set, feeds) — "free, no rate limit" on /api/verify/{id} is a signed charter clause.
+- Paid doors — bounded by payment, not by a counter.
+- MCP tools/list, resources/read, initialize.
+paid_caps:
+- {name: human-labor weekly caps, note: 'Items with fulfillment human_queue (aura_walk, the_collab) are capped because a human fulfils them; caps and waitlists are printed in menu.json and the shelf shutters when the keeper is not provably present (liveness.json keeper_within_presence_window, 48h).'}

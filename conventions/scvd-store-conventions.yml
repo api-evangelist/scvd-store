@@ -1,0 +1,228 @@
+generated: '2026-09-19'
+method: searched
+source: >-
+  https://scvd.store/developers (Conventions section), https://scvd.store/auth.md, https://scvd.store/agents.md,
+  https://scvd.store/.well-known/trust.json (wallet_safety, refund_policy), https://scvd.store/rights,
+  https://scvd.store/deprecation and the OpenAPI's x-versioning / x-rate-limiting / x-scvd-native-checkout
+  blocks; cross-checked against a live unpaid GET /api/buy/small_blessing (402) on 2026-09-19.
+derived_from: openapi/scvd-store-openapi.json
+description: >-
+  How the SCVD General Store HTTP API behaves across all 196 operations: anonymous free reads, x402 v2
+  pay-per-call writes, an Idempotency-Key contract on every paid door, RFC 9457 error objects with a legacy
+  `error` field, IETF RateLimit fields on the five metered doors, url-path versioning with RFC 8594 sunset
+  policy, ETag/304 on the dataset reads, and a delivers-first-settles-after purchase order that makes most
+  failures free. The same semantics carry over MCP (payment and idempotency in _meta) and UCP.
+base_url: https://scvd.store
+api_style: REST over HTTPS; JSON responses; markdown twins on many pages by Accept; JSON-RPC 2.0 for MCP and A2A on the same host
+
+authentication:
+  scheme: none for free doors; a signed x402 v2 payment per call for paid doors; HTTP Basic on /admin (one human's, not for agents); a private bearer status_token only on GET /api/purchase-status/{purchase_id}
+  identity_types_supported: [anonymous]
+  docs: https://scvd.store/auth.md
+  detail: authentication/scvd-store-authentication.yml
+  note: 'auth.md: "There is no account here. No key to request, no signup form, no approval queue, no waitlist, no tier you get promoted into."'
+
+idempotency:
+  supported: true
+  coverage: partial
+  mechanism: Idempotency-Key request header (components.parameters.IdempotencyKey) or _meta['x402/idempotency-key'] over MCP; order_ref on trade-counter orders
+  header: Idempotency-Key
+  key_format: 16–128 characters, client-chosen; or echo idempotency.suggested_key from the 402 body (derived from item + current minute + a digest of the inputs; stable for 60 seconds, previous minute also checked)
+  retention: 24 hours (trust.json wallet_safety — "A repeat of the same key for the same item from the same wallet inside 24 hours returns the ORIGINAL cached result"; agents.md says the same)
+  scope_rule: keyed by verified paying wallet + item + inputs — a key can only ever return the caller's own earlier purchase; a fresh payment without the key can charge again
+  conflict_behavior: A replay returns the original purchase (marked idempotent_replay true) or its pending status; neither path submits a new settlement. Keys outside 16–128 chars are treated as absent.
+  scope:
+  - get_api_buy_spot_check
+  - get_api_buy_settlement_attestation
+  - get_api_buy_small_blessing
+  - get_api_buy_settlement_reconciliation
+  - get_api_buy_daily_fortune
+  - get_api_buy_the_confession
+  - get_api_buy_attestation_bundle
+  - get_api_buy_the_mandate
+  - get_api_buy_the_case_file
+  - get_api_buy_window_pick
+  - get_api_buy_hello
+  - get_api_buy_good_buyer
+  - get_api_buy_signature_agent_card
+  - get_api_buy_the_statement
+  - get_api_buy_luckies
+  - get_api_buy_pack
+  - get_api_buy_coffees_for_closers
+  - get_api_buy_bitcoin_anchor
+  - get_api_buy_context_anchor
+  - get_api_buy_passport_refresh
+  - get_api_buy_graffiti_on_a_train
+  - get_api_buy_a2a_repair_kit
+  - get_api_buy_standing_watch
+  - get_api_buy_service_audit
+  - get_api_buy_conformance_watch
+  - get_api_buy_onpage_audit
+  - get_api_buy_launch_check
+  - get_api_buy_opening_day
+  - get_api_buy_provenance_check
+  - get_api_buy_recurring_patronage
+  - get_api_buy_trust_profile
+  - get_api_buy_operator_statement
+  - get_api_buy_certificate_of_patronage
+  - get_api_buy_aura_walk
+  - get_api_buy_the_collab
+  - get_almanac_notes_from_a_tuesday_in_oak_city
+  - get_almanac_slug
+  - get_open_for_business_week
+  - 'buy_simple / buy_signed_record / buy_human_task / buy_observation / buy_memory_anchor / buy_small_pleasure (MCP, via _meta[x402/idempotency-key])'
+  - 'post_api_trade_partner_item_id and post_api_trade_sandbox_item_id (order_ref up to 120 chars + nonce replay refusal, per /api/trade/contract)'
+  coverage_basis: >-
+    The mechanism covers every operation that moves money — all 38 402-bearing operations declare the
+    Idempotency-Key parameter, the six paid MCP tools take the _meta key, and trade orders carry order_ref —
+    so the money-moving surface is fully covered. It is graded partial rather than full because the
+    contract's 34 POST operations that do not charge (post_api_guestbook, post_api_bell, post_api_stamp,
+    post_api_tip, post_api_letter, post_api_request, post_api_tab_delta, the paywall challenge/burn/redeem,
+    post_api_claims*, post_api_declare_door, post_api_standing_note, post_api_mandate_mandate_id, the free
+    instruments' POSTs and the A2A/MCP doors) declare no idempotency key. Several of those are meant to be
+    non-idempotent (ring_bell and sign_guestbook carry idempotentHint false in MCP), and the free
+    instruments are reads dressed as POSTs, but the field reads what the contract declares.
+  observed: 'The live 402 on GET /api/buy/small_blessing carried Vary: … Idempotency-Key … and an `idempotency` body block; the WWW-Authenticate opaque value embedded purchase_key "scvd-suggested-small_blessing-29831024".'
+  docs: https://scvd.store/developers
+
+dry_run_mode:
+  supported: true
+  status: documented
+  surfaces:
+  - operation: any 402-bearing door called without payment
+    description: '"Asking the price without them is free" — the first unpaid call returns the full terms, required_params, input_contract_url, payload_template and amount_check without charging; a supplied invalid input receives a field refusal before terms.'
+  - operation: post_api_before_you_pay_v1 (MCP check_before_you_pay, CLI scvd before-you-pay)
+    description: A payment dry run for ANY x402 door — replays the stock @x402/core client's own selection (default-asset filter, per-payment ceiling, prefer-authorization) over the door's live accepts; nothing is signed, nothing is paid.
+  - operation: post_api_trade_sandbox_check
+    description: The trade counter's check desk on the published sandbox account — every signature check reported by name plus the expected signature; nothing delivered, nothing consumed.
+  - operation: get_api_practice / get_api_practice_scenario
+    description: '"The obstacle course" — practice scenarios, some answering 402.'
+  - url: https://scvd.store/try
+    description: 'The practice counter: "No test mode. The same code path serves everyone" — the cheapest real settlement is $0.005 (small_blessing) and $0.001 (spot_check).'
+  detail: sandbox/scvd-store-sandbox.yml
+
+reversibility:
+  grade: documented
+  docs: https://scvd.store/rights
+  note: >-
+    A reversal path exists and is written down — the keeper refunds by hand, in full including tip, and
+    records every refund with its on-chain tx hash — and a status operation exists to read it
+    (get_api_refund_refund_id). What is stated is the DELIVERY window whose breach triggers the refund
+    (sla_hours per human-labor item, 168 hours on both such items), not a window inside which a buyer may
+    reverse a completed purchase: signed artifacts are immutable and non-refundable by design ("Immutable is
+    part of what you paid for"), and instant items have no window at all. Graded documented (0.4), not
+    verified, because no buyer-actionable reversal window is stated. Nothing below asserts a window the
+    provider has not written.
+  order_of_operations: '"The store delivers first and settles after (changed 2026-08-10): the goods are produced, then the payment is presented at the last moment before the artifact is signed. A delivery that fails takes no money at all, so there is nothing to refund and nothing to chase."'
+  write_surfaces:
+  - operation: 'get_api_buy_{item} — instant items (33 of 35 doors)'
+    action: Pay USDC per call for a signed artifact delivered in the response
+    reversal: none for a delivered artifact; refund or fix on defect
+    reversal_operation: null
+    status_operation: get_api_refund_refund_id
+    window: null
+    stated_terms:
+    - {source: 'https://scvd.store/rights refund_policy.instant_items', verbatim: 'Instant items deliver in the purchase response itself, so there is no window to miss: if settlement succeeds and the goods do not arrive in that same response, that is a defect, not a delay — write the mailbox at /api/letter and it gets fixed or refunded.'}
+    - {source: 'https://scvd.store/rights clauses[1]', verbatim: 'A signed artifact is fixed at the moment of signing and never edited afterwards — not by us, not to correct a typo, not to improve it.'}
+    - {source: 'https://scvd.store/.well-known/trust.json not_claimed', verbatim: 'No escrow and no chargebacks. x402 settles wallet-to-wallet; once a payment settles the money has moved. Your exposure is the price, which starts at $0.001.'}
+    grade: documented
+  - operation: 'get_api_buy_aura_walk, get_api_buy_the_collab — human_queue items'
+    action: Commission human labor; an order id is returned to poll at get_api_order_order_id
+    reversal: full manual refund (amount + tip) if the promised delivery window is missed
+    reversal_operation: null (keeper pays by hand; status readable at get_api_refund_refund_id and on /fulfillment-log)
+    window: 'sla_hours: 168 (menu.json, both items); the promise is stated in the listing and in the 402 terms before payment'
+    stated_terms:
+    - {source: 'https://scvd.store/rights refund_policy.commitment', verbatim: 'Every human-fulfillment item carries a delivery promise in hours (sla_hours), stated in its listing spec and in its 402 terms before you pay. If the keeper misses that window, he refunds you himself — the full amount you paid, tip included.'}
+    - {source: 'https://scvd.store/rights refund_policy.mechanism', verbatim: 'Personal, not automated, and we say so plainly: x402 settles wallet-to-wallet, so no code here holds funds or can send them back on its own. The keeper pays refunds by hand and marks each one on the public ledger with the on-chain transaction hash once paid.'}
+    - {source: 'https://scvd.store/.well-known/trust.json operator.responds', verbatim: 'Human-labor items carry a 168-hour promise and it has not been missed.'}
+    grade: documented
+    note: The window is a delivery SLA that conditions the refund, not a buyer's reversal deadline; recorded as documented for that reason.
+  - operation: 'term items (standing_watch, conformance_watch, opening_day, recurring_patronage, trust_profile, operator_statement)'
+    action: Buy a fixed term of watches or standing
+    reversal: none stated; nothing renews ("nothing here charges again by itself, ever — there is no mechanism that could")
+    window: the term itself ends on its date
+    grade: none
+  - operation: post_api_trade_partner_item_id (trade counter)
+    action: Order on account for a marketplace's customer
+    reversal: '"an account is never charged for a delivery that did not happen"; refusals deliver nothing and bill nothing'
+    window: null
+    grade: documented
+  - operation: 'post_api_guestbook, post_api_bell, post_api_stamp, post_api_tip, post_api_letter (free writes)'
+    action: Public or private visitor entries
+    reversal: none — public entries are permanent by design ("removing it later would rewrite a record other people were part of"); letters are private and destroyed on wind-down
+    grade: na
+  purchase_recovery:
+    operations: [post_api_claims_challenge, post_api_claims, get_api_claims, get_api_purchase_status_purchase_id]
+    note: Not a reversal but the adjacent safety — a wallet that lost a response to a context reset proves control of the paying address and recovers everything it paid for, free.
+
+pagination:
+  style: cursor / paged views
+  surfaces:
+  - {operation: get_menu_json, param: '?view=compact (paged)', note: 'Small-context purchase guide; "Each row names its required inputs".'}
+  - {operation: get_corpus_index_json, params: [limit, cursor], response_field: next, note: '"Compact paginated snapshot metadata. Follow next; fetch and verify each snapshot separately."'}
+  - {operation: get_corpus_diff_json, param: since=<week>, note: '"What changed since a signed week you already saw … The cheapest honest agent loop is polling this."'}
+  docs: https://scvd.store/developers
+
+caching:
+  mechanism: ETag with 304 Not Modified (components.responses.NotModified) declared on 84 GET reads (datasets, corpus, ledgers, publications)
+  no_store: 402 challenges are served Cache-Control no-store; liveness.json says "Fetch this document fresh; never cache it as evidence."
+  freshness_fields: 'as_of (last checked by hand) vs checked_at / served (when the response was served) are printed separately on menu.json, x402.json and llms.txt — "serving a page is not the same as having verified what is on it".'
+
+request_tracing:
+  request_id_header: null
+  note: No request-id header is documented or declared. Every purchase yields a cert_id verifiable forever at GET /api/verify/{id}; the trade counter returns trade.instruction_digest (sha256 of the signed instruction). Observed response headers include Cloudflare cf-ray and a server-timing header, neither documented as a correlation id.
+
+versioning:
+  scheme: url-path
+  current: /api/preflight/v2, /api/look/v1, /api/conformance/v1
+  policy: https://scvd.store/deprecation
+  sunset: RFC 8594 Deprecation + Sunset + Link rel=sunset / rel=successor-version, at least 90 days before a version stops answering
+  detail: lifecycle/scvd-store-lifecycle.yml
+  changelog: changelog/scvd-store-changelog.yml
+
+error_envelope:
+  media_type: application/problem+json declared; application/json observed
+  rfc9457: true (declared; `error` is the only required field and the RFC fields were absent on the two bodies observed)
+  shape: '{ "type", "title", "status", "detail", "instance", "error" (always), "retry_same_request"?, "next_step"? }'
+  legacy_fields_observed: [code, next_action, documentation_url, valid, freshly_minted_note]
+  json_rpc: MCP and A2A return JSON-RPC 2.0 error objects; paid MCP tools return code 402 with x402 terms in error.data
+  detail: errors/scvd-store-problem-types.yml
+  docs: https://scvd.store/auth.md
+
+payment:
+  protocol: x402 v2 (and MPP evm/charge on Base)
+  challenge: 'HTTP 402 + PAYMENT-REQUIRED (base64 JSON: x402Version 2, accepts[] per rail, extensions.offer-receipt JWS offers) + WWW-Authenticate naming resource_metadata'
+  request_header: PAYMENT-SIGNATURE (legacy X-PAYMENT honoured)
+  receipt_header: PAYMENT-RESPONSE (signed receipt)
+  rails: [eip155:8453 Base, eip155:137 Polygon, eip155:42161 Arbitrum, eip155:480 World, 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp']
+  asset: USDC (six decimals; amounts are integer atomic strings — amount_check prints both)
+  pricing_rule: 'one_price — "Every wallet sees the same price"; signed pricing charter v1 effective 2026-08-20 (https://scvd.store/pricing)'
+  client_ceiling_note: The stock @x402/core client refuses payments above $1 by default (maxAmountPerPayment); 14 of 35 doors sit above it and each such 402 says so.
+  over_mcp: JSON-RPC error 402 with terms in error.data['x402/payment-required']; retry with _meta['x402/payment']; receipt in result._meta['x402/payment-response'] (or the ?payment=tool-result profile)
+  facilitator: Coinbase CDP facilitator verifies and settles (privacy policy); the store never holds funds
+
+rate_limits:
+  signal_status: 429
+  headers: [RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, RateLimit-Policy, RateLimit, Retry-After]
+  metered_paths: [/api/preflight/v1, /api/preflight/v2, /api/before-you-pay/v1, /api/look/v1, /api/preflight/batch]
+  limits: 30 probes per isolate per minute, 60 global; nothing else has an application-level ceiling
+  detail: rate-limits/scvd-store-rate-limits.yml
+  docs: https://scvd.store/developers
+
+webhooks:
+  outbound: trade-counter delivery receipts POSTed once to a partner-supplied callback_url; asynchronous A2A card-check results via A2A tasks/get
+  inbound: partner order instructions to POST /api/trade/{account}/{item_id}, HMAC-SHA256 over timestamp.nonce.body (X-Trade-* or X-Hal-* dialects, 300-second window, nonce replay refused)
+  feeds: four Atom feeds + per-host feeds (https://scvd.store/feeds)
+  detail: asyncapi/scvd-store-webhooks.yml
+
+other_conventions:
+- name: Disclosure block
+  detail: 'Every paid door and evidence tool accepts optional model / client / operator / operator_kind / came_from / prior_cert_id fields — "Telling us counts you in the buyers'' census … It never changes the price."'
+- name: Signed everything
+  detail: Every artifact carries signature, public_key, signed_payload and verify_url; Ed25519 over RFC 8785 canonical JSON; key at /.well-known/scvd-signing-key with full history; offline-verifiable.
+- name: Denominators
+  detail: '"Never a ranking, and never a verdict without its derivation and denominator beside it" — counts are printed with what they are counts of.'
+- name: House rule
+  detail: '"Nothing from this store can act without your decision, and we never ask for credentials, keys, or wallet secrets. Anything that does either is not us."'
+- name: Markdown negotiation
+  detail: /developers, /deprecation, /pricing, /trade and many pages answer Accept application/json and text/markdown at the same URL; .md twins exist for llms.txt (index.md), agents.md, pricing.md, trade.md, mcp.md, auth.md, sitemap.md.

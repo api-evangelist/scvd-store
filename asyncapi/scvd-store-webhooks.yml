@@ -1,0 +1,47 @@
+generated: '2026-09-19'
+method: searched
+source: https://scvd.store/api/trade/contract
+spec_type: webhook-catalog
+docs:
+- https://scvd.store/trade
+- https://scvd.store/feeds
+- https://scvd.store/a2a-desk.json
+asyncapi_published: false
+note: >-
+  SCVD publishes no AsyncAPI document (/asyncapi.json 404; /asyncapi.yaml is a Cloudflare 403 on the .yaml
+  extension; none in the repo). Its event surface is real but small and is recorded here as a webhook
+  catalog rather than fabricated into a spec: one outbound signed delivery-receipt webhook on the trade
+  counter, one inbound HMAC-signed order webhook from resellers, four Atom feeds plus a per-host feed, and
+  A2A task results retrievable for 24 hours. There is no subscription API and no event catalog beyond this.
+outbound_webhooks:
+- name: trade delivery receipt
+  trigger: a reseller order at POST /api/trade/{account}/{item_id} completes
+  delivery: 'POST to the caller-supplied callback_url (an https URL), once, after the synchronous response'
+  payload: the signed delivery receipt — the same delivery object the front door returns (deliverable, certificate with signature, public_key, verify_url, trade block)
+  signing: the payload's certificate is Ed25519-signed by the store's published key (offline-verifiable); no separate webhook-signature header is documented
+  retries: none documented ("once")
+  source: https://scvd.store/api/trade/contract how_to_call.body
+inbound_webhooks:
+- name: trade order instruction
+  endpoint: POST https://scvd.store/api/trade/{account}/{item_id}
+  auth: HMAC-SHA256 over timestamp.nonce.body with a per-account secret
+  dialects:
+  - {id: canonical, headers: [X-Trade-Key, X-Trade-Timestamp, X-Trade-Nonce, X-Trade-Signature]}
+  - {id: hal, headers: [X-Hal-Provider-Key, X-Hal-Timestamp, X-Hal-Nonce, X-Hal-Signature]}
+  replay_protection: 300-second timestamp window; nonce ^[0-9a-f]{32}$ refused if seen before, on a strongly consistent store; optional order_ref (up to 120 chars) as idempotency
+  sandbox: account `sandbox` with a published secret; check desk at POST /api/trade/sandbox/check reports every signature check by name
+async_tasks:
+- name: A2A tasks
+  endpoint: https://scvd.store/a2a
+  note: Completed and failed task results retrievable with tasks/get for 86,400 seconds; no push notifications (capabilities.pushNotifications false).
+- name: human-queue orders
+  poll: GET /api/order/{order_id} (get_api_order_order_id; MCP check_order)
+  note: Human-fulfilled items return an order id and a queue ticket; poll until completed. No webhook.
+feeds:
+- {name: The Week's Doors, url: 'https://scvd.store/feeds/brief.xml', format: Atom, cadence: weekly after the Sunday round}
+- {name: The corpus chain, url: 'https://scvd.store/feeds/corpus.xml', format: Atom, cadence: weekly}
+- {name: Corrections, url: 'https://scvd.store/feeds/corrections.xml', format: Atom, cadence: when we get something wrong, observed: '200 application/atom+xml, 75 entries on 2026-09-19'}
+- {name: Disagreements, url: 'https://scvd.store/feeds/disagreements.xml', format: Atom, cadence: from a named trigger}
+- {name: One host's changes, url_template: 'https://scvd.store/feeds/host/{host}.xml', format: Atom, cadence: 'weekly at most; silent while nothing changed', note: 'Moves on first probe, every verdict change and every change in the set of receiving addresses (as digests).'}
+- {name: askable index, url: 'https://scvd.store/ask/feed.json', format: schema.org DataFeed}
+- {name: schemamap, url: 'https://scvd.store/schemamap.xml', format: NLWeb Schema Feeds}

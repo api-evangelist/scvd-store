@@ -1,0 +1,103 @@
+generated: '2026-09-19'
+method: searched
+source: https://scvd.store/auth.md
+derived_from: openapi/scvd-store-openapi.json
+docs:
+- https://scvd.store/auth.md
+- https://scvd.store/.well-known/oauth-protected-resource
+- https://scvd.store/developers
+summary:
+  types:
+  - none (anonymous)
+  - x402 payment signature (per-call)
+  - http bearer (one narrow scope)
+  - http basic (back office, not for agents)
+  identity_types_supported:
+  - anonymous
+  api_key_in: []
+  oauth2_flows: []
+  registration_required: false
+  signup_url: null
+  api_key_url: null
+statement: '"There is no account here. No key to request, no signup form, no approval queue, no waitlist, no tier
+  you get promoted into." (auth.md). The RFC 9728 document encodes the same: identity_types_supported [anonymous],
+  register_uri / claim_uri / revocation_uri null, bearer_methods_supported [], scopes_supported [], and NO authorization_servers
+  because no OAuth server exists.'
+schemes:
+- name: anonymous
+  type: none
+  applies_to: 'every free door: preflight, conformance, look, before-you-pay, verify, corpus and datasets, menu,
+    openapi.json, MCP tools/list + resources/read + the 14 free tools, all three A2A skills'
+  description: Send the request. "If a request to one of these fails, it failed for a reason printed in the body
+    — never because you were not recognised."
+  sources:
+  - https://scvd.store/auth.md
+  - well-known/scvd-store-oauth-protected-resource.json
+- name: x402_payment_signature
+  type: payment (x402 v2)
+  in: header
+  header: PAYMENT-SIGNATURE (legacy X-PAYMENT honoured); over MCP _meta['x402/payment']; over MPP the org.paymentauth/credential
+    meta key
+  challenge: HTTP 402 with PAYMENT-REQUIRED (base64 x402 v2 terms) and WWW-Authenticate naming resource_metadata;
+    JSON-RPC error 402 over MCP
+  applies_to: the 35 GET /api/buy/{item} doors, the publication pages and the six buy_* MCP tools
+  description: '"That signature IS the credential: it authenticates nothing about who you are, and it does not have
+    to — it settles the call it paid for and it is good for that call only." Settled in USDC on Base, Polygon, Arbitrum,
+    World or Solana via the Coinbase CDP facilitator; the store never holds funds. Revocation: nothing to revoke
+    — a payment authorises exactly one call.'
+  safety: Idempotency-Key (16–128 chars; suggested_key in every 402) prevents a retry loop from double-charging;
+    the store delivers first and settles after so a failed delivery takes no money.
+  sources:
+  - https://scvd.store/auth.md
+  - openapi x-payment-info on each door
+  - live 402 on GET /api/buy/small_blessing 2026-09-19
+- name: purchaseStatusToken
+  type: http
+  scheme: bearer
+  applies_to:
+  - get_api_purchase_status_purchase_id
+  description: Private recovery.status_token returned by a catalogue purchase. This capability reads only its original
+    purchase status. (The only securityScheme declared in the OpenAPI; MCP check_purchase takes it as status_token.)
+  sources:
+  - openapi/scvd-store-openapi.json
+- name: trade_hmac
+  type: hmac
+  in: headers
+  headers:
+  - X-Trade-Key
+  - X-Trade-Timestamp
+  - X-Trade-Nonce
+  - X-Trade-Signature
+  algorithm: sha256=HMAC-SHA256(secret, timestamp.nonce.body); 300-second window; nonce replay refused
+  applies_to:
+  - post_api_trade_partner_item_id
+  - get_api_trade_partner_claim
+  - get_api_trade_partner_statement
+  - post_api_trade_partner_check
+  - post_api_trade_sandbox_item_id
+  - post_api_trade_sandbox_check
+  description: Reseller (trade counter) accounts only; secrets are issued out of band by the keeper. A sandbox account
+    with a published secret exists for exercising the dialect (see sandbox/).
+  note: Not declared as a securityScheme in the OpenAPI (the trade operations declare 401/409 responses); documented
+    at /api/trade/contract.
+  sources:
+  - https://scvd.store/api/trade/contract
+- name: keeper_basic
+  type: http
+  scheme: basic
+  applies_to:
+  - /admin (not in the contract)
+  description: '"HTTP Basic, one human''s password … no agent has business behind it, no credential for it is issued
+    to anyone, and a failed attempt is throttled per address and raises an alarm." Listed because a scanner will
+    find the 401.'
+  sources:
+  - https://scvd.store/auth.md
+discovery:
+  protected_resource_metadata: https://scvd.store/.well-known/oauth-protected-resource
+  authorization_servers: null
+  openid_configuration: '404'
+  oauth_authorization_server: '404'
+  www_authenticate_on_402: X402 resource_metadata="<origin>/.well-known/oauth-protected-resource" per the spec header
+    description; observed as a Payment challenge (MPP) on 2026-09-19
+what_the_store_never_asks_for: credentials, API keys, seed phrases, private keys, or wallet secrets — "Anything
+  that asks you for one of those while claiming to be this store is not this store."

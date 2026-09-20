@@ -1,0 +1,147 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/scvd-store-openapi.json
+docs:
+- https://scvd.store/attestation
+- https://scvd.store/spec/scvd-attestation/v1
+- https://scvd.store/rights
+summary: >-
+  Derived from the 16 component schemas, the id-shaped path parameters ({item_id}, {order_id}, {purchase_id},
+  {refund_id}, {watch_id}, {mandate_id}, {kit_id}, {anchor_id}, {pass_id}, {cert_id}, {host}, {wallet},
+  {partner}, {week}, {sequence}) and the identity model /attestation and /rights describe. Two roots: the
+  WALLET (the buyer — "the wallet is the card"; no accounts exist) and the ITEM (a shelf door identified by
+  item_id, the same id used by GET /api/buy/{item_id}, the MCP buy_* itemIds and menu.json). A Purchase
+  joins them and yields a signed CERTIFICATE (cert_id), which is the root of every "served forever" artifact
+  read. A second, independent graph is the OBSERVATORY: Hosts/Doors observed in weekly signed corpus
+  Snapshots, graded on a Passport tier, with Defect classes as the vocabulary. The contract links by id field
+  and returns whole objects; there is no expansion parameter and no $ref between top-level schemas.
+id_style:
+  format: 'opaque strings with readable prefixes; item_id and defect ids are human slugs'
+  prefixes:
+  - {entity: Certificate, example: cert_4dww28dx5j, note: 'cert_ + 12 chars, minted when a purchase settles'}
+  - {entity: Handover artifact, example: handover_1, note: key-succession announcement signed by the outgoing key}
+  - {entity: Item, example: small_blessing, note: human slug}
+  - {entity: Defect class, example: unsignable-offer, note: kebab-case slug}
+  - {entity: Wallet, example: '0x… (EVM) or base58 (Solana)'}
+  - {entity: Settlement, example: '0x… transaction hash (EVM) or base58 signature (Solana)'}
+  - {entity: Week, example: '2026-W37 (ledger/{week}.json)'}
+entities:
+- name: Wallet
+  description: The buyer. An EVM or Solana address that pays over x402; no account exists beyond it. Proves control with a signed challenge for claims and credit.
+  relationships:
+  - {has_many: Purchase, via: payer}
+  - {has_many: Refund, via: wallet}
+  - {has_one: CreditBalance, via: wallet, operation: get_api_credit_wallet}
+  - {has_one: Binder, via: wallet, operation: get_api_paywall_binder_wallet}
+  - {has_many: Claim, via: paying address, operations: [post_api_claims_challenge, post_api_claims]}
+- name: Item
+  description: A door on the shelf (35 priced). Carries price_usdc, pricing (fixed | pay_what_it_deserves), cadence (one_off | term), fulfillment (instant | human_queue), sla_hours, required_params, payment_capabilities and an input contract.
+  schemas: [PaymentRequiredChallenge (item_id, min_price_usdc, pricing, required_params, input_contract_url)]
+  relationships:
+  - {has_many: Purchase, via: item_id}
+  - {belongs_to: Shelf (MCP buy_* tool), via: itemIds}
+  - {has_one: Listing, via: item_id, operation: get_menu_item_id}
+  - {has_one: Sample, via: sample_url}
+- name: Purchase
+  description: One paid call — item + payer + settlement — that DELIVERS first and settles after. Yields a DeliveryEnvelope with a Certificate (instant) or an OrderReceipt to poll (human_queue). Idempotency-Key + wallet + item + inputs select a 24-hour replay slot.
+  schemas: [DeliveryEnvelope, OrderReceipt, DisclosureBlock]
+  relationships:
+  - {belongs_to: Wallet, via: payer}
+  - {belongs_to: Item, via: item_id}
+  - {has_one: Certificate, via: certificate.cert_id}
+  - {has_one: Order, via: order_id, note: human_queue items only}
+  - {has_one: PurchaseStatus, via: purchase_id + status_token, operation: get_api_purchase_status_purchase_id}
+  - {has_one: Receipt (x402 PAYMENT-RESPONSE JWS), via: settlement_tx}
+  - {has_one: Refund, via: refund_id, note: only on a missed human-labor window}
+- name: Certificate
+  description: The signed artifact every purchase ends in — Ed25519 signature over RFC 8785 canonical signed_payload, public_key, verify_url, patron_number, settlement_tx. Immutable after signing; bearer; verifiable free forever at get_api_verify_id.
+  schemas: [DeliveryEnvelope.certificate, TradeDelivery.certificate]
+  relationships:
+  - {belongs_to: Purchase, via: cert_id}
+  - {belongs_to: SigningKey, via: public_key}
+  - {has_one: Badge, via: badge_url}
+  - {is_a: 'one of the served-forever artifact classes below', note: the artifact class decides which extra fields are bound}
+- name: ServedForeverArtifact
+  description: The purchased-artifact reads, each at a stable URL and each a Certificate specialisation.
+  members:
+  - {entity: SettlementAttestation / Reconciliation, operation: get_api_reconciliation_reconciliation_id}
+  - {entity: Watch (standing_watch / conformance_watch), operations: [get_api_watch_watch_id, get_api_conformance_watch_watch_id], schema: WatchCommission}
+  - {entity: Mandate, operations: [get_api_mandate_mandate_id, post_api_mandate_mandate_id]}
+  - {entity: Statement / OperatorStatement, operations: [get_api_statement_statement_id, get_api_operator_statement_statement_id]}
+  - {entity: LaunchCheck, operation: get_api_launch_check_check_id}
+  - {entity: ServiceAudit / OnpageAudit / GoodBuyer reading, operations: [get_api_service_audit_audit_id, get_api_onpage_audit_audit_id, get_api_good_buyer_reading_id]}
+  - {entity: BitcoinAnchor, operation: get_api_bitcoin_anchor_anchor_id}
+  - {entity: ContextAnchor, operation: get_api_anchor_anchor_id}
+  - {entity: CaseFile, operation: get_case_case_id}
+  - {entity: A2aKit, operations: [get_api_a2a_kits_kit_id, post_api_a2a_kits_kit_id_recheck], schemas: [A2aKit, A2aRecheck, A2aSignedObservation]}
+  - {entity: PatronagePass, operation: get_api_patronage_pass_id}
+  - {entity: Card / Pack / Lucky, operations: [get_api_card_card_id, get_api_pack_pack_id, get_api_lucky_lucky_id]}
+  - {entity: BotAuthCard, operation: get_api_bot_auth_card_card_id}
+- name: Order
+  description: A human-queue ticket (status queued | completed, sla_hours, order_url). Polled, never pushed.
+  schemas: [OrderReceipt]
+  relationships:
+  - {belongs_to: Purchase, via: order_id}
+  - {has_one: Refund, via: refund_id, note: if the sla_hours window is missed}
+- name: Refund
+  description: 'refund_id, item, amount_usdc, status (pending until paid by hand), tx_hash once paid, paid_at. Recorded on /fulfillment-log.'
+  relationships:
+  - {belongs_to: Order, via: order_id}
+  - {belongs_to: Wallet, via: wallet}
+- name: SigningKey
+  description: The store's Ed25519 key with full history (current #key-2 since 2026-07-31; retired #key-1) at /.well-known/scvd-signing-key and did:web:scvd.store; anchored into Bitcoin via the anchor log.
+  relationships:
+  - {has_many: Certificate, via: public_key}
+  - {has_many: Offer / Receipt (JWS), via: kid}
+  - {has_one: DIDDocument, via: did:web:scvd.store}
+- name: TradeAccount
+  description: A reseller account at the trade counter (partner). Orders by HMAC-signed instruction; billed on a statement; trade_price derived from retail by the published rule.
+  schemas: [TradeCheck, TradeDelivery, TradeRefusal]
+  relationships:
+  - {has_many: TradeDelivery, via: account}
+  - {has_one: Statement, via: partner, operation: get_api_trade_partner_statement}
+  - {has_one: Secret (current + previous), via: signed_with}
+- name: TradeDelivery
+  description: Same delivery object as the front door plus a trade block (account, trade_price_usd, net_usd, instruction_digest, order_ref); certificate names no chain.
+  relationships:
+  - {belongs_to: TradeAccount, via: trade.account}
+  - {belongs_to: Item, via: item_id}
+  - {has_one: Certificate, via: certificate}
+- name: Host / Door
+  description: An x402 endpoint the observatory has met. A Door is a URL; a Host groups doors. Each round records a verdict, the level reached (L0–L6), checks, advisories, receiving addresses (as digests).
+  schemas: [PreflightVerdict]
+  relationships:
+  - {has_many: Observation (corpus row), via: host, operation: get_corpus_host_host_json}
+  - {has_one: Passport, via: host, operation: get_passport_host}
+  - {has_one: HostedProfile, via: host, operation: get_profiles_host, note: paid trust_profile}
+  - {has_many: StandingNote, via: host or wallet, operation: post_api_standing_note}
+  - {has_one: Feed, via: host, url: '/feeds/host/{host}.xml'}
+- name: Snapshot (corpus round)
+  description: One weekly signed, hash-chained, OTS-anchored census of the public x402 web (sequence, week, digest, entries).
+  relationships:
+  - {has_many: Observation, via: sequence}
+  - {belongs_to: Ledger week, via: week, operation: get_ledger_week_json}
+  - {has_one: Evidence capture per host, operation: get_corpus_sequence_evidence_host_json}
+  - {has_one: OTS proof, via: digest}
+- name: Passport
+  description: A dated per-host page — rounds probed of rounds since first sighting, last signed verdict, tier with its fraction, freshness state, the gaps counted against the observer. "Not a badge, not a pass mark."
+  relationships:
+  - {belongs_to: Host, via: host}
+  - {derived_from: Observation, note: 'a read-time derivation that prints its rule and denominator'}
+- name: DefectClass
+  description: One of 31 named ways an x402 door can be broken (what it asserts, what falsifies it, evidence labels, remediation). The vocabulary the verdicts speak.
+  source: errors/scvd-store-defects.json
+  relationships:
+  - {referenced_by: PreflightVerdict.checks, via: id}
+  - {referenced_by: Observation.defects, via: id}
+- name: Mandate
+  description: A dated, signed record of what an agent is authorized to do, held by a third party; may be counter-signed free.
+  relationships:
+  - {belongs_to: Wallet, via: agent wallet}
+  - {referenced_by: CaseFile, via: mandate_id}
+- name: Claim
+  description: Purchase recovery — a wallet proves control and recovers everything it paid for.
+  relationships:
+  - {belongs_to: Wallet, via: paying address}
+  - {has_many: Purchase, via: payer}
+render: null

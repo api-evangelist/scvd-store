@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /manage/
+Disallow: /api/
+Sitemap: https://viewsmeet.com/sitemap.xml
+Agentmap: https://viewsmeet.com/.well-known/ai-catalog.json

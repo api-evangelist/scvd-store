@@ -1,0 +1,95 @@
+generated: '2026-09-19'
+method: searched
+source: https://scvd.store/feeds/corrections.xml
+docs:
+- https://scvd.store/corrections
+- https://scvd.store/deprecation
+- https://scvd.store/agents.md
+- https://scvd.store/pricing.md
+- https://github.com/seancrecord/scvd-general-store-repo/blob/main/cli/CHANGELOG.md
+description: >-
+  SCVD publishes no single API changelog page (/changelog 404). Change is recorded three ways: the version
+  table on /deprecation (url-path versions with since dates), the dated corrections log at /corrections
+  (75 Atom entries, each a thing the store got wrong, when, who found it and what changed — the closest
+  thing to a release log for behaviour), and per-package CHANGELOG.md files in the open-source monorepo (cli,
+  verifier, defects, corpus-client, mcp-starter, x402-preflight*). Dated product changes are also stated
+  inline in agents.md, pricing.md and mcp.md. The recent window is captured below from those sources; the
+  live feeds are the source of truth.
+versioning:
+  scheme: url-path for instruments; semver for packages and the MCP server (0.5.0); OpenAPI info.version 0.3.0; skill.md 3.18.0
+  detail: lifecycle/scvd-store-lifecycle.yml
+current:
+  preflight: v2 (since 2026-08-23)
+  look: v1 (since 2026-09-02)
+  conformance: v1 (since 2026-08-03)
+  mcp_server: 0.5.0
+  cli: 0.3.0 (2026-09-10)
+  pricing_charter: v1 (effective 2026-08-20)
+feeds:
+- {name: Corrections, url: 'https://scvd.store/feeds/corrections.xml', cadence: when we get something wrong}
+- {name: The Week's Doors, url: 'https://scvd.store/feeds/brief.xml', cadence: weekly after the Sunday round}
+- {name: The corpus chain, url: 'https://scvd.store/feeds/corpus.xml', cadence: weekly}
+- {name: Disagreements, url: 'https://scvd.store/feeds/disagreements.xml', cadence: from a named trigger}
+entries:
+- date: '2026-09-19'
+  kind: correction
+  highlights: [Host-row citations labeled a snapshot's publication time as the observation time; corrected.]
+  source: https://scvd.store/corrections
+- date: '2026-09-18'
+  kind: correction
+  highlights: [Follow-up to the 2026-09-16 probe-verb correction.]
+- date: '2026-09-17'
+  kind: correction
+  highlights: [Preflight's evidence ladder mis-named The Night Watch as the instrument for L4–L6.]
+- date: '2026-09-16'
+  kind: correction + behaviour change
+  breaking: false
+  highlights: ['Every probe at a stranger''s x402 door sent GET and only GET — probes now fall back to POST once if the door refuses the method (preflight v2 400 body now says so).', 'Decline desk: two computed facts were being thrown away; shared-reason escalation fault attribution corrected.']
+- date: '2026-09-15'
+  kind: contract correction
+  breaking: false
+  highlights: ['The OpenAPI declared the IETF RateLimit headers on EVERY response of the five metered doors, including the 400 that never spends a probe — removed from the 400.', 'Wallet Claims can now return a paid certificate after client state was lost, not only locate it.', 'Front-page card rack "Ring the bell — free" copy corrected.', 'Facilitator refusal reason CODE and message now both surfaced.']
+- date: '2026-09-14'
+  kind: correction
+  highlights: ['The shop window sold a buyer their own card; fixed.', 'Front-page card rack shipped.']
+- date: '2026-09-10'
+  kind: release
+  highlights: ['scvd-cli 0.3.0: corpus-index command, global --json/week flags.', 'x402-sign 1.0.3 and scvd-corpus-client 0.1.0 published.']
+  source: https://github.com/seancrecord/scvd-general-store-repo/blob/main/cli/CHANGELOG.md
+- date: '2026-09-05'
+  kind: addition
+  highlights: ['Documentation MCP door added at /mcp/docs (and POST on /mcp.md) after a scanner that POSTed a handshake there got a 405 and reported the docs server down.']
+  source: https://scvd.store/mcp.md
+- date: '2026-09-03'
+  kind: addition
+  highlights: ['Trade counter opened (/trade, /api/trade/*): reseller accounts ordering by HMAC-signed webhook.', 'scvd-cli 0.2.0: look, before-you-pay, month, feeds commands; FIX lines from remediation rows.']
+- date: '2026-09-02'
+  kind: addition
+  highlights: ['/api/look/v1 shipped — one live preflight beside the signed per-host history.', 'Readings derived from checks now print their rule, fraction and rows.']
+- date: '2026-08-28'
+  kind: release
+  highlights: ['scvd-cli 0.1.0 first publish (0.1.1 the same day to correct the README).', 'MCP Apps cards observed rendering on stdio hosts and not on the remote connector (mcp.md).']
+- date: '2026-08-23'
+  kind: version
+  breaking: false
+  highlights: ['/api/preflight/v2 became current — folds the Solana rail-receivability read into the verdict. v1 stays supported through the overlap.']
+  source: https://scvd.store/deprecation
+- date: '2026-08-20'
+  kind: policy
+  highlights: ['Pricing charter v1 signed and effective: one_price, floor_stays_low, verification_stays_free, changes_are_dated, scarcity_is_labor, no_gate_on_the_door.']
+  source: https://scvd.store/pricing.md
+- date: '2026-08-10'
+  kind: behaviour change
+  breaking: false
+  highlights: ['Purchase order reversed to deliver-first-settle-after: a failed delivery takes no money.']
+  source: https://scvd.store/agents.md
+- date: '2026-08-03'
+  kind: version
+  highlights: ['/api/preflight/v1 and /api/conformance/v1 began serving.']
+- date: '2026-07-31'
+  kind: key rotation
+  highlights: ['Signing key #key-1 retired (no recoverable private-key copy existed); #key-2 in service; paper-backup procedure written. Everything signed under #key-1 still verifies.']
+  source: https://scvd.store/.well-known/scvd-signing-key
+- date: '2026-07-30'
+  kind: policy
+  highlights: ['Wind-down policy decided and published; /rights decided 2026-07-31.']

@@ -1,0 +1,244 @@
+generated: '2026-09-19'
+method: probed
+source: >-
+  Live GET probes of the named /.well-known/* path list on scvd.store and www.scvd.store, 2026-09-19, plus the
+  discovery documents the provider's own RFC 9727 api-catalog, agents.md and llms.txt point at. Every row is a
+  request that was issued; every status is the one returned. Only documents that returned a real, correctly
+  typed payload were saved (file: populated).
+summary:
+  hosts_probed: 2
+  paths_probed: 44
+  documents_served: 20
+  hit_count: 20
+  path_echo_control: passed
+  note: >-
+    scvd.store is one of the densest /.well-known/ surfaces in the catalog. It serves an RFC 9116 security.txt,
+    an RFC 9728 protected-resource document (with no authorization_servers — deliberately, since there is no
+    OAuth server, and the document says so), an RFC 9727 API catalog (application/linkset+json) linking every
+    surface, an OpenAI-style ai-plugin.json, an MCP server card, a UCP business profile, an ARD manifest, an
+    x402 discovery document, an A2A agent card at three paths, a did:web document, an Ed25519 signing-key
+    history, a Web Bot Auth key directory, an ERC-8004 agent registration, a signed liveness beacon, a
+    machine-readable trust summary and an agent-instructions document. It does NOT serve OIDC discovery, an
+    OAuth authorization-server document, an APIs.json, an AAuth resource document or an ACP manifest — every
+    miss is the site's real JSON 404 (711 bytes, application/json, {"error": …}), not an SPA shell, and a
+    negative-control path also 404s. /apis.yml is the one anomaly: a Cloudflare 403 HTML challenge page, i.e.
+    the edge refusing the .yml extension, not a document. All three MCP endpoints and the A2A endpoint live on
+    this same apex host, so the RFC 9728 probe on the MCP host is the apex row. www.scvd.store 301s every path
+    to the apex and serves nothing of its own.
+hosts:
+- host: scvd.store
+  role: Website, API (OpenAPI servers[]), all three MCP servers, A2A JSON-RPC and UCP host — one origin
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    content_type: text/plain; charset=utf-8
+    bytes: 435
+    file: scvd-store-security.txt
+    standard: RFC 9116
+    note: 'Contact (letter endpoint + security@scvd.store), Expires 2027-03-20, Canonical, Policy -> /.well-known/trust.json, Preferred-Languages.'
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+    note: No OAuth authorization server exists; auth.md says naming one "would be a false claim in machine form".
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    content_type: application/json
+    bytes: 2787
+    file: scvd-store-oauth-protected-resource.json
+    standard: RFC 9728
+    note: >-
+      resource https://scvd.store, bearer_methods_supported [] and scopes_supported [] (explicitly empty), NO
+      authorization_servers (by design), plus an x402 block (v2, PAYMENT-SIGNATURE / PAYMENT-REQUIRED headers)
+      and an agent_auth block (identity_types_supported [anonymous]; register/claim/revocation URIs null with a
+      stated reason). This is also the MCP resource host's document.
+  - path: /.well-known/api-catalog
+    status: 200
+    content_type: application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"
+    bytes: 22028
+    file: scvd-store-api-catalog.json
+    standard: RFC 9727 / RFC 9264
+    note: A linkset anchoring the HTTP API, three MCP servers, the UCP profile, the trade counter, the A2A card, each versioned free instrument, ten datasets and the npm CLI, each with service-desc / service-doc / service-meta / status links.
+  - path: /.well-known/api-catalog.json
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    content_type: application/json
+    bytes: 1223
+    file: scvd-store-ai-plugin.json
+    note: 'auth.type none; api.type openapi -> https://scvd.store/openapi.json; contact sean@recordcreativeco.com; legal_info_url /rights.'
+  - path: /.well-known/ucp.json
+    status: 200
+    content_type: application/json
+    bytes: 7110
+    file: scvd-store-ucp.json
+    standard: UCP 2026-08-25
+    note: Identical to /.well-known/ucp. dev.ucp.shopping REST service at https://scvd.store/ucp/v1; catalog.search, catalog.lookup, checkout, order capabilities; five store.scvd.payment.usdc x402 handlers (Base, Polygon, Arbitrum, World, Solana).
+  - path: /.well-known/ucp
+    status: 200
+    content_type: application/json
+    bytes: 7110
+    file: scvd-store-ucp.json
+  - path: /.well-known/acp.json
+    status: 404
+  - path: /.well-known/aauth-resource.json
+    status: 404
+  - path: /.well-known/apis.json
+    status: 404
+  - path: /apis.json
+    status: 404
+  - path: /apis.yml
+    status: 403
+    content_type: text/html; charset=UTF-8
+    bytes: 4571
+    note: Cloudflare 403 challenge HTML, not a document — the edge refuses the .yml extension. Not an APIs.json.
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: application/json
+    bytes: 3818
+    file: ../a2a/scvd-store-agent-card.json
+    standard: A2A Agent Card (protocolVersion 0.3.0)
+    note: Saved verbatim under a2a/ and graded conformant in a2a/scvd-store-a2a.yml.
+  - path: /.well-known/agent.json
+    status: 200
+    content_type: application/json
+    bytes: 3818
+    file: ../a2a/scvd-store-agent-card.json
+    note: Legacy pre-0.3 path; byte-identical to the canonical card.
+  - path: /.well-known/a2a.json
+    status: 200
+    content_type: application/json
+    bytes: 3818
+    file: ../a2a/scvd-store-agent-card.json
+    note: Provider's own alias, named in its api-catalog; byte-identical.
+  - path: /.well-known/mcp
+    status: 200
+    content_type: application/json
+    bytes: 90247
+    file: scvd-store-mcp-server-card.json
+    standard: MCP server card (static.modelcontextprotocol.io/schemas/v1/server-card.schema.json)
+    note: Identical bytes served at /.well-known/mcp.json and /.well-known/mcp/server-card.json. Endpoint https://scvd.store/mcp, transport streamable-http, protocol_versions [2026-07-28, 2025-11-25, 2025-06-18, 2025-03-26], authentication.required false, full tool and resource lists, the two payment profiles.
+  - path: /.well-known/mcp.json
+    status: 200
+    content_type: application/json
+    bytes: 90247
+    file: scvd-store-mcp-server-card.json
+  - path: /.well-known/mcp/server-card.json
+    status: 200
+    content_type: application/json
+    bytes: 90247
+    file: scvd-store-mcp-server-card.json
+  - path: /.well-known/x402.json
+    status: 200
+    content_type: application/json
+    bytes: 452649
+    file: scvd-store-x402.json
+    standard: x402 v2 discovery document
+    note: 43 priced resources each with accepts[] (five rails), 16 when_to_use situations, 10 datasets, the atlas, signing key, DID, ERC-8004 chain identity and MCP pointers. /.well-known/x402 (no extension) serves a 434,406-byte minimal variant (200), not saved separately.
+  - path: /.well-known/x402
+    status: 200
+    content_type: application/json
+    bytes: 434406
+  - path: /.well-known/ard.json
+    status: 200
+    content_type: application/json
+    bytes: 36240
+    file: scvd-store-ard.json
+    standard: Agentic Resource Discovery 1.0
+    note: host identifier did:web:scvd.store with a JWS-signed trustManifest; entries for the MCP server card, the A2A card, the free instruments and datasets. Identical bytes at the predecessor path /.well-known/ai-catalog.json (200). Also named in robots.txt as Agentmap.
+  - path: /.well-known/ai-catalog.json
+    status: 200
+    content_type: application/json
+    bytes: 36240
+    file: scvd-store-ard.json
+  - path: /.well-known/trust.json
+    status: 200
+    content_type: application/json
+    bytes: 93752
+    file: scvd-store-trust.json
+    note: The security.txt Policy target — a machine-readable diligence summary (operator legal entity, standards implemented, wallet safety, data handling, refund policy, not_claimed list, external registry records, discovery by protocol). See security/scvd-store-trust-center.yml.
+  - path: /.well-known/liveness.json
+    status: 200
+    content_type: application/json
+    bytes: 3066
+    file: scvd-store-liveness.json
+    note: Ed25519-signed per-request liveness beacon with keeper presence window; the api-catalog's `status` link. Computed per request, so the saved copy is one observation.
+  - path: /.well-known/agent-instructions
+    status: 200
+    content_type: application/json
+    bytes: 5438
+    file: scvd-store-agent-instructions.json
+    note: 16 "when to use / when not to" situations with example requests.
+  - path: /.well-known/scvd-signing-key
+    status: 200
+    content_type: application/json
+    bytes: 3139
+    file: scvd-store-scvd-signing-key.json
+    note: Current Ed25519 public key (hex), full key history with one retired key and its signed retirement reason, sample artifact and verify URL.
+  - path: /.well-known/did.json
+    status: 200
+    content_type: application/did+json
+    bytes: 1761
+    file: scvd-store-did.json
+    standard: did:web
+    note: did:web:scvd.store, JsonWebKey2020 Ed25519 verificationMethod #key-2, retired #key-1 listed.
+  - path: /.well-known/http-message-signatures-directory
+    status: 200
+    content_type: application/http-message-signatures-directory+json
+    bytes: 176
+    file: scvd-store-http-message-signatures-directory.json
+    standard: Web Bot Auth (RFC 9421 key directory)
+  - path: /.well-known/agent-registration.json
+    status: 200
+    content_type: application/json
+    bytes: 2541
+    file: scvd-store-agent-registration.json
+    standard: ERC-8004 agent registration
+  - path: /.well-known/anchor-log.json
+    status: 200
+    content_type: application/json
+    bytes: 126177
+    note: Append-only hash chain over the signing-key state with OpenTimestamps proofs. Not saved (large, and re-derivable from the key history); status recorded.
+  - path: /.well-known/conformance/offer-receipt-vectors.json
+    status: 200
+    content_type: application/json
+    bytes: 14608
+    note: x402 Signed Offers & Receipts conformance vectors (known-good and known-bad JWS). Not saved; status recorded.
+  - path: /.well-known/scvd-store-negative-control-9f3ab1c2.json
+    status: 404
+    control: negative
+    note: A path that cannot exist. Its 404 (the same 711-byte JSON body every miss returns) proves the host does not echo or catch-all /.well-known/* requests.
+- host: www.scvd.store
+  role: Alias — 301 to the apex for every path
+  documents:
+  - {path: /.well-known/security.txt, status: 301, redirect: 'https://scvd.store/.well-known/security.txt'}
+  - {path: /.well-known/openid-configuration, status: 301}
+  - {path: /.well-known/oauth-authorization-server, status: 301}
+  - {path: /.well-known/oauth-protected-resource, status: 301}
+  - {path: /.well-known/api-catalog, status: 301}
+  - {path: /.well-known/ai-plugin.json, status: 301}
+  - {path: /.well-known/agent-card.json, status: 301}
+  - {path: /.well-known/agent.json, status: 301}
+  - {path: /.well-known/ucp.json, status: 301}
+  - {path: /.well-known/acp.json, status: 301}
+  - {path: /.well-known/aauth-resource.json, status: 301}
+  - {path: /.well-known/apis.json, status: 301}
+  - {path: /apis.json, status: 301}
+  - {path: /apis.yml, status: 301}
+  - {path: /llms.txt, status: 301}
+robots_txt:
+  url: https://scvd.store/robots.txt
+  status: 200
+  file: scvd-store-robots.txt
+  note: >-
+    "User-agent: *" Allow: / plus 55 named AI crawlers each explicitly allowed; a Content-Signal line
+    (search=yes, ai-train=yes, ai-input=yes) with the provider's reasoning; Sitemap, a NLWeb Schemamap
+    (/schemamap.xml) and an ARD Agentmap (/.well-known/ard.json) directive.
+other_discovery:
+- {url: 'https://scvd.store/llms.txt', status: 200, file: ../llms/scvd-store-llms.txt}
+- {url: 'https://scvd.store/agents.md', status: 200, file: ../llms/scvd-store-agents.md}
+- {url: 'https://scvd.store/skill.md', status: 200, file: ../skills/scvd-store-general-store.md}
+- {url: 'https://scvd.store/openapi.json', status: 200, file: ../openapi/scvd-store-openapi.json}
+- {url: 'https://scvd.store/openapi-tools.json', status: 200, file: ../mcp/scvd-store-openapi-tools.json}
+- {url: 'https://scvd.store/sitemap.xml', status: 200, bytes: 561282}
+- {url: 'https://scvd.store/schemamap.xml', status: 200, bytes: 992}

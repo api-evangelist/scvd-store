@@ -1,0 +1,583 @@
+generated: '2026-09-19'
+method: derived
+source: mcp/scvd-store-mcp-tools.json + mcp/scvd-store-mcp-verifier-tools.json (live tools/list, 2026-09-19), a2a/scvd-store-agent-card.json
+  (live card) and the provider's own function-calling manifest mcp/scvd-store-openapi-tools.json (https://scvd.store/openapi-tools.json,
+  whose x-scvd.operation_id binds each free tool to an operationId), all bound to openapi/scvd-store-openapi.json
+surfaces:
+  openapi:
+    file: openapi/scvd-store-openapi.json
+    url: https://scvd.store/openapi.json
+    operations: 196
+    gated: false
+    note: OpenAPI 3.1.0, 180 paths, 196 operations (162 GET, 34 POST), every operation carrying a unique operationId
+      and a summary; no tags declared. 35 GET /api/buy/{item} doors plus the publication pages declare 402 responses
+      with x402 terms in x-payment-info.
+  mcp:
+  - url: https://scvd.store/mcp
+    gated: false
+    tools: 20
+    note: Anonymous tools/list; 6 buy_* tools are x402-gated at invocation.
+  - url: https://scvd.store/mcp/verifier
+    gated: false
+    tools: 5
+  - url: https://scvd.store/mcp/docs
+    gated: false
+    tools: 1
+  graphql: null
+  a2a:
+    url: https://scvd.store/a2a
+    card: a2a/scvd-store-agent-card.json
+    gated: false
+    protocol_version: 0.3.0
+    skills: 3
+  ucp:
+    profile: well-known/scvd-store-ucp.json
+    endpoint: https://scvd.store/ucp/v1
+    note: 'A fourth projection (UCP shopping: catalog.search, catalog.lookup, checkout, order) whose checkout settles
+      the same x402 terms; not enumerated as tools here.'
+crosswalk:
+- tool: check_a2a_card
+  surface: mcp (main)
+  category: a2a-conformance
+  rest:
+  - post_api_a2a_check
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = post_api_a2a_check, POST /api/a2a/check);
+    the REST operation's parameters/requestBody are the tool's real input contract.
+- tool: check_purchase
+  surface: mcp (main)
+  category: purchase-recovery
+  rest:
+  - get_api_purchase_status_purchase_id
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = get_api_purchase_status_purchase_id,
+    GET /api/purchase-status/{purchase_id}); the REST operation's parameters/requestBody are the tool's real input
+    contract.
+- tool: ring_bell
+  surface: mcp (main)
+  category: store-errands
+  rest:
+  - post_api_bell
+  binding: rest
+  confidence: medium
+  note: Mapped by name and semantics (POST /api/bell "Ring the bell"); not in the provider's openapi-tools.json
+    because it is a visitor-entry tool, not an instrument.
+- tool: read_binder
+  surface: mcp (main)
+  category: paywall
+  rest:
+  - get_api_paywall_binder_wallet
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = get_api_paywall_binder_wallet, GET
+    /api/paywall/binder/{wallet}); the REST operation's parameters/requestBody are the tool's real input contract.
+- tool: look_in_window
+  surface: mcp (main)
+  category: paywall
+  rest:
+  - get_api_paywall_window
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = get_api_paywall_window, GET /api/paywall/window);
+    the REST operation's parameters/requestBody are the tool's real input contract.
+- tool: sign_guestbook
+  surface: mcp (main)
+  category: store-errands
+  rest:
+  - post_api_guestbook
+  binding: rest
+  confidence: medium
+  note: Mapped by name and semantics (POST /api/guestbook "Sign the guestbook", 201).
+- tool: preflight_endpoint
+  surface: mcp (main)
+  category: x402-verification
+  rest:
+  - post_api_preflight_v2
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = post_api_preflight_v2, POST /api/preflight/v2);
+    the REST operation's parameters/requestBody are the tool's real input contract.
+- tool: look_at_door
+  surface: mcp (main)
+  category: x402-verification
+  rest:
+  - post_api_look_v1
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = post_api_look_v1, POST /api/look/v1);
+    the REST operation's parameters/requestBody are the tool's real input contract.
+- tool: check_before_you_pay
+  surface: mcp (main)
+  category: x402-verification
+  rest:
+  - post_api_before_you_pay_v1
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = post_api_before_you_pay_v1, POST /api/before-you-pay/v1);
+    the REST operation's parameters/requestBody are the tool's real input contract.
+- tool: check_conformance
+  surface: mcp (main)
+  category: x402-verification
+  rest:
+  - post_api_conformance_v1
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = post_api_conformance_v1, POST /api/conformance/v1);
+    the REST operation's parameters/requestBody are the tool's real input contract.
+- tool: verify_artifact
+  surface: mcp (main)
+  category: signature-verification
+  rest:
+  - get_api_verify_id
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = get_api_verify_id, GET /api/verify/{id});
+    the REST operation's parameters/requestBody are the tool's real input contract.
+- tool: check_order
+  surface: mcp (main)
+  category: orders
+  rest:
+  - get_api_order_order_id
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = get_api_order_order_id, GET /api/order/{order_id});
+    the REST operation's parameters/requestBody are the tool's real input contract.
+- tool: find_in_catalog
+  surface: mcp (main)
+  category: catalog
+  rest:
+  - get_api_catalog_v1
+  binding: rest
+  confidence: high
+  note: Bound by the provider's own openapi-tools.json (x-scvd.operation_id = get_api_catalog_v1, GET /api/catalog/v1);
+    the REST operation's parameters/requestBody are the tool's real input contract.
+- tool: buy_simple
+  surface: mcp (main)
+  category: x402-purchase
+  rest:
+  - get_api_buy_small_blessing
+  - get_api_buy_daily_fortune
+  - get_api_buy_window_pick
+  - get_api_buy_hello
+  - get_api_buy_pack
+  binding: rest (one operation per item_id)
+  confidence: high
+  note: The tool's itemIds enum maps one-to-one onto GET /api/buy/{item_id} operations; each REST twin declares
+    the same x-payment-info accepts[], the Idempotency-Key parameter and a 402 PaymentRequiredChallenge. Over MCP
+    the x402 payment rides in _meta['x402/payment'] (JSON-RPC error 402 carries the terms); over HTTP it rides in
+    PAYMENT-SIGNATURE.
+- tool: buy_signed_record
+  surface: mcp (main)
+  category: x402-purchase
+  rest:
+  - get_api_buy_hello
+  - get_api_buy_certificate_of_patronage
+  - get_api_buy_graffiti_on_a_train
+  - get_api_buy_coffees_for_closers
+  - get_api_buy_the_confession
+  - get_api_buy_recurring_patronage
+  binding: rest (one operation per item_id)
+  confidence: high
+  note: The tool's itemIds enum maps one-to-one onto GET /api/buy/{item_id} operations; each REST twin declares
+    the same x-payment-info accepts[], the Idempotency-Key parameter and a 402 PaymentRequiredChallenge. Over MCP
+    the x402 payment rides in _meta['x402/payment'] (JSON-RPC error 402 carries the terms); over HTTP it rides in
+    PAYMENT-SIGNATURE.
+- tool: buy_human_task
+  surface: mcp (main)
+  category: x402-purchase
+  rest:
+  - get_api_buy_the_collab
+  - get_api_buy_aura_walk
+  binding: rest (one operation per item_id)
+  confidence: high
+  note: The tool's itemIds enum maps one-to-one onto GET /api/buy/{item_id} operations; each REST twin declares
+    the same x-payment-info accepts[], the Idempotency-Key parameter and a 402 PaymentRequiredChallenge. Over MCP
+    the x402 payment rides in _meta['x402/payment'] (JSON-RPC error 402 carries the terms); over HTTP it rides in
+    PAYMENT-SIGNATURE.
+- tool: buy_observation
+  surface: mcp (main)
+  category: x402-purchase
+  rest:
+  - get_api_buy_settlement_attestation
+  - get_api_buy_settlement_reconciliation
+  - get_api_buy_the_case_file
+  - get_api_buy_attestation_bundle
+  - get_api_buy_standing_watch
+  - get_api_buy_service_audit
+  - get_api_buy_a2a_repair_kit
+  - get_api_buy_good_buyer
+  - get_api_buy_conformance_watch
+  - get_api_buy_signature_agent_card
+  - get_api_buy_onpage_audit
+  - get_api_buy_launch_check
+  - get_api_buy_opening_day
+  - get_api_buy_provenance_check
+  - get_api_buy_the_statement
+  - get_api_buy_operator_statement
+  - get_api_buy_the_mandate
+  - get_api_buy_bitcoin_anchor
+  - get_api_buy_passport_refresh
+  - get_api_buy_trust_profile
+  - get_api_buy_spot_check
+  binding: rest (one operation per item_id)
+  confidence: high
+  note: The tool's itemIds enum maps one-to-one onto GET /api/buy/{item_id} operations; each REST twin declares
+    the same x-payment-info accepts[], the Idempotency-Key parameter and a 402 PaymentRequiredChallenge. Over MCP
+    the x402 payment rides in _meta['x402/payment'] (JSON-RPC error 402 carries the terms); over HTTP it rides in
+    PAYMENT-SIGNATURE.
+- tool: buy_memory_anchor
+  surface: mcp (main)
+  category: x402-purchase
+  rest:
+  - get_api_buy_context_anchor
+  binding: rest (one operation per item_id)
+  confidence: high
+  note: The tool's itemIds enum maps one-to-one onto GET /api/buy/{item_id} operations; each REST twin declares
+    the same x-payment-info accepts[], the Idempotency-Key parameter and a 402 PaymentRequiredChallenge. Over MCP
+    the x402 payment rides in _meta['x402/payment'] (JSON-RPC error 402 carries the terms); over HTTP it rides in
+    PAYMENT-SIGNATURE.
+- tool: buy_small_pleasure
+  surface: mcp (main)
+  category: x402-purchase
+  rest:
+  - get_api_buy_small_blessing
+  - get_api_buy_daily_fortune
+  - get_api_buy_luckies
+  - get_api_buy_pack
+  - get_api_buy_window_pick
+  binding: rest (one operation per item_id)
+  confidence: high
+  note: The tool's itemIds enum maps one-to-one onto GET /api/buy/{item_id} operations; each REST twin declares
+    the same x-payment-info accepts[], the Idempotency-Key parameter and a 402 PaymentRequiredChallenge. Over MCP
+    the x402 payment rides in _meta['x402/payment'] (JSON-RPC error 402 carries the terms); over HTTP it rides in
+    PAYMENT-SIGNATURE.
+- tool: preflight_x402_endpoint
+  surface: mcp (verifier)
+  category: x402-verification
+  rest:
+  - post_api_preflight_v2
+  binding: rest
+  confidence: high
+  note: Same handler as the main door's preflight_endpoint per mcp.md; identical inputSchema.
+- tool: verify_x402_receipt
+  surface: mcp (verifier)
+  category: x402-verification
+  rest:
+  - post_api_conformance_v1
+  binding: rest
+  confidence: high
+  note: Same handler as check_conformance; identical inputSchema (artifact, kind, public_key_hex).
+- tool: lookup_endpoint_readiness
+  surface: mcp (verifier)
+  category: x402-verification
+  rest:
+  - get_corpus_host_host_json
+  binding: rest
+  confidence: medium
+  note: 'Mapped by semantics: "read what the signed weekly corpus holds about one host … from the chain, not a live
+    probe" is GET /corpus/host/{host}.json. Not named in openapi-tools.json.'
+- tool: get_defect_definition
+  surface: mcp (verifier)
+  category: x402-verification
+  rest:
+  - get_defects_json
+  binding: rest
+  confidence: medium
+  note: 'Mapped by semantics: one class out of GET /defects.json (the defect vocabulary; also errors/scvd-store-defects.json).
+    No single-defect REST route exists.'
+- tool: verify_scvd_artifact
+  surface: mcp (verifier)
+  category: x402-verification
+  rest:
+  - get_api_verify_id
+  binding: rest
+  confidence: high
+  note: Same handler as verify_artifact; identical input (id).
+- tool: preflight_endpoint
+  surface: a2a
+  category: x402-verification
+  rest:
+  - post_api_preflight_v2
+  binding: rest
+  confidence: high
+  note: Card skill; same battery as the HTTP preflight v2 per the card description ("well-formed x402 v2 challenge
+    a stock client could sign").
+- tool: verify_receipt
+  surface: a2a
+  category: x402-verification
+  rest:
+  - post_api_conformance_v1
+  binding: rest
+  confidence: high
+  note: Card skill; the conformance desk.
+- tool: get_endpoint_readiness
+  surface: a2a
+  category: x402-verification
+  rest:
+  - get_corpus_host_host_json
+  binding: rest
+  confidence: medium
+  note: Card skill; "from the chain, not a live probe; a host never met comes back as never met" — the per-host
+    corpus read.
+mcp_only:
+- tool: read_store_guide
+  surface: mcp (main)
+  reason: Returns resource scvd://guide, i.e. https://scvd.store/llms.txt; /llms.txt is not an operation in the
+    OpenAPI.
+- tool: read_docs
+  surface: mcp (docs)
+  reason: Returns one of the 7 scvd:// resources by name; a resources/read convenience for hosts that hide resources,
+    with no REST twin for the resource set as such (the underlying documents are /llms.txt, /agents.md, /menu.json,
+    /api/preflight/checks, /.well-known/agent-instructions, /fresh-set and /stats).
+rest_only:
+  count: 146
+  note: 'Operations with no MCP tool or A2A skill: the corpus/dataset reads, the passport/profile/trust pages, the
+    trade counter, claims recovery, bounties, credit, the paywall card game, publication pages and every "served
+    forever" purchased-artifact read. Grouped by first path segment; every id below exists verbatim in the spec.'
+  by_group:
+    a2a-desk.json:
+    - get_a2a_desk_json
+    almanac:
+    - get_almanac
+    - get_almanac_notes_from_a_tuesday_in_oak_city
+    - get_almanac_slug
+    api/a2a:
+    - get_api_a2a_check
+    - get_api_a2a_kits_kit_id
+    - get_api_a2a_runner_mjs
+    - post_api_a2a_kits_kit_id_recheck
+    api/anchor:
+    - get_api_anchor_anchor_id
+    api/before-you-pay:
+    - get_api_before_you_pay_v1
+    api/bitcoin-anchor:
+    - get_api_bitcoin_anchor_anchor_id
+    api/bot-auth-card:
+    - get_api_bot_auth_card_card_id
+    api/bounties:
+    - get_api_bounties
+    - post_api_bounties
+    api/card:
+    - get_api_card_card_id
+    api/claims:
+    - get_api_claims
+    - post_api_claims
+    - post_api_claims_challenge
+    api/conformance:
+    - get_api_conformance_v1
+    - get_api_conformance_v1_fixtures
+    api/conformance-watch:
+    - get_api_conformance_watch_watch_id
+    api/credit:
+    - get_api_credit_wallet
+    api/declare-door:
+    - get_api_declare_door
+    - post_api_declare_door
+    api/good-buyer:
+    - get_api_good_buyer_reading_id
+    api/guestbook:
+    - get_api_guestbook
+    api/launch-check:
+    - get_api_launch_check_check_id
+    api/letter:
+    - get_api_letter_letter_id
+    - post_api_letter
+    api/look:
+    - get_api_look_v1
+    api/lucky:
+    - get_api_lucky_lucky_id
+    api/mandate:
+    - get_api_mandate_mandate_id
+    - post_api_mandate_mandate_id
+    api/onpage-audit:
+    - get_api_onpage_audit_audit_id
+    api/onpage:
+    - get_api_onpage_v1
+    - post_api_onpage_v1
+    api/operator-statement:
+    - get_api_operator_statement_statement_id
+    api/pack:
+    - get_api_pack_pack_id
+    api/patronage:
+    - get_api_patronage_pass_id
+    api/paywall:
+    - get_api_paywall_releases
+    - get_api_paywall_seed_date
+    - get_api_paywall_set
+    - post_api_paywall_burn
+    - post_api_paywall_challenge
+    - post_api_paywall_redeem
+    api/phantom:
+    - get_api_phantom_check_id
+    api/practice:
+    - get_api_practice
+    - get_api_practice_scenario
+    api/preflight:
+    - get_api_preflight_checks
+    - get_api_preflight_v1
+    - get_api_preflight_v2
+    - post_api_preflight_batch
+    - post_api_preflight_v1
+    api/reconciliation:
+    - get_api_reconciliation_reconciliation_id
+    api/refund:
+    - get_api_refund_refund_id
+    api/replay:
+    - get_api_replay_cert_id
+    api/service-audit:
+    - get_api_service_audit_audit_id
+    api/standing-note:
+    - get_api_standing_note
+    - post_api_standing_note
+    api/statement:
+    - get_api_statement_statement_id
+    api/tab:
+    - get_api_tab_pool
+    - post_api_tab_delta
+    api/trade:
+    - get_api_trade_catalog
+    - get_api_trade_contract
+    - get_api_trade_ledger
+    - get_api_trade_partner_claim
+    - get_api_trade_partner_statement
+    - post_api_trade_partner_check
+    - post_api_trade_partner_item_id
+    - post_api_trade_sandbox_check
+    - post_api_trade_sandbox_item_id
+    api/verify-receipt:
+    - get_api_verify_receipt
+    - post_api_verify_receipt
+    api/watch:
+    - get_api_watch_watch_id
+    ask:
+    - get_ask
+    - get_ask_feed_json
+    - post_ask
+    attestation:
+    - get_attestation
+    auth.md:
+    - get_auth_md
+    bell:
+    - get_bell
+    - post_bell
+    bounties:
+    - get_bounties
+    case:
+    - get_case_case_id
+    corpus:
+    - get_corpus_asked_json
+    - get_corpus_battery_delta_json
+    - get_corpus_diff_json
+    - get_corpus_index_json
+    - get_corpus_sequence_evidence_host_json
+    - get_corpus_tiers_json
+    - get_corpus_trajectory_json
+    - get_corpus_wallet_facts_json
+    corpus.json:
+    - get_corpus_json
+    corrections:
+    - get_corrections
+    credit:
+    - get_credit
+    deprecation:
+    - get_deprecation
+    developers:
+    - get_developers
+    directory:
+    - get_directory
+    doors:
+    - get_doors
+    doors.json:
+    - get_doors_json
+    fresh-set:
+    - get_fresh_set
+    gazette:
+    - get_gazette
+    health:
+    - get_health
+    ledger:
+    - get_ledger
+    - get_ledger_week_json
+    mcp-ward.json:
+    - get_mcp_ward_json
+    menu:
+    - get_menu_item_id
+    menu.json:
+    - get_menu_json
+    open-for-business:
+    - get_open_for_business
+    - get_open_for_business_week
+    passport:
+    - get_passport
+    - get_passport_host
+    porch:
+    - get_porch
+    pricing:
+    - get_pricing
+    pricing.md:
+    - get_pricing_md
+    profiles:
+    - get_profiles
+    - get_profiles_host
+    pulse.json:
+    - get_pulse_json
+    registry:
+    - get_registry
+    rights:
+    - get_rights
+    samples:
+    - get_samples
+    - get_samples_once_over_json
+    sites:
+    - get_sites
+    sources.json:
+    - get_sources_json
+    trade.md:
+    - get_trade_md
+    trust:
+    - get_trust
+    .well-known:
+    - get_well_known_agent_instructions
+    - get_well_known_ai_catalog_json
+    - get_well_known_api_catalog
+    - get_well_known_ard_json
+    - get_well_known_http_message_signatures_directory
+    - get_well_known_mcp
+    - get_well_known_mcp_json
+    - get_well_known_oauth_protected_resource
+    - get_well_known_scvd_signing_key
+    - get_well_known_x402
+    - get_well_known_x402_json
+    what:
+    - get_what
+    wind-down:
+    - get_wind_down
+    zodiac:
+    - get_zodiac
+    - get_zodiac_address
+    - get_zodiac_archive
+    api/bot-auth:
+    - post_api_bot_auth_check
+    api/request:
+    - post_api_request
+    api/stamp:
+    - post_api_stamp
+    api/tip:
+    - post_api_tip
+    mcp:
+    - post_mcp
+coverage:
+  mcp_tools_total: 26
+  mcp_tools_bound: 24
+  mcp_tools_mcp_only: 2
+  a2a_skills_total: 3
+  a2a_skills_bound: 3
+  openapi_operations: 196
+  openapi_operations_with_tool: 50
+  openapi_operations_rest_only: 146
+  binding_confidence:
+    high: 22
+    medium: 5
+    low: 0

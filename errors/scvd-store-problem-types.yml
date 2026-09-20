@@ -1,0 +1,118 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/scvd-store-openapi.json
+probed: true
+docs:
+- https://scvd.store/developers
+- https://scvd.store/auth.md
+- https://scvd.store/defects
+format: rfc9457
+envelope:
+  media_type: application/problem+json (declared) / application/json (observed)
+  schema: components.schemas.Problem
+  fields:
+  - {name: type, description: 'A URI identifying the problem class, dereferenceable at this origin where one exists.'}
+  - {name: title, description: 'A short, stable summary of the problem class.'}
+  - {name: status, description: 'The HTTP status code, repeated in the body.'}
+  - {name: detail, description: 'What went wrong with THIS request, in plain language.'}
+  - {name: instance, description: 'The request path.'}
+  - {name: error, description: 'The store''s long-standing human-readable message. ALWAYS present (the only required field), including on responses that predate the typed model.'}
+  - {name: retry_same_request, description: 'const false; present on repair responses — correct the selection or inputs before retrying.'}
+  - {name: next_step, description: 'Optional free read after a refusal: {method GET, url, payment_required false, mcp {url, tool find_in_catalog, arguments}}.'}
+  observed:
+  - {status: 400, url: 'POST https://scvd.store/api/preflight/v2 (body {})', content_type: application/json, body: '{"error":"Send {\"url\": \"https://your-endpoint/...\"} — the URL a buyer would call, expecting your 402. We send GET first and fall back to POST once if your door refuses the method.","code":"url_missing","next_action":"POST {\"url\": ...} with Content-Type: application/json. Retrying the same body will fail identically.","documentation_url":"https://scvd.store/api/preflight/v2"}', note: 'Legacy envelope with code / next_action / documentation_url; no RFC fields; no RateLimit headers (by design — a refusal spends no probe).'}
+  - {status: 404, url: 'GET https://scvd.store/api/verify/apievangelist-nonexistent', content_type: application/json, body: '{"valid":false,"error":"No certificate by that name on the wall. Check the spelling on your receipt.","freshly_minted_note":"If this id was issued within the last minute, the record may still be propagating between regions …"}', note: 'A domain-shaped 404 with a propagation caveat; `error` present, RFC fields absent.'}
+  - {status: 402, url: 'GET https://scvd.store/api/buy/small_blessing', content_type: application/json, headers: [PAYMENT-REQUIRED (base64 x402 v2 terms), 'WWW-Authenticate: Payment …', 'Vary: PAYMENT-SIGNATURE, X-PAYMENT, Authorization, Idempotency-Key, Accept, Accept-Encoding, User-Agent', 'Cache-Control: no-store'], body_fields: [error, note, item_id, min_price_usdc, pricing, payload_template, payload_template_note, hand_rolling_url, amount_check, idempotency, spec, spec_note, guarantee, verification, wallet_safety, house_rule, extensions], note: 'Not an error in the ordinary sense — auth.md: "It is the price, quoted, in the only place a machine reliably reads."'}
+  - {status: 404, url: 'GET https://scvd.store/.well-known/scvd-store-negative-control-9f3ab1c2.json', content_type: application/json, bytes: 711, note: The generic JSON 404 every unknown path returns; never an HTML shell.}
+  note: >-
+    The contract declares RFC 9457 on every 4xx/5xx (23 responses name application/problem+json explicitly;
+    the shared BadRequest / NotFound / TooManyRequests / TooManyRequestsMetered / ServerError components
+    offer problem+json and json). On the wire the observed bodies were the store's own envelope with `error`
+    always present and the RFC fields optional. The JSON-RPC surfaces (/mcp, /a2a) use JSON-RPC 2.0 error
+    objects — observed -32001 Task not found (A2A TaskNotFoundError); paid MCP tools return error code 402
+    with x402 terms in error.data['x402/payment-required'].
+problem_types:
+- status: 400
+  title: Bad Request
+  component: BadRequest
+  occurrences: 196
+  meaning: The request was malformed or a required parameter was missing.
+  observed_codes: [url_missing]
+  remediation: Fix the input; a validation refusal returns before any rate-limit bucket or payment is touched. On purchase doors a supplied invalid input receives a "field refusal instead of terms" and nothing is charged.
+- status: 401
+  title: Unauthorized
+  occurrences: 4
+  source_operations: [post_api_trade_sandbox_item_id, get_api_trade_partner_claim, get_api_trade_partner_statement, post_api_trade_partner_item_id]
+  meaning: A trade-counter signing header is missing or wrong (codes missing_headers, bad_provider_key, bad_timestamp, bad_nonce, bad_signature per /api/trade/contract errors[]), or a knock on /admin (HTTP Basic, one human's).
+  remediation: Send every header the dialect names (X-Trade-Key, X-Trade-Timestamp, X-Trade-Nonce, X-Trade-Signature) over timestamp.nonce.body; use POST /api/trade/sandbox/check to see every signature check reported by name.
+- status: 402
+  title: Payment Required
+  occurrences: 39
+  schema: PaymentRequiredChallenge
+  headers: [PAYMENT-REQUIRED, WWW-Authenticate]
+  meaning: 'The offer, not a failure: signable x402 v2 terms ride base64 in PAYMENT-REQUIRED and readably in the body; retry the same URL with PAYMENT-SIGNATURE (the v1 X-PAYMENT name is honoured). Over MCP: JSON-RPC error 402 with terms in error.data, retry with _meta[''x402/payment''].'
+  remediation: Sign one of the accepts with a wallet holding USDC on that rail; echo idempotency.suggested_key as Idempotency-Key so a retry cannot double-charge. The stock @x402/core client refuses payments above $1 by default — 14 of 35 doors sit above it.
+- status: 403
+  title: Forbidden
+  occurrences: 2
+  source_operations: [get_api_buy_trust_profile, post_api_a2a_kits_kit_id_recheck]
+  meaning: A hosted trust profile refused for the named host, or a recheck presented without the private purchase token.
+- status: 404
+  title: Not Found
+  component: NotFound
+  occurrences: 196
+  meaning: No such resource. The body names where to look instead (observed on /api/verify with a one-minute propagation caveat).
+  remediation: For a just-minted artifact id, retry in a minute before concluding anything; verification is free and unlimited.
+- status: 409
+  title: Conflict
+  occurrences: 5
+  source_operations: [post_api_trade_sandbox_item_id, get_api_trade_partner_claim, get_api_trade_partner_statement, post_api_trade_partner_item_id, get_corpus_sequence_evidence_host_json]
+  meaning: A replayed trade nonce / order_ref, or a corpus evidence capture whose digest does not match the sealed row.
+- status: 410
+  title: Gone
+  occurrences: 1
+  source_operations: [post_api_a2a_kits_kit_id_recheck]
+  meaning: The included A2A recheck window (30 days) has passed.
+- status: 429
+  title: Too Many Requests
+  component: TooManyRequests / TooManyRequestsMetered
+  occurrences: 196
+  headers: [Retry-After, 'RateLimit-Limit / RateLimit-Remaining / RateLimit-Reset / RateLimit-Policy / RateLimit (metered doors only)']
+  meaning: From the edge under abuse conditions on any route; from the store's own limiter on the five metered doors (30 probes per isolate per minute, 60 global). "A refused request is never charged for."
+  remediation: Retry after Retry-After; on metered doors pace against RateLimit-Remaining rather than discovering the ceiling by being refused. See rate-limits/scvd-store-rate-limits.yml.
+- status: 500
+  title: Server Error
+  component: ServerError
+  occurrences: 196
+  meaning: '"Something fell off a shelf. Nothing was charged."'
+- status: 503
+  title: Service Unavailable
+  occurrences: 5
+  source_operations: [get_api_purchase_status_purchase_id, post_api_trade_sandbox_item_id, post_api_trade_partner_item_id, post_api_a2a_kits_kit_id_recheck, get_corpus_sequence_evidence_host_json]
+  observed_codes: [counter_closed, account_not_provisioned]
+  meaning: The trade counter fails closed when its replay store is unreachable ("rather than risk honouring one instruction twice") or an account's secret is not yet provisioned; a purchase-status or evidence store is momentarily unavailable.
+  remediation: '"Do not retry in a loop; the condition is ours to fix and the keeper is paged. Retry after a minute."'
+- status: 304
+  title: Not Modified
+  component: NotModified
+  occurrences: 84
+  meaning: The ETag you sent still names these exact bytes. No body; every other header as the 200 would carry it. (Not an error; recorded because it is on 84 GET reads and matters to a polling agent.)
+domain_error_registries:
+- name: x402 defect vocabulary
+  file: errors/scvd-store-defects.json
+  url: https://scvd.store/defects.json
+  package: scvd-defects (npm, 0.19.0, 2026-09-18)
+  classes: 31
+  note: >-
+    Not this API's own errors — the named defect classes the preflight and conformance instruments return
+    about OTHER x402 endpoints (no-402, unparseable-challenge, unsignable-offer, unpayable-payto,
+    rail-cannot-receive, wrong-network, amount-not-atomic, inputs-undeclared, replay-accepted …), each with
+    what it asserts, what falsifies it, evidence labels and remediation. Saved verbatim because it is the
+    error-code registry a consumer of the verdicts needs, and because it is the provider's product.
+- name: Trade counter refusals
+  url: https://scvd.store/api/trade/contract
+  codes: [unknown_account, counter_closed, account_not_provisioned, body_too_large, missing_headers, bad_provider_key, bad_timestamp, bad_nonce, bad_signature, replayed_nonce, unknown_item, invalid_inputs, budget_exhausted]
+  note: Named codes with status, meaning and what_to_do, published in the trade contract's errors[] (the first eight were read; the list may be longer).
+- name: CLI exit codes
+  file: cli/scvd-store-cli.yml
+  codes: {0: 'ran, answer yes', 1: 'ran, answer no', 2: 'store refused as malformed', 3: 'store or network did not answer / probe budget'}

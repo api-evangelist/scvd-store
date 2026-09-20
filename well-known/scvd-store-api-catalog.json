@@ -1,0 +1,581 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://scvd.store/.well-known/api-catalog",
+      "title": "SCVD General Store — API catalog",
+      "item": [
+        {
+          "href": "https://scvd.store/",
+          "title": "SCVD General Store — HTTP API"
+        },
+        {
+          "href": "https://scvd.store/mcp",
+          "title": "SCVD General Store — MCP server (Streamable HTTP)"
+        },
+        {
+          "href": "https://scvd.store/.well-known/ucp",
+          "title": "SCVD General Store — UCP business profile"
+        },
+        {
+          "href": "https://scvd.store/api/trade/contract",
+          "title": "SCVD General Store — trade counter (marketplace reseller accounts)"
+        },
+        {
+          "href": "https://scvd.store/.well-known/a2a.json",
+          "title": "SCVD Evidence Agent — A2A agent card"
+        },
+        {
+          "href": "https://scvd.store/mcp/verifier",
+          "title": "SCVD x402 Verifier — MCP server (scvd-x402-verifier, free verification tools)"
+        },
+        {
+          "href": "https://scvd.store/mcp/docs",
+          "title": "SCVD Store Docs — MCP server (scvd-store-docs, resources and one read-only tool)"
+        },
+        {
+          "href": "https://scvd.store/api/preflight/v1",
+          "title": "Preflight — the free x402 door check (v1, supported)"
+        },
+        {
+          "href": "https://scvd.store/api/preflight/v2",
+          "title": "Preflight — the free x402 door check (v2, current)"
+        },
+        {
+          "href": "https://scvd.store/api/look/v1",
+          "title": "The look — what this store holds about one door (v1, current)"
+        },
+        {
+          "href": "https://scvd.store/api/conformance/v1",
+          "title": "The conformance desk — signed offers and receipts, any issuer (v1, current)"
+        },
+        {
+          "href": "https://scvd.store/fixtures.json",
+          "title": "The fixtures — dataset (appended when a fixture joins the tree)"
+        },
+        {
+          "href": "https://scvd.store/corpus.json",
+          "title": "The signed corpus — dataset (weekly, appended)"
+        },
+        {
+          "href": "https://scvd.store/registry",
+          "title": "State of the registry — dataset (weekly, by the keeper's hand)"
+        },
+        {
+          "href": "https://scvd.store/inflows",
+          "title": "Inflows to advertised payment addresses — dataset (weekly, by the keeper's hand)"
+        },
+        {
+          "href": "https://scvd.store/fresh-set",
+          "title": "The fresh set — dataset (weekly, with the census)"
+        },
+        {
+          "href": "https://scvd.store/defects.json",
+          "title": "The defect vocabulary — dataset (changes when a class is added or retired)"
+        },
+        {
+          "href": "https://scvd.store/doors.json",
+          "title": "Every door the census has met — dataset (weekly, with the ward round)"
+        },
+        {
+          "href": "https://scvd.store/observatory",
+          "title": "The observatory — what gets read here, counted — dataset (live, in monthly buckets)"
+        },
+        {
+          "href": "https://scvd.store/corpus/month",
+          "title": "The state of x402, by month — dataset (weekly, as the Sunday round appends a week to the month)"
+        },
+        {
+          "href": "https://scvd.store/feeds",
+          "title": "Feeds — the record, as Atom — dataset (weekly for the two corpus feeds; the other two when something happens)"
+        },
+        {
+          "href": "https://www.npmjs.com/package/scvd-cli",
+          "title": "SCVD General Store — official CLI (scvd-cli, on npm)"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/",
+      "title": "SCVD General Store — HTTP API",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/openapi.json",
+          "type": "application/openapi+json;version=3.1",
+          "title": "OpenAPI 3.1 contract, every endpoint"
+        },
+        {
+          "href": "https://scvd.store/openapi-tools.json",
+          "type": "application/json",
+          "title": "The free instruments as function-calling tools, one worked call each"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/developers",
+          "type": "text/html",
+          "title": "Developer documentation"
+        },
+        {
+          "href": "https://scvd.store/llms.txt",
+          "type": "text/plain",
+          "title": "The agent briefing"
+        },
+        {
+          "href": "https://scvd.store/agents.md",
+          "type": "text/markdown",
+          "title": "The operational manual — the x402 purchase flow, step by step"
+        }
+      ],
+      "service-meta": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "x402 discovery document: rails, assets, prices"
+        },
+        {
+          "href": "https://scvd.store/.well-known/agent-instructions",
+          "type": "application/json",
+          "title": "When to reach for this store, and when not to"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://scvd.store/.well-known/liveness.json",
+          "type": "application/json",
+          "title": "Liveness: what answered, and when it was last checked"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/mcp",
+      "title": "SCVD General Store — MCP server (Streamable HTTP)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/.well-known/mcp",
+          "type": "application/json",
+          "title": "MCP server manifest: endpoint, transport, free methods, resources"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/developers",
+          "type": "text/html",
+          "title": "Developer documentation"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/.well-known/ucp",
+      "title": "SCVD General Store — UCP business profile",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/.well-known/ucp",
+          "type": "application/json",
+          "title": "UCP profile: version, shopping service endpoint, catalog capabilities, the payment handler, and the checkout and order capabilities exactly when this deployment has them switched on"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/ucp",
+          "type": "application/json",
+          "title": "What works over UCP here, what does not, and how to pay instead"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/api/trade/contract",
+      "title": "SCVD General Store — trade counter (marketplace reseller accounts)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/api/trade/contract",
+          "type": "application/json",
+          "title": "The trade contract: the signed order door, the signing dialects, the pricing rule with every price derived, every account's row, every refusal by name"
+        },
+        {
+          "href": "https://scvd.store/openapi.json",
+          "type": "application/openapi+json;version=3.1",
+          "title": "OpenAPI 3.1 contract, the trade doors included"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/trade",
+          "type": "text/html",
+          "title": "The Trade Counter"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://scvd.store/health",
+          "type": "application/json",
+          "title": "Liveness, one line"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/.well-known/a2a.json",
+      "title": "SCVD Evidence Agent — A2A agent card",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/.well-known/a2a.json",
+          "type": "application/json",
+          "title": "A2A agent card: 3 read-only evidence tasks over message/send at /a2a, nothing paid"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/developers",
+          "type": "text/html",
+          "title": "Developer documentation"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/mcp/verifier",
+      "title": "SCVD x402 Verifier — MCP server (scvd-x402-verifier, free verification tools)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/mcp/verifier",
+          "type": "application/json",
+          "title": "The door's own document: 5 free verification tools by name, the handshake, and the full door beside it"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/mcp.md",
+          "type": "text/markdown",
+          "title": "Which MCP door to use"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/mcp/docs",
+      "title": "SCVD Store Docs — MCP server (scvd-store-docs, resources and one read-only tool)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/mcp/docs",
+          "type": "application/json",
+          "title": "The door's own document: the resources by name, the one tool, the handshake, and the two other doors beside it"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/mcp.md",
+          "type": "text/markdown",
+          "title": "Which MCP door to use (the same address answers POST as this server)"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/api/preflight/v1",
+      "title": "Preflight — the free x402 door check (v1, supported)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/openapi.json",
+          "type": "application/openapi+json;version=3.1",
+          "title": "SCVD General Store OpenAPI 3.1 contract"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/developers",
+          "type": "text/html",
+          "title": "SCVD General Store developer documentation"
+        },
+        {
+          "href": "https://scvd.store/deprecation",
+          "type": "text/html",
+          "title": "API versioning and deprecation policy"
+        }
+      ],
+      "successor-version": [
+        {
+          "href": "https://scvd.store/api/preflight/v2",
+          "title": "The current version"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/api/preflight/v2",
+      "title": "Preflight — the free x402 door check (v2, current)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/openapi.json",
+          "type": "application/openapi+json;version=3.1",
+          "title": "SCVD General Store OpenAPI 3.1 contract"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/developers",
+          "type": "text/html",
+          "title": "SCVD General Store developer documentation"
+        },
+        {
+          "href": "https://scvd.store/deprecation",
+          "type": "text/html",
+          "title": "API versioning and deprecation policy"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/api/look/v1",
+      "title": "The look — what this store holds about one door (v1, current)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/openapi.json",
+          "type": "application/openapi+json;version=3.1",
+          "title": "SCVD General Store OpenAPI 3.1 contract"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/developers",
+          "type": "text/html",
+          "title": "SCVD General Store developer documentation"
+        },
+        {
+          "href": "https://scvd.store/deprecation",
+          "type": "text/html",
+          "title": "API versioning and deprecation policy"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/api/conformance/v1",
+      "title": "The conformance desk — signed offers and receipts, any issuer (v1, current)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/openapi.json",
+          "type": "application/openapi+json;version=3.1",
+          "title": "SCVD General Store OpenAPI 3.1 contract"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/developers",
+          "type": "text/html",
+          "title": "SCVD General Store developer documentation"
+        },
+        {
+          "href": "https://scvd.store/deprecation",
+          "type": "text/html",
+          "title": "API versioning and deprecation policy"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/fixtures.json",
+      "title": "The fixtures — dataset (appended when a fixture joins the tree)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/fixtures.json",
+          "type": "application/json",
+          "title": "The recorded 402 doors, MPP challenges and signed-artifact vectors this store tests its own instruments against, at stable URLs with the sha256 of the bytes served, so another instrument can cite the exact bytes."
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "The datasets, catalogued with what each must not be read as"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/corpus.json",
+      "title": "The signed corpus — dataset (weekly, appended)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/corpus.json",
+          "type": "application/json",
+          "title": "One snapshot per weekly ward round of the public x402 discovery list — a round re-run inside its week appends a later entry, and the week's derived views read the newest — recording which hosts were listed, which answered, and what a single conformance probe saw. Answered rows record protocols_spoken and an mpp challenge reading under its named battery; older rows may lack them. Hash-chained, ed25519-signed, Bitcoin-anchored."
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "The datasets, catalogued with what each must not be read as"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/registry",
+      "title": "State of the registry — dataset (weekly, by the keeper's hand)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/registry",
+          "type": "application/json",
+          "title": "A weekly running tally of the public x402 discovery list: how many listed doors answer a well-formed payment challenge, how many serve structurally valid signed offers, what the market charges, how concentrated it is."
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "The datasets, catalogued with what each must not be read as"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/inflows",
+      "title": "Inflows to advertised payment addresses — dataset (weekly, by the keeper's hand)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/inflows",
+          "type": "application/json",
+          "title": "What arrived at the payment addresses public x402 doors advertise in their own 402 challenges, read from Base and Polygon over roughly a day per round."
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "The datasets, catalogued with what each must not be read as"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/fresh-set",
+      "title": "The fresh set — dataset (weekly, with the census)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/fresh-set",
+          "type": "application/json",
+          "title": "The doors that answered a spec-conformant x402 challenge in the latest census, named, with the rails and cheapest USDC ask each door's own 402 offered."
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "The datasets, catalogued with what each must not be read as"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/defects.json",
+      "title": "The defect vocabulary — dataset (changes when a class is added or retired)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/defects.json",
+          "type": "application/json",
+          "title": "The named defect classes this store's instruments report, so separate tools can compare notes about the same failure in the same words."
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "The datasets, catalogued with what each must not be read as"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/doors.json",
+      "title": "Every door the census has met — dataset (weekly, with the ward round)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/doors.json",
+          "type": "application/json",
+          "title": "One entry per host the weekly ward round has ever carried, alphabetical, with the most recent dated verdict, the week it was taken, how many rounds carried the host and how many reached a real verdict, and the URL of its full signed history."
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "The datasets, catalogued with what each must not be read as"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/observatory",
+      "title": "The observatory — what gets read here, counted — dataset (live, in monthly buckets)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/observatory",
+          "type": "application/json",
+          "title": "Per month and per surface, how many times each agent-read surface of this store was fetched: organic visits beside the house and infrastructure buckets kept out of them, and the channel split inside the organic count. In name order, never by count."
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "The datasets, catalogued with what each must not be read as"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/corpus/month",
+      "title": "The state of x402, by month — dataset (weekly, as the Sunday round appends a week to the month)",
+      "service-desc": [
+        {
+          "href": "https://scvd.store/corpus/month",
+          "type": "application/json",
+          "title": "One derived reading per calendar month of signed rounds: doors named, probed, payable and not at the month's closing week; every round's counts summed as door-weeks, labelled apart; defects by registered name in door-weeks; the month before beside it. A stable address per month at /corpus/month/{YYYY-MM}."
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "The datasets, catalogued with what each must not be read as"
+        }
+      ]
+    },
+    {
+      "anchor": "https://scvd.store/feeds",
+      "title": "Feeds — the record, as Atom — dataset (weekly for the two corpus feeds; the other two when something happens)",
+      "alternate": [
+        {
+          "href": "https://scvd.store/feeds/brief.xml",
+          "type": "application/atom+xml",
+          "title": "The Week's Doors: One entry per signed week: doors named, probed, payable and not, defects by name, the gaps counted against the observer. Each entry links the week's stable page."
+        },
+        {
+          "href": "https://scvd.store/feeds/corpus.xml",
+          "type": "application/atom+xml",
+          "title": "The corpus chain: One entry per signed snapshot appended to the corpus, with its sequence, week and digest. Each entry links the snapshot's JSON, the bytes a signature covers."
+        },
+        {
+          "href": "https://scvd.store/feeds/corrections.xml",
+          "type": "application/atom+xml",
+          "title": "Corrections: One entry per correction this store has published against itself: what was wrong, how long, who found it, what changed."
+        },
+        {
+          "href": "https://scvd.store/feeds/disagreements.xml",
+          "type": "application/atom+xml",
+          "title": "Disagreements: One entry per divergence between this store's reading and another instrument's, with its state; both readings live on the page the entry links."
+        }
+      ],
+      "service-desc": [
+        {
+          "href": "https://scvd.store/feeds",
+          "type": "application/json",
+          "title": "Four Atom feeds derived at fetch from the same record the pages read: the week's doors (one entry per signed week), the corpus chain (one per signed snapshot), the corrections and the disagreements. Every entry links the page it came from."
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://scvd.store/.well-known/x402.json",
+          "type": "application/json",
+          "title": "The datasets, catalogued with what each must not be read as"
+        }
+      ]
+    },
+    {
+      "anchor": "https://www.npmjs.com/package/scvd-cli",
+      "title": "SCVD General Store — official CLI (scvd-cli, on npm)",
+      "service-doc": [
+        {
+          "href": "https://scvd.store/developers",
+          "type": "text/html",
+          "title": "Developer documentation, including the CLI's commands"
+        }
+      ]
+    }
+  ]
+}

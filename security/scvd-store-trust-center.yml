@@ -1,0 +1,61 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+url: https://scvd.store/trust
+machine_readable: https://scvd.store/.well-known/trust.json
+file: ../well-known/scvd-store-trust.json
+certifications: []
+summary: 'A trust surface built for automated diligence rather than a certification showcase: /.well-known/trust.json
+  (the security.txt Policy target, 93 KB) and its human twin /trust name the operator (Record Creative Co. LLC,
+  Oak City, North Carolina; kind individual), the standards implemented end to end, wallet-safety mechanisms, data
+  handling (no cookies, no IP logs, no accounts), the refund policy, external registry records with dates, and —
+  unusually — an explicit not_claimed list. No SOC 2, ISO 27001, PCI DSS, HIPAA or any third-party audit is claimed,
+  so no Compliance pointer is emitted; the TrustCenter pointer records that the surface exists and says what it
+  says.'
+not_claimed:
+- No third-party security audit of anything here, and no plans for one.
+- No VAT number and no D-U-N-S. There IS a registered company — Record Creative Co. LLC.
+- No escrow and no chargebacks.
+- No insurance, no bonding, no regulator, and nothing here is offered as a financial service.
+- One ed25519 signing key and one operator — "the wrong root of trust for compliance, dispute resolution, or anything
+  load-bearing".
+- No post-quantum signatures.
+- No reputation score on any actor, ours or anybody's, ever, and no ranking of one host against another.
+- No independent audit of the books.
+independently_checkable:
+  signatures: GET /api/verify/{id} + key history at /.well-known/scvd-signing-key
+  settlement: every certificate binds settlement_tx, checkable on the chain explorer
+  key_history: /.well-known/anchor-log.json, OTS-anchored into Bitcoin
+  ecosystem_record: corpus.json, hash-chained and OTS-stamped
+external_records:
+- registry: UCP Checker
+  url: https://ucpchecker.com/check/scvd.store
+  confirmed: '2026-09-19'
+- registry: MPPScan
+  url: https://www.mppscan.com/server/d58b4c8d9dc872c8308b594e4b4117bff2255f83b47f054e492b2a2fbc0ddb7b
+  confirmed: '2026-09-19'
+- registry: HOL awesome-ai-plugins
+  url: https://github.com/hashgraph-online/awesome-ai-plugins#tools--integrations
+  confirmed: '2026-09-19'
+- registry: A2A Registry
+  url: https://a2aregistry.org/api/agents/3ec62f32-4e67-4382-8d15-2b6bf689f33a
+  confirmed: '2026-09-18'
+evidence:
+- source: https://scvd.store/.well-known/trust.json
+  http_status: 200
+  keywords:
+  - trust
+  - independence
+  - operator
+  - standards
+  - data_handling
+  - not_claimed
+  - refund_policy
+- source: https://scvd.store/trust
+  http_status: 200
+  content_type: application/json
+- source: https://scvd.store/.well-known/security.txt
+  http_status: 200
+  note: 'Policy: line points at trust.json'
+note: probe-security-programs.py recorded trust=none because it requires named certifications; this artifact is
+  written by hand from the pages above and claims none.

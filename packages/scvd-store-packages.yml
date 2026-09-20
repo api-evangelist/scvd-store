@@ -1,0 +1,155 @@
+generated: '2026-09-19'
+method: searched
+source: registry.npmjs.org metadata, pypi.org/pypi/scvd-preflight/json and proxy.golang.org, queried 2026-09-19; the RFC 9727 api-catalog (which lists scvd-cli) and https://scvd.store/developers
+package_count: 10
+official_count: 10
+summary: >-
+  Ten first-party packages, all MIT, all zero-dependency by the provider's stated design, all published from
+  one monorepo (github.com/seancrecord/scvd-general-store-repo) under the npm maintainer "scvd-store"
+  (sean@recordcreativeco.com — the same contact as the OpenAPI and ai-plugin.json). Eight on npm, one on PyPI,
+  one Go module. Every release is dated between 2026-08-28 and 2026-09-19, i.e. within the API's own lifetime
+  (preflight v1 since 2026-08-03), so nothing here is stale. None of these hold a key or can pay: the paid
+  shelf needs an x402 client such as @x402/fetch, which is Coinbase's, not the provider's. Versions and dates
+  are read from the registry metadata endpoints, not restated from docs.
+packages:
+- language: javascript
+  registry: npm
+  name: scvd-cli
+  bin: scvd
+  kind: cli
+  url: https://www.npmjs.com/package/scvd-cli
+  source: https://github.com/seancrecord/scvd-general-store-repo/tree/main/cli
+  install: npm i -g scvd-cli
+  official: true
+  version: 0.3.0
+  published: '2026-09-10'
+  first_published: '2026-08-28'
+  license: MIT
+  note: The official command line (preflight, conformance, receipt, verify, corpus, look, before-you-pay, catalog, versions …). Published with npm provenance. Command surface in cli/scvd-store-cli.yml.
+- language: javascript
+  registry: npm
+  name: x402-verify
+  bin: scvd-evidence
+  kind: library
+  url: https://www.npmjs.com/package/x402-verify
+  source: https://github.com/seancrecord/scvd-general-store-repo/tree/main/verifier
+  install: npm i x402-verify
+  official: true
+  version: 1.7.0
+  published: '2026-09-19'
+  license: MIT
+  note: Offline verifier for x402 Signed Offers & Receipts (compact JWS, EdDSA/Ed25519, did:web key resolution) — the conformance desk's method as a library; works on any issuer's artifacts.
+- language: javascript
+  registry: npm
+  name: x402-sign
+  kind: library
+  url: https://www.npmjs.com/package/x402-sign
+  source: https://github.com/seancrecord/scvd-general-store-repo/tree/main/signer
+  install: npm i x402-sign
+  official: true
+  version: 1.0.3
+  published: '2026-09-10'
+  license: MIT
+  note: Mints spec-conformant x402 v2 signed offers and receipts for issuers; byte-reproduces the provider's conformance vectors.
+- language: javascript
+  registry: npm
+  name: scvd-preflight
+  bin: scvd-preflight
+  kind: client
+  url: https://www.npmjs.com/package/scvd-preflight
+  source: https://github.com/seancrecord/scvd-general-store-repo/tree/main/x402-preflight
+  install: npm i scvd-preflight
+  official: true
+  version: 0.2.0
+  published: '2026-09-19'
+  license: MIT
+  note: Zero-dependency client for the free preflight (POST /api/preflight/v2).
+- language: python
+  registry: pypi
+  name: scvd-preflight
+  kind: client
+  url: https://pypi.org/project/scvd-preflight/
+  source: https://github.com/seancrecord/scvd-general-store-repo/tree/main/x402-preflight-py
+  install: pip install scvd-preflight
+  official: true
+  version: null
+  published: null
+  license: MIT
+  note: 'pypi.org/pypi/scvd-preflight/json answered 200 on 2026-09-19 (package exists); the version/date fields were not extracted in this pass and are recorded null rather than guessed. Module scvd_preflight with a __main__.'
+- language: go
+  registry: go
+  name: github.com/seancrecord/scvd-general-store-repo/x402-preflight-go
+  bin: scvd-preflight
+  kind: client
+  url: https://pkg.go.dev/github.com/seancrecord/scvd-general-store-repo/x402-preflight-go
+  source: https://github.com/seancrecord/scvd-general-store-repo/tree/main/x402-preflight-go
+  install: go install github.com/seancrecord/scvd-general-store-repo/x402-preflight-go/cmd/scvd-preflight@latest
+  official: true
+  version: v0.1.0
+  published: '2026-09-16'
+  license: MIT
+  note: proxy.golang.org @latest -> v0.1.0, tag x402-preflight-go/v0.1.0, 2026-09-16T18:50:03Z. The install line is derived from the module path and cmd/ layout, not copied from docs.
+- language: javascript
+  registry: npm
+  name: scvd-mcp-starter
+  bin: scvd-mcp-starter
+  kind: mcp-server (stdio)
+  url: https://www.npmjs.com/package/scvd-mcp-starter
+  source: https://github.com/seancrecord/scvd-general-store-repo/tree/main/mcp-starter
+  install: npx -y scvd-mcp-starter
+  official: true
+  version: 0.1.1
+  published: '2026-09-18'
+  license: MIT
+  note: A stdio MCP server that forwards tools/list and tools/call to https://scvd.store/mcp/verifier (five free verifier tools; cannot reach a paid tool). See mcp/scvd-store-mcp.yml deployment.
+- language: javascript
+  registry: npm
+  name: scvd-tab
+  bin: [scvd-tab, scvd-tab-pager]
+  kind: mcp-server (local, stdio)
+  url: https://www.npmjs.com/package/scvd-tab
+  source: https://github.com/seancrecord/scvd-general-store-repo/tree/main/tab
+  install: npm i -g scvd-tab
+  official: true
+  version: 0.11.1
+  published: '2026-09-03'
+  license: MIT
+  note: "The Tab: a local append-only ledger MCP server of what an agent signed up for and spent; works against any x402 store, not only this one."
+- language: javascript
+  registry: npm
+  name: scvd-corpus-client
+  kind: client
+  url: https://www.npmjs.com/package/scvd-corpus-client
+  source: https://github.com/seancrecord/scvd-general-store-repo/tree/main/corpus-client
+  install: npm i scvd-corpus-client
+  official: true
+  version: 0.1.0
+  published: '2026-09-10'
+  license: MIT
+  note: Reader for the signed weekly corpus (corpus.json, fresh set, per-host history) with verification.
+- language: javascript
+  registry: npm
+  name: scvd-defects
+  kind: data
+  url: https://www.npmjs.com/package/scvd-defects
+  source: https://github.com/seancrecord/scvd-general-store-repo/tree/main/defects
+  install: npm i scvd-defects
+  official: true
+  version: 0.19.0
+  published: '2026-09-18'
+  license: MIT
+  note: The x402 defect vocabulary (defects.json) as a typed package; the served copy is errors/scvd-store-defects.json.
+also_published:
+- {kind: GitHub Action, name: seancrecord/scvd-general-store-repo/action/preflight@main, note: 'x402 preflight in CI with the CLI exit law.'}
+- {kind: Gemini CLI extension, file: gemini-extension.json, source: repo topics + file}
+- {kind: Claude Code plugin, file: .claude-plugin/plugin.json, note: repo ships a plugin manifest and skills/}
+- {kind: ChatGPT app submission, file: chatgpt-app-submission.json}
+not_first_party:
+- {registry: npm, name: x402-preflight, maintainer: gareth1953, note: 'A different author''s package with a similar name (2026-06-22); NOT the provider''s. Listed so it is not mistaken for scvd-preflight.'}
+searched:
+- {registry: npm, query: 'https://registry.npmjs.org/-/v1/search?text=scvd', result: '7 provider packages + 1 unrelated'}
+- {registry: npm, query: 'https://registry.npmjs.org/x402-sign', result: found}
+- {registry: pypi, query: 'https://pypi.org/pypi/scvd/json', status: 404}
+- {registry: pypi, query: 'https://pypi.org/pypi/scvd-preflight/json', status: 200}
+- {registry: go, query: 'https://proxy.golang.org/github.com/seancrecord/scvd-general-store-repo/x402-preflight-go/@latest', status: 200}
+- {registry: github, query: 'gh search repos scvd.store', result: 'seancrecord/scvd-general-store-repo (MIT, 3,919 files, created 2026-07-21)'}

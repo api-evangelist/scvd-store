@@ -1,0 +1,63 @@
+generated: '2026-09-19'
+method: searched
+source: https://scvd.store/deprecation
+derived_from: openapi/scvd-store-openapi.json (x-versioning, deprecated flags)
+docs:
+- https://scvd.store/developers
+- https://scvd.store/wind-down
+- https://scvd.store/rights
+- https://scvd.store/corrections
+versioning:
+  scheme: url-path
+  current: {'/api/preflight': v2, '/api/look': v1, '/api/conformance': v1}
+  spec_version: 0.3.0 (OpenAPI info.version) / 0.5.0 (MCP serverInfo) / 1.1.0 (agent card) / 3.18.0 (skill.md)
+  policy_published: true
+  policy_url: https://scvd.store/deprecation
+  statement: '"Breaking changes arrive as a new version in the path (/api/preflight/v1 → /v2). A published version''s SHAPE never changes under a client: fields are added, never removed or retyped."'
+  versions:
+  - {path: /api/preflight/v1, status: supported, since: '2026-08-03', sunset: null, successor: /api/preflight/v2, note: 'Kept running through the overlap so a v1 verdict means in week 40 exactly what it meant in week 34.'}
+  - {path: /api/preflight/v2, status: current, since: '2026-08-23', sunset: null, note: Folds the Solana rail-receivability read into the verdict.}
+  - {path: /api/look/v1, status: current, since: '2026-09-02', sunset: null}
+  - {path: /api/conformance/v1, status: current, since: '2026-08-03', sunset: null, note: '"The contract at this path is frozen."'}
+  note: The table above is served by the same code that sets the headers ("there is no second place to remember to edit"); /deprecation answers Accept application/json with the same rows. Most other routes are unversioned.
+deprecation:
+  policy_published: true
+  policy_url: https://scvd.store/deprecation
+  sunset_header: true
+  deprecation_header: true
+  rfc8594: true
+  link_relations: ['rel="sunset" -> /deprecation', 'rel="successor-version" (RFC 5829)']
+  minimum_notice: at least 90 days of headers before a version stops answering; the date is published on /deprecation before the headers appear
+  currently_deprecated_versions: []
+  deprecated_operations:
+  - {operationId: get_zodiac, path: /zodiac, source: openapi/scvd-store-openapi.json, note: 'deprecated: true — "Archived Systems Almanac"; an archived publication, not a versioned instrument'}
+  - {operationId: get_zodiac_address, path: '/zodiac/{address}', source: openapi/scvd-store-openapi.json}
+  - {operationId: get_zodiac_archive, path: /zodiac/archive, source: openapi/scvd-store-openapi.json}
+  observed: 'HEAD https://scvd.store/zodiac on 2026-09-19: 200 with no Deprecation or Sunset header — consistent with the policy that headers appear only when a row on /deprecation gains a date, and none has.'
+  documented_retirements:
+  - {what: 'Gazette and Zodiac (Systems Almanac) publications', status: archived, evidence: 'MCP server card publications[] status "archived"; agents.md "Gazette and Zodiac collections are archives, available separately from the active shelf."'}
+  - {what: 'Legacy X-PAYMENT request header (x402 v1 name)', status: still honoured, evidence: 'auth.md and every 402 body: "the v1 X-PAYMENT header is honoured too."'}
+  - {what: 'Settle-then-deliver ordering', changed: '2026-08-10', evidence: 'agents.md: "The store delivers first and settles after (changed 2026-08-10)".'}
+  - {what: 'Signing key #key-1', retired: '2026-07-31', evidence: '/.well-known/scvd-signing-key key_history — retired with a signed reason; everything signed under it still verifies.'}
+sla:
+  url: https://scvd.store/rights
+  public_uptime_target: null
+  delivery_promise: 'Human-labor items carry a delivery promise in hours (sla_hours: 168 on aura_walk and the_collab per menu.json), stated in the listing and in the 402 before payment; a missed window is refunded in full by hand and recorded on /fulfillment-log.'
+  permanence: 'Not promised. /deprecation "What is not promised": "One operator and one key cannot honestly promise that any endpoint runs forever" — /wind-down states what happens to every class of held thing if the store closes (signed artifacts stay valid, public records stay up, private letters are destroyed, the refund promise is honoured one last time).'
+  verification_forever: 'pricing.md clause verification_stays_free: "/api/verify/{id}, the conformance desk and the preflight are free today and stay free."'
+status_page:
+  url: https://scvd.store/.well-known/liveness.json
+  kind: signed liveness beacon (not an incident history)
+  probed:
+  - {url: 'https://scvd.store/status', status: 404}
+  - {url: 'https://scvd.store/health', status: 200, body: '{"ok":true,"service":"SCVD General Store","checked_at":"2026-09-19T23:41:25.528Z", …, "liveness":"https://scvd.store/.well-known/liveness.json"}'}
+  - {url: 'https://scvd.store/.well-known/liveness.json', status: 200, note: 'Ed25519-signed per request; issued_at, keeper_last_seen, keeper_within_presence_window (48h), how_to_fail_closed, anti_replay nonce.'}
+  note: >-
+    The provider's RFC 9727 api-catalog registers liveness.json as the `status` link relation for the HTTP
+    API, so it is the provider's own declared status surface and the StatusPage pointer follows it. It is a
+    live, signed "is the Worker answering and when was the keeper last provably present" document with
+    fail-closed instructions — not an uptime history, not an incident log, and it says so ("infrastructure
+    liveness, nothing more"). /corrections (75 dated Atom entries) is the closest thing to an incident
+    record. No third-party status page exists.
+changelog: changelog/scvd-store-changelog.yml
+corrections_log: https://scvd.store/corrections
