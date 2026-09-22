@@ -22,7 +22,7 @@ created: '2026-09-19'
 modified: '2026-09-19'
 tags:
 - Agents
-- Agent Commerce
+- Agentic Commerce
 - x402
 - Payments
 - Micropayments
@@ -34,7 +34,7 @@ tags:
 - Observability
 - MCP
 - A2A
-- UCP
+- Universal Commerce Protocol
 - Signatures
 - agent-native
 - United States
@@ -56,6 +56,7 @@ tags_raw:
 - Signatures
 - Agent-native
 - United States
+- Agent Commerce
 apis:
 - aid: scvd-store:scvd-general-store-api
   name: SCVD General Store API
@@ -67,6 +68,12 @@ apis:
   humanURL: https://scvd.store/developers
   baseURL: https://scvd.store
   tags:
+  - x402
+  - Verification
+  - Agentic Commerce
+  - Payments
+  - Attestation
+  tags_raw:
   - x402
   - Verification
   - Agent Commerce
@@ -101,6 +108,11 @@ apis:
   humanURL: https://scvd.store/mcp.md
   baseURL: https://scvd.store/mcp
   tags:
+  - MCP
+  - agent-native
+  - Agentic Commerce
+  - x402
+  tags_raw:
   - MCP
   - agent-native
   - Agent Commerce
