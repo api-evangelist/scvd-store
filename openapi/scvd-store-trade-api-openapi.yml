@@ -1,0 +1,1572 @@
+openapi: 3.2.0
+info:
+  title: SCVD General Store Trade API
+  version: 0.3.0
+  description: 'scvd.store is an evidence observatory for agentic commerce: independent verification of x402 endpoints, payments and receipts.'
+  contact:
+    url: https://scvd.store
+    email: sean@recordcreativeco.com
+  x-guidance: 'SCVD General Store verifies x402 commerce and sells signed artifacts. Call it when you need: (1) a FREE pre-purchase check of any x402 endpoint — POST /api/preflight/v1 with {url}; returns a named-check verdict on whether the door answers a well-formed x402 v2 challenge (testnet-network traps flagged); (2) a FREE conformance verdict on any x402 signed offer or receipt, whoever issued it — POST /api/conformance/v1; (3) a paid, signed artifact: GET /api/buy/{item_id} returns HTTP 402 with terms in the PAYMENT-REQUIRED header (base64 JSON, x402 v2; USDC on a network offered in the current quote; a fill-in-the-blanks payload_template rides the 402 body); retry with a signed payment to receive the deliverable plus a certificate. Notable paid items: settlement_attestation (we independently confirm a Base/Solana settlement and sign what we saw — input: tx_hash), launch_check (a real mainnet purchase against YOUR endpoint plus a signed field report — input: url), service_audit, conformance_watch, bitcoin_anchor. Inputs are query parameters, declared per item in /menu.json; outputs are JSON with a certificate id. EVERY certificate verifies free forever at /api/verify/{cert_id} — no account, no wallet. Starting prices run $0.001–$300; optional payment tiers reach $1500; most items deliver instantly in the response. Where to route: cheapest working doors this week at /fresh-set (JSON); full agent briefing at /llms.txt. Before you start: free instruments need only plain HTTPS (no account, key or SDK); a purchase needs an x402 v2 client and a wallet holding USDC on Base (eip155:8453), Polygon (eip155:137), Arbitrum (eip155:42161), World (eip155:480), Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), paid only on a network the 402 offers; the stock client refuses payments above $1 by default and 14 of 35 priced doors sit above it; optional tooling (scvd-tab, the MCP stdio bridge, the scvd CLI) is listed at https://scvd.store/agents.md and none of it is required.'
+servers:
+- url: https://scvd.store
+tags:
+- name: Trade
+paths:
+  /api/trade/contract:
+    get:
+      summary: The trade counter's contract
+      description: 'How a marketplace orders the shelf on account: the door, the signing dialects, the pricing rule with every trade price derived from the live menu, each open account''s row, every refusal by name, and what the store never sees. Free to read; the counter itself is billed per delivery on a statement.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - what_this_is
+                - door
+                - how_to_call
+                - dialects
+                - pricing
+                - shelf
+                - accounts
+                - errors
+                - ledger
+                - honest_limits
+                properties:
+                  what_this_is:
+                    type: string
+                  opened:
+                    type: string
+                  door:
+                    type: string
+                  how_to_call:
+                    type: object
+                  dialects:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        headers:
+                          type: object
+                        signing_string:
+                          type: string
+                        signature:
+                          type: string
+                        timestamp_unit:
+                          type: string
+                        window_seconds:
+                          type: integer
+                  pricing:
+                    type: object
+                    properties:
+                      rule:
+                        type: string
+                      uplift_bps:
+                        type: integer
+                      min_retail_usd:
+                        type: number
+                      example_share_bps:
+                        type: integer
+                      cadence:
+                        type: string
+                  shelf:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        item_id:
+                          type: string
+                        name:
+                          type: string
+                        retail_usd:
+                          type: number
+                        trade_price_usd_at_example_share:
+                          type: number
+                        store_net_usd_at_example_share:
+                          type: number
+                        cadence:
+                          type: string
+                        input_kind:
+                          type: string
+                        fields:
+                          type: array
+                          items:
+                            type: string
+                  eligible_but_not_yet_shelved:
+                    type: array
+                    items:
+                      type: string
+                  accounts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        account:
+                          type: string
+                        name:
+                          type: string
+                        dialect:
+                          type: string
+                        mode:
+                          type: string
+                          enum:
+                          - live
+                          - test
+                        provisioned:
+                          type: boolean
+                          description: Whether the account's signing secret is set on this side; false answers 503 account_not_provisioned at every signed door.
+                        door_status:
+                          type: string
+                          enum:
+                          - open
+                          - awaiting_secret
+                        secret_scope:
+                          type: string
+                          enum:
+                          - per_account
+                          - per_listing
+                          description: Whether one pair verifies every item or each item verifies against its own.
+                        secret_scope_note:
+                          type: string
+                        partner_share_bps:
+                          type: integer
+                        daily_cap:
+                          type: integer
+                        door:
+                          type: string
+                        fixture:
+                          type: object
+                          description: 'One deterministic order for the account: door, body, expected values on the 200, and the response invariants.'
+                        partner_terms:
+                          type: array
+                          items:
+                            type: string
+                          description: 'The partner''s own terms as they answered them: retries, refunds, rotation, price unit.'
+                        items:
+                          type: array
+                          items:
+                            type: object
+                  expected_outcome:
+                    type: string
+                  response_invariants:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - path
+                      - holds
+                      properties:
+                        path:
+                          type: string
+                        holds:
+                          type: string
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - status
+                      - code
+                      - meaning
+                      - what_to_do
+                      properties:
+                        status:
+                          type: integer
+                        code:
+                          type: string
+                        meaning:
+                          type: string
+                        what_to_do:
+                          type: string
+                  ledger:
+                    type: string
+                    format: uri
+                  room:
+                    type: string
+                    format: uri
+                  honest_limits:
+                    type: string
+                  security:
+                    type: object
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_api_trade_contract
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - Trade
+  /api/trade/ledger:
+    get:
+      summary: Every trade account's books
+      description: Delivered, billed, net, paid and outstanding per account, derived from the delivery rows at request time, with the truncation flag any bounded read here carries. The receivable is public because a liability off the books is how stores rot.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - what_this_is
+                - read_at
+                - accounts
+                - bounded_read
+                properties:
+                  what_this_is:
+                    type: string
+                  read_at:
+                    type: string
+                    format: date-time
+                  accounts:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - account
+                      - mode
+                      - delivered_live
+                      - delivered_test
+                      - billed_usd
+                      - net_usd
+                      - paid_usd
+                      - outstanding_usd
+                      - truncated
+                      properties:
+                        account:
+                          type: string
+                        name:
+                          type: string
+                        site:
+                          type: string
+                        mode:
+                          type: string
+                          enum:
+                          - live
+                          - test
+                        opened:
+                          type: string
+                        partner_share_bps:
+                          type: integer
+                        daily_cap:
+                          type: integer
+                        credit_ceiling_usd:
+                          type: number
+                        items:
+                          type: array
+                          items:
+                            type: string
+                        delivered_live:
+                          type: integer
+                        delivered_test:
+                          type: integer
+                        billed_usd:
+                          type: number
+                        net_usd:
+                          type: number
+                        paid_usd:
+                          type: number
+                        outstanding_usd:
+                          type: number
+                        last_delivery_at:
+                          type: string
+                          nullable: true
+                        last_payout_at:
+                          type: string
+                          nullable: true
+                        oldest_unpaid_at:
+                          type: string
+                          nullable: true
+                        truncated:
+                          type: boolean
+                  bounded_read:
+                    type: string
+                  terms:
+                    type: string
+                    format: uri
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_api_trade_ledger
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - Trade
+  /api/trade/catalog:
+    get:
+      summary: The trade counter's listing feed
+      description: Every item at the counter with the copy the item page prints, what it reads, its constraints, the free specimen, the artifact class and what it does not prove, and the price at the caller's share — derived from the rows our own shelf renders. Pass ?account={id} for an account's own items and prices.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - what_this_is
+                - share_bps
+                - items
+                - pricing_rule
+                - contract
+                properties:
+                  what_this_is:
+                    type: string
+                  account:
+                    type: string
+                  share_bps:
+                    type: integer
+                  note:
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        item_id:
+                          type: string
+                        name:
+                          type: string
+                        subtitle:
+                          type: string
+                        description:
+                          type: string
+                        what_it_reads:
+                          type: string
+                        constraints:
+                          type: array
+                          items:
+                            type: string
+                        cadence:
+                          type: string
+                        retail_usd:
+                          type: number
+                        share_bps:
+                          type: integer
+                        trade_price_usd:
+                          type: number
+                        store_net_usd:
+                          type: number
+                        input_kind:
+                          type: string
+                        fields:
+                          type: array
+                          items:
+                            type: string
+                        specimen:
+                          type: string
+                          format: uri
+                        artifact_class:
+                          type: string
+                        signs:
+                          type: string
+                        does_not_prove:
+                          type: string
+                        verify_url_template:
+                          type: string
+                        item_page:
+                          type: string
+                          format: uri
+                        front_door:
+                          type: string
+                          format: uri
+                  pricing_rule:
+                    type: string
+                  contract:
+                    type: string
+                    format: uri
+                  verify_note:
+                    type: string
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      parameters:
+      - name: account
+        in: query
+        required: false
+        schema:
+          type: string
+        description: A trade account id; prices print at its share and the list narrows to its items.
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      operationId: get_api_trade_catalog
+      tags:
+      - Trade
+  /api/trade/sandbox/check:
+    post:
+      summary: The sandbox's check desk
+      description: 'Send exactly the headers and body you would send to the order door. All four checks run and each is reported — headers present, provider key, clock skew, nonce shape, whether the HMAC verified under the secret in service or the previous one — with the sha256 of the signing string we computed so you can compare bytes. No nonce is consumed, nothing is delivered, no money moves. On the sandbox account the expected signature is printed, since that secret is public. THIS PATH IS THE SANDBOX: the account named sandbox, whose signing secret and provider key are published on /trade and returned by a GET on its check desk. Real signatures checked, real goods delivered and marked test, nothing booked to anyone, fifty a day.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeCheck'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      requestBody:
+        required: true
+        description: The body you would send to the order door, byte for byte.
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The item's own fields (see /api/trade/contract shelf[].fields) at the top level or under `inputs`, plus the optional common fields. Sign the EXACT bytes you send.
+              properties:
+                inputs:
+                  type: object
+                  description: Optional envelope for the item's fields.
+                order_ref:
+                  type: string
+                  maxLength: 120
+                  description: Your order id. A retry carrying the same order_ref within a day returns the original delivery and bills nothing twice.
+                agent_name:
+                  type: string
+                  maxLength: 80
+                purpose:
+                  type: string
+                  maxLength: 280
+                callback_url:
+                  type: string
+                  format: uri
+                  description: Optional. A public https URL; after the response, the signed delivery receipt (certificate, signature, verify_url) is POSTed there once, with Web Bot Auth headers on the request. The outcome is written on your statement row.
+                url:
+                  type: string
+                  format: uri
+                  description: 'For the probe items: a public https door.'
+                summary:
+                  type: string
+                  description: 'context_anchor: the state to remember.'
+                digest:
+                  type: string
+                  pattern: ^[0-9a-fA-F]{64}$
+                  description: 'bitcoin_anchor: a sha256 you computed.'
+                label:
+                  type: string
+                  maxLength: 120
+                address:
+                  type: string
+                  description: 'provenance_check: an EVM address or Solana pubkey.'
+                max_usd:
+                  type: number
+                  description: 'good_buyer: the client''s declared per-payment cap.'
+                no_spend_controls:
+                  type: boolean
+      parameters:
+      - name: X-Trade-Timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+        description: As you would send it to the order door.
+      - name: X-Trade-Nonce
+        in: header
+        required: false
+        schema:
+          type: string
+        description: As you would send it.
+      - name: X-Trade-Signature
+        in: header
+        required: false
+        schema:
+          type: string
+        description: As you would send it.
+      - name: X-Trade-Key
+        in: header
+        required: false
+        schema:
+          type: string
+        description: As you would send it, where the dialect has one.
+      operationId: post_api_trade_sandbox_check
+      tags:
+      - Trade
+  /api/trade/sandbox/{item_id}:
+    post:
+      summary: Order one item on the sandbox account
+      description: 'NOT free and NOT x402: the marketplace named by {partner} collected its customer''s payment and is billed the trade price on its statement. The request is authenticated by HMAC-SHA256 over timestamp, nonce and the exact body under the account''s dialect (/api/trade/contract), a five-minute window, and a nonce never seen before. Delivers the same signed goods /api/buy/{item_id} would, with a certificate that says settled_via: trade_account and carries no chain fields. THIS PATH IS THE SANDBOX: the account named sandbox, whose signing secret and provider key are published on /trade and returned by a GET on its check desk. Real signatures checked, real goods delivered and marked test, nothing booked to anyone, fifty a day.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeDelivery'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: The signature, timestamp, nonce or provider key did not verify. delivered:false, billed:false, and the code names which.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: 'Replayed: this nonce or instruction was already presented. Nothing delivered on this call.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+        '429':
+          description: The account's daily cap is reached.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '503':
+          description: 'The counter is closed: the account is not provisioned on this side, or the replay store is unreachable.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+      requestBody:
+        required: true
+        description: 'One JSON object: the item''s fields plus optional order_ref, agent_name, purpose. Sign the exact bytes.'
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The item's own fields (see /api/trade/contract shelf[].fields) at the top level or under `inputs`, plus the optional common fields. Sign the EXACT bytes you send.
+              properties:
+                inputs:
+                  type: object
+                  description: Optional envelope for the item's fields.
+                order_ref:
+                  type: string
+                  maxLength: 120
+                  description: Your order id. A retry carrying the same order_ref within a day returns the original delivery and bills nothing twice.
+                agent_name:
+                  type: string
+                  maxLength: 80
+                purpose:
+                  type: string
+                  maxLength: 280
+                callback_url:
+                  type: string
+                  format: uri
+                  description: Optional. A public https URL; after the response, the signed delivery receipt (certificate, signature, verify_url) is POSTed there once, with Web Bot Auth headers on the request. The outcome is written on your statement row.
+                url:
+                  type: string
+                  format: uri
+                  description: 'For the probe items: a public https door.'
+                summary:
+                  type: string
+                  description: 'context_anchor: the state to remember.'
+                digest:
+                  type: string
+                  pattern: ^[0-9a-fA-F]{64}$
+                  description: 'bitcoin_anchor: a sha256 you computed.'
+                label:
+                  type: string
+                  maxLength: 120
+                address:
+                  type: string
+                  description: 'provenance_check: an EVM address or Solana pubkey.'
+                max_usd:
+                  type: number
+                  description: 'good_buyer: the client''s declared per-payment cap.'
+                no_spend_controls:
+                  type: boolean
+      parameters:
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: A menu id on that account's row.
+      - name: X-Trade-Timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Unix seconds at signing (the header name and unit follow the account's dialect; this is ours).
+      - name: X-Trade-Nonce
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 32 hex characters, fresh per request.
+      - name: X-Trade-Signature
+        in: header
+        required: true
+        schema:
+          type: string
+        description: sha256=<hex of HMAC-SHA256(secret, timestamp.nonce.body)>.
+      - name: X-Trade-Key
+        in: header
+        required: false
+        schema:
+          type: string
+        description: The provider key, where the account's dialect sends one.
+      operationId: post_api_trade_sandbox_item_id
+      tags:
+      - Trade
+  /api/trade/{partner}/check:
+    post:
+      summary: 'The check desk: every signature check reported, nothing delivered'
+      description: Send exactly the headers and body you would send to the order door. All four checks run and each is reported — headers present, provider key, clock skew, nonce shape, whether the HMAC verified under the secret in service or the previous one — with the sha256 of the signing string we computed so you can compare bytes. No nonce is consumed, nothing is delivered, no money moves. On the sandbox account the expected signature is printed, since that secret is public.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeCheck'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      requestBody:
+        required: true
+        description: The body you would send to the order door, byte for byte.
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The item's own fields (see /api/trade/contract shelf[].fields) at the top level or under `inputs`, plus the optional common fields. Sign the EXACT bytes you send.
+              properties:
+                inputs:
+                  type: object
+                  description: Optional envelope for the item's fields.
+                order_ref:
+                  type: string
+                  maxLength: 120
+                  description: Your order id. A retry carrying the same order_ref within a day returns the original delivery and bills nothing twice.
+                agent_name:
+                  type: string
+                  maxLength: 80
+                purpose:
+                  type: string
+                  maxLength: 280
+                callback_url:
+                  type: string
+                  format: uri
+                  description: Optional. A public https URL; after the response, the signed delivery receipt (certificate, signature, verify_url) is POSTed there once, with Web Bot Auth headers on the request. The outcome is written on your statement row.
+                url:
+                  type: string
+                  format: uri
+                  description: 'For the probe items: a public https door.'
+                summary:
+                  type: string
+                  description: 'context_anchor: the state to remember.'
+                digest:
+                  type: string
+                  pattern: ^[0-9a-fA-F]{64}$
+                  description: 'bitcoin_anchor: a sha256 you computed.'
+                label:
+                  type: string
+                  maxLength: 120
+                address:
+                  type: string
+                  description: 'provenance_check: an EVM address or Solana pubkey.'
+                max_usd:
+                  type: number
+                  description: 'good_buyer: the client''s declared per-payment cap.'
+                no_spend_controls:
+                  type: boolean
+      parameters:
+      - name: partner
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The account id; use sandbox to test against the published secret.
+      - name: X-Trade-Timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+        description: As you would send it to the order door.
+      - name: X-Trade-Nonce
+        in: header
+        required: false
+        schema:
+          type: string
+        description: As you would send it.
+      - name: X-Trade-Signature
+        in: header
+        required: false
+        schema:
+          type: string
+        description: As you would send it.
+      - name: X-Trade-Key
+        in: header
+        required: false
+        schema:
+          type: string
+        description: As you would send it, where the dialect has one.
+      operationId: post_api_trade_partner_check
+      tags:
+      - Trade
+  /api/trade/{partner}/claim:
+    get:
+      summary: Recover a delivery by order_ref (signed)
+      description: 'For the marketplace''s customer who lost the receipt: the account asks, signed over the empty body like a statement read, with ?order_ref= naming the order, and gets the ledger row and the signed certificate back. A bounded, newest-first search of the account''s rows.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - what_this_is
+                - row
+                properties:
+                  what_this_is:
+                    type: string
+                  row:
+                    type: object
+                  certificate:
+                    type: object
+                    nullable: true
+                  signature:
+                    type: string
+                  signature_jcs:
+                    type: string
+                  public_key:
+                    type: string
+                  verify_url:
+                    type: string
+                    format: uri
+                  note:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: The signature did not verify.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Replayed nonce.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      parameters:
+      - name: partner
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The account id.
+      - name: order_ref
+        in: query
+        required: true
+        schema:
+          type: string
+          maxLength: 120
+        description: The order_ref the delivery was ordered with.
+      - name: X-Trade-Timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Unix seconds at signing.
+      - name: X-Trade-Nonce
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 32 hex characters, fresh per request.
+      - name: X-Trade-Signature
+        in: header
+        required: true
+        schema:
+          type: string
+        description: sha256=<hex of HMAC-SHA256(secret, timestamp.nonce.)> — the body is empty.
+      - name: X-Trade-Key
+        in: header
+        required: false
+        schema:
+          type: string
+        description: The provider key, where the account's dialect sends one.
+      operationId: get_api_trade_partner_claim
+      tags:
+      - Trade
+  /api/trade/{partner}/statement:
+    get:
+      summary: Your trade account's statement, both sides (signed)
+      description: 'Every delivery row and every recorded payout on the account, newest first, with the summary the public ledger prints. Authenticated like an order: sign the EMPTY body under the account''s dialect. Not free in the sense of open — only the account holder can read it — and free in the sense that nothing is charged for reading.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - what_this_is
+                - read_at
+                - summary
+                - deliveries
+                - payouts
+                - deliveries_truncated
+                - payouts_truncated
+                properties:
+                  what_this_is:
+                    type: string
+                  read_at:
+                    type: string
+                    format: date-time
+                  signed_with:
+                    type: string
+                    enum:
+                    - current
+                    - previous
+                  summary:
+                    type: object
+                  deliveries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        partner:
+                          type: string
+                        item:
+                          type: string
+                        cert_id:
+                          type: string
+                        mode:
+                          type: string
+                          enum:
+                          - live
+                          - test
+                        trade_price_usd:
+                          type: number
+                        partner_share_bps:
+                          type: integer
+                        net_usd:
+                          type: number
+                        instruction_digest:
+                          type: string
+                        order_ref:
+                          type: string
+                        delivered_at:
+                          type: string
+                          format: date-time
+                  payouts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        partner:
+                          type: string
+                        payout_id:
+                          type: string
+                        amount_usd:
+                          type: number
+                        reference:
+                          type: string
+                        recorded_at:
+                          type: string
+                          format: date-time
+                  deliveries_truncated:
+                    type: boolean
+                  payouts_truncated:
+                    type: boolean
+                  signed_payload:
+                    type: object
+                  signature_jcs:
+                    type: string
+                  public_key:
+                    type: string
+                  algorithm:
+                    type: string
+                    enum:
+                    - ed25519
+                  signature_covers:
+                    type: string
+                  canonical_form:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: The signature did not verify. delivered:false, billed:false, and the code names which check.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Replayed nonce.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      parameters:
+      - name: partner
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The account id.
+      - name: X-Trade-Timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Unix seconds at signing.
+      - name: X-Trade-Nonce
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 32 hex characters, fresh per request.
+      - name: X-Trade-Signature
+        in: header
+        required: true
+        schema:
+          type: string
+        description: sha256=<hex of HMAC-SHA256(secret, timestamp.nonce.)> — the body is empty.
+      - name: X-Trade-Key
+        in: header
+        required: false
+        schema:
+          type: string
+        description: The provider key, where the account's dialect sends one.
+      operationId: get_api_trade_partner_statement
+      tags:
+      - Trade
+  /api/trade/{partner}/{item_id}:
+    post:
+      summary: Order one item on a trade account (signed, billed on statement)
+      description: 'NOT free and NOT x402: the marketplace named by {partner} collected its customer''s payment and is billed the trade price on its statement. The request is authenticated by HMAC-SHA256 over timestamp, nonce and the exact body under the account''s dialect (/api/trade/contract), a five-minute window, and a nonce never seen before. Delivers the same signed goods /api/buy/{item_id} would, with a certificate that says settled_via: trade_account and carries no chain fields.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeDelivery'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: The signature, timestamp, nonce or provider key did not verify. delivered:false, billed:false, and the code names which.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: 'Replayed: this nonce or instruction was already presented. Nothing delivered on this call.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+        '429':
+          description: The account's daily cap is reached.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '503':
+          description: 'The counter is closed: the account is not provisioned on this side, or the replay store is unreachable.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeRefusal'
+      requestBody:
+        required: true
+        description: 'One JSON object: the item''s fields plus optional order_ref, agent_name, purpose. Sign the exact bytes.'
+        content:
+          application/json:
+            schema:
+              type: object
+              description: The item's own fields (see /api/trade/contract shelf[].fields) at the top level or under `inputs`, plus the optional common fields. Sign the EXACT bytes you send.
+              properties:
+                inputs:
+                  type: object
+                  description: Optional envelope for the item's fields.
+                order_ref:
+                  type: string
+                  maxLength: 120
+                  description: Your order id. A retry carrying the same order_ref within a day returns the original delivery and bills nothing twice.
+                agent_name:
+                  type: string
+                  maxLength: 80
+                purpose:
+                  type: string
+                  maxLength: 280
+                callback_url:
+                  type: string
+                  format: uri
+                  description: Optional. A public https URL; after the response, the signed delivery receipt (certificate, signature, verify_url) is POSTed there once, with Web Bot Auth headers on the request. The outcome is written on your statement row.
+                url:
+                  type: string
+                  format: uri
+                  description: 'For the probe items: a public https door.'
+                summary:
+                  type: string
+                  description: 'context_anchor: the state to remember.'
+                digest:
+                  type: string
+                  pattern: ^[0-9a-fA-F]{64}$
+                  description: 'bitcoin_anchor: a sha256 you computed.'
+                label:
+                  type: string
+                  maxLength: 120
+                address:
+                  type: string
+                  description: 'provenance_check: an EVM address or Solana pubkey.'
+                max_usd:
+                  type: number
+                  description: 'good_buyer: the client''s declared per-payment cap.'
+                no_spend_controls:
+                  type: boolean
+      parameters:
+      - name: partner
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The account id from /api/trade/contract accounts[].account.
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: A menu id on that account's row.
+      - name: X-Trade-Timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Unix seconds at signing (the header name and unit follow the account's dialect; this is ours).
+      - name: X-Trade-Nonce
+        in: header
+        required: true
+        schema:
+          type: string
+        description: 32 hex characters, fresh per request.
+      - name: X-Trade-Signature
+        in: header
+        required: true
+        schema:
+          type: string
+        description: sha256=<hex of HMAC-SHA256(secret, timestamp.nonce.body)>.
+      - name: X-Trade-Key
+        in: header
+        required: false
+        schema:
+          type: string
+        description: The provider key, where the account's dialect sends one.
+      operationId: post_api_trade_partner_item_id
+      tags:
+      - Trade
+components:
+  responses:
+    NotModified:
+      description: 'Not Modified: the ETag you sent still names these exact bytes. No body; every other header is as the 200 would carry it.'
+    BadRequest:
+      description: The request was malformed or a required parameter was missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    TooManyRequests:
+      description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying.
+    ServerError:
+      description: Something fell off a shelf. Nothing was charged.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    TradeDelivery:
+      type: object
+      required:
+      - item_id
+      - deliverable
+      - settled_via
+      - trade
+      - certificate
+      - signature
+      - public_key
+      - verify_url
+      properties:
+        message:
+          type: string
+        item_id:
+          type: string
+        deliverable:
+          type: string
+        settled_via:
+          type: string
+          enum:
+          - trade_account
+          - trade_account_test
+        trade:
+          type: object
+          properties:
+            account:
+              type: string
+            partner_name:
+              type: string
+            trade_price_usd:
+              type: number
+            partner_share_bps:
+              type: integer
+            net_usd:
+              type: number
+            instruction_digest:
+              type: string
+            order_ref:
+              type: string
+            what_this_settles:
+              type: string
+        patron_number:
+          type: integer
+        certificate:
+          type: object
+        signature:
+          type: string
+        signature_jcs:
+          type: string
+        public_key:
+          type: string
+        signed_payload:
+          type: string
+        verify_url:
+          type: string
+          format: uri
+        signed_with:
+          type: string
+          enum:
+          - current
+          - previous
+        replayed_order_ref:
+          type: boolean
+    Problem:
+      type: object
+      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
+        title:
+          type: string
+          description: A short, stable summary of the problem class.
+        status:
+          type: integer
+          description: The HTTP status code, repeated in the body.
+        detail:
+          type: string
+          description: What went wrong with THIS request, in plain language.
+        instance:
+          type: string
+          format: uri
+          description: The request path.
+        error:
+          type: string
+          description: The store's human-readable message. Always present, including on responses that predate the typed model.
+        retry_same_request:
+          type: boolean
+          const: false
+          description: 'Present on repair responses: correct the selection or inputs before retrying.'
+        next_step:
+          type: object
+          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
+          required:
+          - method
+          - url
+          - payment_required
+          properties:
+            method:
+              type: string
+              const: GET
+            url:
+              type: string
+              format: uri
+            payment_required:
+              type: boolean
+              const: false
+            mcp:
+              type: object
+              required:
+              - url
+              - tool
+              - arguments
+              properties:
+                url:
+                  type: string
+                  format: uri
+                tool:
+                  type: string
+                  const: find_in_catalog
+                arguments:
+                  type: object
+                  properties:
+                    item_id:
+                      type: string
+                  additionalProperties: false
+      required:
+      - error
+    TradeRefusal:
+      type: object
+      required:
+      - delivered
+      - billed
+      - code
+      - error
+      properties:
+        delivered:
+          type: boolean
+          enum:
+          - false
+        billed:
+          type: boolean
+          enum:
+          - false
+        code:
+          type: string
+        error:
+          type: string
+    TradeCheck:
+      type: object
+      required:
+      - what_this_is
+      - account
+      - would_pass
+      - first_failure
+      - checks
+      - signing_string
+      properties:
+        what_this_is:
+          type: string
+        account:
+          type: string
+        dialect:
+          type: object
+        account_provisioned:
+          type: boolean
+          description: False while the account's secret is not set on this side; the checks that need none still run.
+        secrets_on_this_side:
+          type: array
+          items:
+            type: object
+            properties:
+              scope:
+                type: string
+                enum:
+                - account
+                - listing
+              item_id:
+                type: string
+        secret_matched:
+          type: object
+          properties:
+            scope:
+              type: string
+              enum:
+              - account
+              - listing
+            item_id:
+              type: string
+        note:
+          type: string
+        would_pass:
+          type: boolean
+        first_failure:
+          type: string
+          nullable: true
+        checks:
+          type: object
+          properties:
+            headers:
+              type: object
+              properties:
+                present:
+                  type: array
+                  items:
+                    type: string
+                missing:
+                  type: array
+                  items:
+                    type: string
+            provider_key:
+              type: string
+              enum:
+              - ok
+              - wrong
+              - missing
+              - not_in_this_dialect
+              - unverifiable
+            timestamp:
+              type: object
+              properties:
+                raw:
+                  type: string
+                  nullable: true
+                unit:
+                  type: string
+                parsed_ms:
+                  type: integer
+                  nullable: true
+                skew_seconds:
+                  type: integer
+                  nullable: true
+                within_window:
+                  type: boolean
+                window_seconds:
+                  type: integer
+            nonce:
+              type: object
+              properties:
+                raw:
+                  type: string
+                  nullable: true
+                shape_ok:
+                  type: boolean
+                  nullable: true
+            signature:
+              type: object
+              properties:
+                raw:
+                  type: string
+                  nullable: true
+                prefix_ok:
+                  type: boolean
+                hex_ok:
+                  type: boolean
+                verified_with:
+                  type: string
+                  enum:
+                  - current
+                  - previous
+                  - none
+                  - unverifiable
+            replay:
+              type: string
+              enum:
+              - fresh
+              - already_presented
+              - store_unavailable
+        signing_string:
+          type: object
+          properties:
+            template:
+              type: string
+            length:
+              type: integer
+            sha256:
+              type: string
+            how_to_compare:
+              type: string
+        expected_signature:
+          type: string
+        body_bytes:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+            - status
+            - code
+            - meaning
+            - what_to_do
+            properties:
+              status:
+                type: integer
+              code:
+                type: string
+              meaning:
+                type: string
+              what_to_do:
+                type: string
+  securitySchemes:
+    purchaseStatusToken:
+      type: http
+      scheme: bearer
+      description: Private recovery.status_token returned by a catalogue purchase. This capability reads only its original purchase status.
+externalDocs:
+  url: https://scvd.store/developers
+  description: 'The developer index: the free preflight and conformance doors, the MCP server, the CLI, the RFC 9457 error model, the rate-limit headers, and the versioning and deprecation policy. The full agent briefing is at /llms.txt.'
+x-agentcash-provenance:
+  ownershipProofs:
+  - '0xd0716b334368fed445d000f12c7e586a6c86e13bd543333bab6c04695df236320c5dbfa4f0beb6807cc486c0ed4fd5a38892a8148d5aa80377db9f35ed4c4b151c'
+  - 4HduymBCHhwyLgtMyXRpDX3JHQR3oyqTSytsXqCamzCc4ed9fJeBSpDUDSLwfZ59mZaw9ggdMNURPNBi4P6BRU47
+x-scvd-ucp:
+  profile: https://scvd.store/.well-known/ucp
+  checkout: advertised
+x-scvd-native-checkout:
+  mcp:
+    protocol: mpp
+    payment_method: evm
+    intent: charge
+    transport: mcp
+    method: tools/call
+    path: /mcp
+    challenge_key: org.paymentauth/payment-required
+    challenge_location: error.data, or result._meta with ?payment=tool-result
+    credential_meta_key: org.paymentauth/credential
+    receipt_meta_key: org.paymentauth/receipt
+    idempotency_meta_key: x402/idempotency-key
+    terms: 'each item''s payment_capabilities row with transport http: same network, asset and amount_atomic'
+  webmcp:
+    protocol: mpp
+    payment_method: evm
+    intent: charge
+    transport: webmcp
+    script: /webmcp.js
+    quote_tool: quote_store_purchase
+    challenge_field: payment_challenge
+    complete_tool: complete_store_purchase
+    credential_argument: signed_credential
+    receipt_field: payment_receipt
+    terms: 'each item''s payment_capabilities row with transport http: same network, asset and amount_atomic'
+x-rate-limiting:
+  application_level_limit: true
+  limited_paths:
+  - /api/preflight/v1
+  - /api/preflight/v2
+  - /api/before-you-pay/v1
+  - /api/look/v1
+  - /api/preflight/batch
+  headers_returned:
+  - RateLimit-Limit
+  - RateLimit-Remaining
+  - RateLimit-Reset
+  - RateLimit-Policy
+  - RateLimit
+  note: 'The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+  policy_url: https://scvd.store/developers
+x-versioning:
+  scheme: url-path
+  note: 'Breaking changes arrive as a new version in the path (/api/preflight/v1 → /v2). A published version''s SHAPE never changes under a client: fields are added, never removed or retyped.'
+  deprecation: A version being retired serves the RFC 8594 Deprecation and Sunset headers on every response for at least 90 days before it stops answering, and the date is published at /developers before the headers appear.
+  sunset_headers:
+  - Deprecation
+  - Sunset
+  - Link; rel="successor-version"
+  policy_url: https://scvd.store/deprecation
+  currently_deprecated: []
+  versions:
+  - path: /api/preflight/v1
+    status: supported
+    since: '2026-08-03'
+    sunset: null
+    successor: /api/preflight/v2
+  - path: /api/preflight/v2
+    status: current
+    since: '2026-08-23'
+    sunset: null
+    successor: null
+  - path: /api/look/v1
+    status: current
+    since: '2026-09-02'
+    sunset: null
+    successor: null
+  - path: /api/conformance/v1
+    status: current
+    since: '2026-08-03'
+    sunset: null
+    successor: null

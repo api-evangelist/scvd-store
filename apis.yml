@@ -1,5 +1,5 @@
 aid: scvd-store
-name: Record Creative Co. LLC
+name: SCVD General Store
 description: 'Record Creative Co. LLC is the one-person Oak City, North Carolina company that operates scvd.store — "Sean-Claude Van Damme''s General Store", an evidence observatory for agentic commerce
   and a general store for AI agents. It independently verifies x402 payment endpoints, signed offers and receipts: a free preflight that checks whether any x402 door serves a well-formed, payable v2 challenge,
   a free conformance desk for any issuer''s JWS-signed offers and receipts, a named 31-class defect vocabulary, and a weekly Bitcoin-anchored, hash-chained corpus of the public x402 web. Paid instruments
@@ -8,6 +8,21 @@ description: 'Record Creative Co. LLC is the one-person Oak City, North Carolina
   surface: a 196-operation OpenAPI 3.1 contract, three remote MCP servers (20 tools, MCP Apps cards), an A2A 0.3.0 agent card, a UCP business profile, an RFC 9727 API catalog, RFC 9728 protected-resource
   metadata, llms.txt, agents.md, SKILL.md files, an official CLI and nine more open-source packages.'
 url: https://raw.githubusercontent.com/api-evangelist/scvd-store/refs/heads/main/apis.yml
+deliveryModel:
+  model: saas
+  license_evidence:
+    not_product:
+    - seancrecord/scvd-general-store-repo
+  open_source: unknown
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: low
+  source:
+  - pricing
+  - repository-not-product
+  generated: '2026-09-25'
+  method: derived
 image: https://scvd.store/og.png
 x-type: company
 x-source: harvest:a2a-registry
@@ -36,7 +51,7 @@ tags:
 - A2A
 - Universal Commerce Protocol
 - Signatures
-- agent-native
+- Agent-Native
 - United States
 tags_raw:
 - Agents
@@ -57,59 +72,25 @@ tags_raw:
 - Agent-native
 - United States
 - Agent Commerce
+- agent-native
 apis:
-- aid: scvd-store:scvd-general-store-api
-  name: SCVD General Store API
-  description: 'The HTTP contract for scvd.store: 196 operations on 180 paths (OpenAPI 3.1.0, every operation with a unique operationId and summary) covering the free x402 instruments (POST /api/preflight/v1
-    and /v2, /api/look/v1, /api/before-you-pay/v1, /api/conformance/v1, /api/a2a/check, /api/bot-auth/check, /api/onpage/v1, GET /api/verify/{id}), the 35 x402-paid doors at GET /api/buy/{item} (402 with
-    PAYMENT-REQUIRED terms, Idempotency-Key on every one), the signed corpus and datasets (corpus.json, ledger, doors, fresh-set, defects, passports), purchase recovery and refunds, the reseller trade counter,
-    and the discovery documents. Anonymous for free doors; a signed x402 v2 payment per call for paid doors; RFC 9457 problem objects; IETF RateLimit headers on the five metered doors; url-path versioning
-    with an RFC 8594 sunset policy.'
-  humanURL: https://scvd.store/developers
-  baseURL: https://scvd.store
-  tags:
-  - x402
-  - Verification
-  - Agentic Commerce
-  - Payments
-  - Attestation
-  tags_raw:
-  - x402
-  - Verification
-  - Agent Commerce
-  - Payments
-  - Attestation
-  properties:
-  - type: OpenAPI
-    url: openapi/scvd-store-openapi.json
-  - type: OpenAPI
-    name: SCVD General Store OpenAPI (provider-hosted)
-    url: https://scvd.store/openapi.json
-  - type: Documentation
-    url: https://scvd.store/developers
-  - type: APIReference
-    url: https://scvd.store/openapi.json
-  - type: GettingStarted
-    url: https://scvd.store/agents.md
-  - type: Overlay
-    url: overlays/scvd-store-openapi-overlay.yaml
-  - type: APICatalog
-    url: well-known/scvd-store-api-catalog.json
-  - type: APICatalog
-    name: RFC 9727 API catalog (provider-hosted)
-    url: https://scvd.store/.well-known/api-catalog
 - aid: scvd-store:scvd-mcp-servers
   name: SCVD General Store MCP Servers
-  description: Three remote Model Context Protocol servers on the apex host, all Streamable HTTP and all answering initialize, tools/list and resources/list anonymously at protocol version 2025-06-18 (serverInfo
-    0.5.0). https://scvd.store/mcp is the store — 14 free instruments (preflight_endpoint, look_at_door, check_before_you_pay, check_conformance, verify_artifact, check_a2a_card, find_in_catalog …) and
-    six x402-paid buy_* shelves that settle in-band, seven readable scvd:// resources and two MCP Apps ui:// cards. https://scvd.store/mcp/verifier serves the same five verification handlers with no paid
-    tool; https://scvd.store/mcp/docs serves the documentation resources and one read_docs tool. A stdio path exists through the provider's npm package scvd-mcp-starter (verifier only) or the documented
-    mcp-remote bridge. A WebMCP script registers the same free instruments in the browser.
+  description: >-
+    Three remote Model Context Protocol servers on the apex host, all Streamable HTTP and all answering
+    initialize, tools/list and resources/list anonymously at protocol version 2025-06-18 (serverInfo 0.5.0).
+    https://scvd.store/mcp is the store — 14 free instruments (preflight_endpoint, look_at_door, check_before_you_pay,
+    check_conformance, verify_artifact, check_a2a_card, find_in_catalog …) and six x402-paid buy_* shelves
+    that settle in-band, seven readable scvd:// resources and two MCP Apps ui:// cards. https://scvd.store/mcp/verifier
+    serves the same five verification handlers with no paid tool; https://scvd.store/mcp/docs serves the
+    documentation resources and one read_docs tool. A stdio path exists through the provider's npm package
+    scvd-mcp-starter (verifier only) or the documented mcp-remote bridge. A WebMCP script registers the
+    same free instruments in the browser.
   humanURL: https://scvd.store/mcp.md
   baseURL: https://scvd.store/mcp
   tags:
   - MCP
-  - agent-native
+  - Agent-Native
   - Agentic Commerce
   - x402
   tags_raw:
@@ -137,13 +118,23 @@ apis:
     url: https://scvd.store/webmcp.js
 - aid: scvd-store:scvd-evidence-agent
   name: SCVD Evidence Agent (A2A)
-  description: 'Agent2Agent protocol surface: an agent card served from https://scvd.store/.well-known/agent-card.json (and byte-identically at /.well-known/agent.json and /.well-known/a2a.json; protocolVersion
-    0.3.0, JSONRPC, card version 1.1.0, provider Record Creative Co. LLC) advertising three free, read-only, no-account skills — preflight_endpoint, verify_receipt and get_endpoint_readiness — invoked as
-    JSON task messages at https://scvd.store/a2a. Results are retrievable with tasks/get for 24 hours; streaming and push notifications are declared unsupported; securitySchemes is deliberately empty. The
-    endpoint answers JSON-RPC 2.0 (tasks/get on an unknown id returns -32001 Task not found). Graded conformant against A2A 1.0.0. The paid instruments are x402 doors, never A2A tasks.'
+  description: >-
+    Agent2Agent protocol surface: an agent card served from https://scvd.store/.well-known/agent-card.json
+    (and byte-identically at /.well-known/agent.json and /.well-known/a2a.json; protocolVersion 0.3.0,
+    JSONRPC, card version 1.1.0, provider Record Creative Co. LLC) advertising three free, read-only,
+    no-account skills — preflight_endpoint, verify_receipt and get_endpoint_readiness — invoked as JSON
+    task messages at https://scvd.store/a2a. Results are retrievable with tasks/get for 24 hours; streaming
+    and push notifications are declared unsupported; securitySchemes is deliberately empty. The endpoint
+    answers JSON-RPC 2.0 (tasks/get on an unknown id returns -32001 Task not found). Graded conformant
+    against A2A 1.0.0. The paid instruments are x402 doors, never A2A tasks.
   humanURL: https://scvd.store/a2a
   baseURL: https://scvd.store/a2a
   tags:
+  - A2A
+  - Agent-Native
+  - x402
+  - Verification
+  tags_raw:
   - A2A
   - agent-native
   - x402
@@ -156,12 +147,1797 @@ apis:
     url: https://scvd.store/.well-known/agent-card.json
   - type: Documentation
     url: https://scvd.store/a2a-desk.json
+- aid: scvd-store:scvd-store-a2a-api
+  name: SCVD General Store A2a API
+  description: The A2a API from SCVD General Store — 4 operation(s) for a2a.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - A2a
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-a2a-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-a2a-desk-json-api
+  name: SCVD General Store A2a Desk.json API
+  description: The A2a Desk.json API from SCVD General Store — 1 operation(s) for a2a desk.json.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - A2a Desk.json
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-a2a-desk-json-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-almanac-api
+  name: SCVD General Store Almanac API
+  description: The Almanac API from SCVD General Store — 3 operation(s) for almanac.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Almanac
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-almanac-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-anchor-api
+  name: SCVD General Store Anchor API
+  description: The Anchor API from SCVD General Store — 1 operation(s) for anchor.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Anchor
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-anchor-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-ask-api
+  name: SCVD General Store Ask API
+  description: The Ask API from SCVD General Store — 2 operation(s) for ask.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Ask
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-ask-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-attestation-api
+  name: SCVD General Store Attestation API
+  description: The Attestation API from SCVD General Store — 1 operation(s) for attestation.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Attestation
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-attestation-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-auth-md-api
+  name: SCVD General Store Auth.md API
+  description: The Auth.md API from SCVD General Store — 1 operation(s) for auth.md.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Auth.md
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-auth-md-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-before-you-pay-api
+  name: SCVD General Store Before You Pay API
+  description: The Before You Pay API from SCVD General Store — 1 operation(s) for before you pay.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Before You Pay
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-before-you-pay-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-bell-api
+  name: SCVD General Store Bell API
+  description: The Bell API from SCVD General Store — 2 operation(s) for bell.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Bell
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-bell-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-bitcoin-anchor-api
+  name: SCVD General Store Bitcoin Anchor API
+  description: The Bitcoin Anchor API from SCVD General Store — 1 operation(s) for bitcoin anchor.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Bitcoin Anchor
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-bitcoin-anchor-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-bot-auth-api
+  name: SCVD General Store Bot Auth API
+  description: The Bot Auth API from SCVD General Store — 1 operation(s) for bot auth.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Bot Auth
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-bot-auth-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-bot-auth-card-api
+  name: SCVD General Store Bot Auth Card API
+  description: The Bot Auth Card API from SCVD General Store — 1 operation(s) for bot auth card.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Bot Auth Card
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-bot-auth-card-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-bounties-api
+  name: SCVD General Store Bounties API
+  description: The Bounties API from SCVD General Store — 2 operation(s) for bounties.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Bounties
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-bounties-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-buy-api
+  name: SCVD General Store Buy API
+  description: The Buy API from SCVD General Store — 35 operation(s) for buy.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Buy
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-buy-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-card-api
+  name: SCVD General Store Card API
+  description: The Card API from SCVD General Store — 1 operation(s) for card.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Card
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-card-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-case-api
+  name: SCVD General Store Case API
+  description: The Case API from SCVD General Store — 1 operation(s) for case.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Case
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-case-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-catalog-api
+  name: SCVD General Store Catalog API
+  description: The Catalog API from SCVD General Store — 1 operation(s) for catalog.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Catalog
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-catalog-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-claims-api
+  name: SCVD General Store Claims API
+  description: The Claims API from SCVD General Store — 2 operation(s) for claims.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Claims
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-claims-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-conformance-api
+  name: SCVD General Store Conformance API
+  description: The Conformance API from SCVD General Store — 2 operation(s) for conformance.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Conformance
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-conformance-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-conformance-watch-api
+  name: SCVD General Store Conformance Watch API
+  description: >-
+    The Conformance Watch API from SCVD General Store — 1 operation(s) for conformance watch.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Conformance Watch
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-conformance-watch-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-corpus-api
+  name: SCVD General Store Corpus API
+  description: The Corpus API from SCVD General Store — 9 operation(s) for corpus.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Corpus
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-corpus-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-corpus-json-api
+  name: SCVD General Store Corpus.json API
+  description: The Corpus.json API from SCVD General Store — 1 operation(s) for corpus.json.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Corpus.json
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-corpus-json-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-corrections-api
+  name: SCVD General Store Corrections API
+  description: The Corrections API from SCVD General Store — 1 operation(s) for corrections.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Corrections
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-corrections-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-credit-api
+  name: SCVD General Store Credit API
+  description: The Credit API from SCVD General Store — 2 operation(s) for credit.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Credit
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-credit-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-declare-door-api
+  name: SCVD General Store Declare Door API
+  description: The Declare Door API from SCVD General Store — 1 operation(s) for declare door.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Declare Door
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-declare-door-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-defects-json-api
+  name: SCVD General Store Defects.json API
+  description: The Defects.json API from SCVD General Store — 1 operation(s) for defects.json.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Defects.json
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-defects-json-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-deprecation-api
+  name: SCVD General Store Deprecation API
+  description: The Deprecation API from SCVD General Store — 1 operation(s) for deprecation.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Deprecation
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-deprecation-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-developers-api
+  name: SCVD General Store Developers API
+  description: The Developers API from SCVD General Store — 1 operation(s) for developers.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Developers
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-developers-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-directory-api
+  name: SCVD General Store Directory API
+  description: The Directory API from SCVD General Store — 1 operation(s) for directory.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Directory
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-directory-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-doors-api
+  name: SCVD General Store Doors API
+  description: The Doors API from SCVD General Store — 1 operation(s) for doors.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Doors
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-doors-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-doors-json-api
+  name: SCVD General Store Doors.json API
+  description: The Doors.json API from SCVD General Store — 1 operation(s) for doors.json.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Doors.json
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-doors-json-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-fresh-set-api
+  name: SCVD General Store Fresh Set API
+  description: The Fresh Set API from SCVD General Store — 1 operation(s) for fresh set.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Fresh Set
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-fresh-set-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-gazette-api
+  name: SCVD General Store Gazette API
+  description: The Gazette API from SCVD General Store — 1 operation(s) for gazette.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Gazette
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-gazette-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-good-buyer-api
+  name: SCVD General Store Good Buyer API
+  description: The Good Buyer API from SCVD General Store — 1 operation(s) for good buyer.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Good Buyer
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-good-buyer-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-guestbook-api
+  name: SCVD General Store Guestbook API
+  description: The Guestbook API from SCVD General Store — 1 operation(s) for guestbook.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Guestbook
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-guestbook-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-health-api
+  name: SCVD General Store Health API
+  description: The Health API from SCVD General Store — 1 operation(s) for health.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Health
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-health-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-launch-check-api
+  name: SCVD General Store Launch Check API
+  description: The Launch Check API from SCVD General Store — 1 operation(s) for launch check.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Launch Check
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-launch-check-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-ledger-api
+  name: SCVD General Store Ledger API
+  description: The Ledger API from SCVD General Store — 2 operation(s) for ledger.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Ledger
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-ledger-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-letter-api
+  name: SCVD General Store Letter API
+  description: The Letter API from SCVD General Store — 2 operation(s) for letter.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Letter
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-letter-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-look-api
+  name: SCVD General Store Look API
+  description: The Look API from SCVD General Store — 1 operation(s) for look.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Look
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-look-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-lucky-api
+  name: SCVD General Store Lucky API
+  description: The Lucky API from SCVD General Store — 1 operation(s) for lucky.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Lucky
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-lucky-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-mandate-api
+  name: SCVD General Store Mandate API
+  description: The Mandate API from SCVD General Store — 1 operation(s) for mandate.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Mandate
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-mandate-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-mcp-api
+  name: SCVD General Store MCP API
+  description: The Mcp API from SCVD General Store — 1 operation(s) for mcp.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Mcp
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-mcp-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-mcp-ward-json-api
+  name: SCVD General Store Mcp Ward.json API
+  description: The Mcp Ward.json API from SCVD General Store — 1 operation(s) for mcp ward.json.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Mcp Ward.json
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-mcp-ward-json-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-menu-api
+  name: SCVD General Store Menu API
+  description: The Menu API from SCVD General Store — 1 operation(s) for menu.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Menu
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-menu-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-menu-json-api
+  name: SCVD General Store Menu.json API
+  description: The Menu.json API from SCVD General Store — 1 operation(s) for menu.json.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Menu.json
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-menu-json-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-onpage-api
+  name: SCVD General Store Onpage API
+  description: The Onpage API from SCVD General Store — 1 operation(s) for onpage.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Onpage
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-onpage-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-onpage-audit-api
+  name: SCVD General Store Onpage Audit API
+  description: The Onpage Audit API from SCVD General Store — 1 operation(s) for onpage audit.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Onpage Audit
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-onpage-audit-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-open-for-business-api
+  name: SCVD General Store Open For Business API
+  description: >-
+    The Open For Business API from SCVD General Store — 2 operation(s) for open for business.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Open For Business
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-open-for-business-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-operator-statement-api
+  name: SCVD General Store Operator Statement API
+  description: >-
+    The Operator Statement API from SCVD General Store — 1 operation(s) for operator statement.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Operator Statement
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-operator-statement-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-order-api
+  name: SCVD General Store Order API
+  description: The Order API from SCVD General Store — 1 operation(s) for order.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Order
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-order-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-pack-api
+  name: SCVD General Store Pack API
+  description: The Pack API from SCVD General Store — 1 operation(s) for pack.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Pack
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-pack-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-passport-api
+  name: SCVD General Store Passport API
+  description: The Passport API from SCVD General Store — 2 operation(s) for passport.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Passport
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-passport-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-patronage-api
+  name: SCVD General Store Patronage API
+  description: The Patronage API from SCVD General Store — 1 operation(s) for patronage.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Patronage
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-patronage-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-paywall-api
+  name: SCVD General Store Paywall API
+  description: The Paywall API from SCVD General Store — 8 operation(s) for paywall.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Paywall
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-paywall-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-phantom-api
+  name: SCVD General Store Phantom API
+  description: The Phantom API from SCVD General Store — 1 operation(s) for phantom.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Phantom
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-phantom-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-porch-api
+  name: SCVD General Store Porch API
+  description: The Porch API from SCVD General Store — 1 operation(s) for porch.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Porch
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-porch-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-practice-api
+  name: SCVD General Store Practice API
+  description: The Practice API from SCVD General Store — 2 operation(s) for practice.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Practice
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-practice-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-preflight-api
+  name: SCVD General Store Preflight API
+  description: The Preflight API from SCVD General Store — 4 operation(s) for preflight.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Preflight
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-preflight-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-pricing-api
+  name: SCVD General Store Pricing API
+  description: The Pricing API from SCVD General Store — 1 operation(s) for pricing.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Pricing
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-pricing-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-pricing-md-api
+  name: SCVD General Store Pricing.md API
+  description: The Pricing.md API from SCVD General Store — 1 operation(s) for pricing.md.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Pricing.md
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-pricing-md-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-profiles-api
+  name: SCVD General Store Profiles API
+  description: The Profiles API from SCVD General Store — 2 operation(s) for profiles.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Profiles
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-profiles-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-pulse-json-api
+  name: SCVD General Store Pulse.json API
+  description: The Pulse.json API from SCVD General Store — 1 operation(s) for pulse.json.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Pulse.json
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-pulse-json-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-purchase-status-api
+  name: SCVD General Store Purchase Status API
+  description: The Purchase Status API from SCVD General Store — 1 operation(s) for purchase status.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Purchase Status
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-purchase-status-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-reconciliation-api
+  name: SCVD General Store Reconciliation API
+  description: The Reconciliation API from SCVD General Store — 1 operation(s) for reconciliation.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Reconciliation
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-reconciliation-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-refund-api
+  name: SCVD General Store Refund API
+  description: The Refund API from SCVD General Store — 1 operation(s) for refund.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Refund
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-refund-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-registry-api
+  name: SCVD General Store Registry API
+  description: The Registry API from SCVD General Store — 1 operation(s) for registry.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Registry
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-registry-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-replay-api
+  name: SCVD General Store Replay API
+  description: The Replay API from SCVD General Store — 1 operation(s) for replay.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Replay
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-replay-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-request-api
+  name: SCVD General Store Request API
+  description: The Request API from SCVD General Store — 1 operation(s) for request.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Request
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-request-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-rights-api
+  name: SCVD General Store Rights API
+  description: The Rights API from SCVD General Store — 1 operation(s) for rights.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Rights
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-rights-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-samples-api
+  name: SCVD General Store Samples API
+  description: The Samples API from SCVD General Store — 2 operation(s) for samples.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Samples
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-samples-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-service-audit-api
+  name: SCVD General Store Service Audit API
+  description: The Service Audit API from SCVD General Store — 1 operation(s) for service audit.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Service Audit
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-service-audit-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-sites-api
+  name: SCVD General Store Sites API
+  description: The Sites API from SCVD General Store — 1 operation(s) for sites.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Sites
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-sites-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-sources-json-api
+  name: SCVD General Store Sources.json API
+  description: The Sources.json API from SCVD General Store — 1 operation(s) for sources.json.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Sources.json
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-sources-json-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-stamp-api
+  name: SCVD General Store Stamp API
+  description: The Stamp API from SCVD General Store — 1 operation(s) for stamp.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Stamp
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-stamp-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-standing-note-api
+  name: SCVD General Store Standing Note API
+  description: The Standing Note API from SCVD General Store — 1 operation(s) for standing note.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Standing Note
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-standing-note-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-statement-api
+  name: SCVD General Store Statement API
+  description: The Statement API from SCVD General Store — 1 operation(s) for statement.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Statement
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-statement-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-tab-api
+  name: SCVD General Store Tab API
+  description: The Tab API from SCVD General Store — 2 operation(s) for tab.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Tab
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-tab-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-tip-api
+  name: SCVD General Store Tip API
+  description: The Tip API from SCVD General Store — 1 operation(s) for tip.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Tip
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-tip-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-trade-api
+  name: SCVD General Store Trade API
+  description: The Trade API from SCVD General Store — 9 operation(s) for trade.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Trade
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-trade-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-trade-md-api
+  name: SCVD General Store Trade.md API
+  description: The Trade.md API from SCVD General Store — 1 operation(s) for trade.md.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Trade.md
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-trade-md-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-trust-api
+  name: SCVD General Store Trust API
+  description: The Trust API from SCVD General Store — 1 operation(s) for trust.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Trust
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-trust-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-verify-api
+  name: SCVD General Store Verify API
+  description: The Verify API from SCVD General Store — 1 operation(s) for verify.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Verify
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-verify-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-verify-receipt-api
+  name: SCVD General Store Verify Receipt API
+  description: The Verify Receipt API from SCVD General Store — 1 operation(s) for verify receipt.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Verify Receipt
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-verify-receipt-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-watch-api
+  name: SCVD General Store Watch API
+  description: The Watch API from SCVD General Store — 1 operation(s) for watch.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Watch
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-watch-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-well-known-api
+  name: SCVD General Store .well Known API
+  description: The .well Known API from SCVD General Store — 11 operation(s) for .well known.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - .well Known
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-well-known-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-what-api
+  name: SCVD General Store What API
+  description: The What API from SCVD General Store — 1 operation(s) for what.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - What
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-what-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-wind-down-api
+  name: SCVD General Store Wind Down API
+  description: The Wind Down API from SCVD General Store — 1 operation(s) for wind down.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Wind Down
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-wind-down-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
+- aid: scvd-store:scvd-store-zodiac-api
+  name: SCVD General Store Zodiac API
+  description: The Zodiac API from SCVD General Store — 3 operation(s) for zodiac.
+  humanURL: https://scvd.store/developers
+  baseURL: https://scvd.store/mcp
+  tags:
+  - Zodiac
+  properties:
+  - type: OpenAPI
+    url: openapi/scvd-store-zodiac-api-openapi.yml
+  - type: Documentation
+    url: https://scvd.store/developers
+  - type: APIReference
+    url: https://scvd.store/openapi.json
+  - type: GettingStarted
+    url: https://scvd.store/agents.md
+  - type: APICatalog
+    url: well-known/scvd-store-api-catalog.json
+  - type: APICatalog
+    url: https://scvd.store/.well-known/api-catalog
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Overlay
+  url: overlays/scvd-store-openapi-overlay.yaml
 - type: Website
   url: https://scvd.store/
 - type: DeveloperPortal
@@ -298,3 +2074,11 @@ x-enrichment:
   status: enriched
   artifacts_added: 54
   pass: local-v3
+x-legal-name: Record Creative Co. LLC
+x-a2a:
+  verified: true
+  probed: '2026-09-26'
+  url: "https://scvd.store/.well-known/agent-card.json"
+  grade: "conformant"
+  protocol_version: "0.3.0"
+  control: 404

@@ -1,0 +1,1017 @@
+openapi: 3.2.0
+info:
+  title: SCVD General Store Corpus API
+  version: 0.3.0
+  description: 'scvd.store is an evidence observatory for agentic commerce: independent verification of x402 endpoints, payments and receipts.'
+  contact:
+    url: https://scvd.store
+    email: sean@recordcreativeco.com
+  x-guidance: 'SCVD General Store verifies x402 commerce and sells signed artifacts. Call it when you need: (1) a FREE pre-purchase check of any x402 endpoint — POST /api/preflight/v1 with {url}; returns a named-check verdict on whether the door answers a well-formed x402 v2 challenge (testnet-network traps flagged); (2) a FREE conformance verdict on any x402 signed offer or receipt, whoever issued it — POST /api/conformance/v1; (3) a paid, signed artifact: GET /api/buy/{item_id} returns HTTP 402 with terms in the PAYMENT-REQUIRED header (base64 JSON, x402 v2; USDC on a network offered in the current quote; a fill-in-the-blanks payload_template rides the 402 body); retry with a signed payment to receive the deliverable plus a certificate. Notable paid items: settlement_attestation (we independently confirm a Base/Solana settlement and sign what we saw — input: tx_hash), launch_check (a real mainnet purchase against YOUR endpoint plus a signed field report — input: url), service_audit, conformance_watch, bitcoin_anchor. Inputs are query parameters, declared per item in /menu.json; outputs are JSON with a certificate id. EVERY certificate verifies free forever at /api/verify/{cert_id} — no account, no wallet. Starting prices run $0.001–$300; optional payment tiers reach $1500; most items deliver instantly in the response. Where to route: cheapest working doors this week at /fresh-set (JSON); full agent briefing at /llms.txt. Before you start: free instruments need only plain HTTPS (no account, key or SDK); a purchase needs an x402 v2 client and a wallet holding USDC on Base (eip155:8453), Polygon (eip155:137), Arbitrum (eip155:42161), World (eip155:480), Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), paid only on a network the 402 offers; the stock client refuses payments above $1 by default and 14 of 35 priced doors sit above it; optional tooling (scvd-tab, the MCP stdio bridge, the scvd CLI) is listed at https://scvd.store/agents.md and none of it is required.'
+servers:
+- url: https://scvd.store
+tags:
+- name: Corpus
+paths:
+  /corpus/index.json:
+    get:
+      summary: Compact corpus index
+      description: 'Free paginated snapshot metadata, without embedded snapshot bodies. Follow next until null; retain unreadable rows. Metadata is not signature, chain or Bitcoin verification. Existing full index: /corpus.json.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - entries
+                - listed
+                - unreadable
+                - has_more
+                - next
+                - verification
+                properties:
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                  listed:
+                    type: integer
+                  unreadable:
+                    type: integer
+                  has_more:
+                    type: boolean
+                  next:
+                    type: string
+                    nullable: true
+                  verification:
+                    type: string
+                  completeness:
+                    type: string
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 25
+          default: 25
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 2048
+        description: Opaque continuation from the previous page.
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      operationId: get_corpus_index_json
+      tags:
+      - Corpus
+  /corpus/host/{host}.json:
+    get:
+      summary: Read one host's recorded history
+      description: Free underlying evidence for Spot Check. Add view=stable to omit the request-time asked_at field and revalidate exact published bytes with If-None-Match. A 304 means this published view is unchanged, not that the host is unchanged or that a new probe ran. The default view retains asked_at.
+      security: []
+      responses:
+        '200':
+          description: Recorded history, dated observations and gaps
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - host
+                - timeline
+                - rounds_probed
+                - rounds_gapped
+                - what_this_cannot_see
+                properties:
+                  host:
+                    type: string
+                  asked_at:
+                    type: string
+                    format: date-time
+                    description: Request time, omitted with view=stable
+                  first_observed:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                  last_observed:
+                    type:
+                    - string
+                    - 'null'
+                    format: date-time
+                  rounds_in_chain:
+                    type: integer
+                  rounds_since_first_sighting:
+                    type: integer
+                  rounds_probed:
+                    type: integer
+                  rounds_gapped:
+                    type: integer
+                  observation_coverage_pct:
+                    type:
+                    - number
+                    - 'null'
+                    description: Our coverage of this host, never the host's uptime
+                  gaps_by_reason:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  timeline:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        sequence:
+                          type: integer
+                        week:
+                          type: string
+                        taken_at:
+                          type: string
+                          format: date-time
+                        digest:
+                          type: string
+                        entry_url:
+                          type: string
+                          format: uri
+                        listed:
+                          type: boolean
+                        probed:
+                          type: boolean
+                        coverage_suspect:
+                          type: boolean
+                        note:
+                          type: string
+                        verdict:
+                          type: string
+                        gap:
+                          type: string
+                        url:
+                          type: string
+                          format: uri
+                        observed_at:
+                          type: string
+                          format: date-time
+                  verdict_changes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        at:
+                          type: string
+                          format: date-time
+                        week:
+                          type: string
+                        from:
+                          type: string
+                        to:
+                          type: string
+                  tier:
+                    type: object
+                    properties:
+                      tier:
+                        type: string
+                      line:
+                        type: string
+                      criteria_url:
+                        type: string
+                        format: uri
+                      coverage_suspect:
+                        type: boolean
+                      fraction:
+                        type: object
+                        properties:
+                          ready:
+                            type: integer
+                          rounds:
+                            type: integer
+                          weeks:
+                            type: string
+                  pay_to:
+                    type: object
+                    description: Where the door asks to be paid, week by week, as salted digests (never verbatim); absent when no probed round captured an address. unchanged_since is the earliest round of the unbroken run carrying this same set.
+                    properties:
+                      digests:
+                        type: array
+                        items:
+                          type: string
+                      observed:
+                        type: object
+                      unchanged_since:
+                        type: object
+                      rounds_captured:
+                        type: integer
+                      rounds_probed:
+                        type: integer
+                      changes:
+                        type: array
+                        items:
+                          type: object
+                      how_to_match:
+                        type: string
+                  corrections:
+                    type: string
+                  what_this_cannot_see:
+                    type: array
+                    items:
+                      type: string
+        '304':
+          description: The published view has unchanged bytes; no body or charge
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      parameters:
+      - name: host
+        in: path
+        required: true
+        schema:
+          type: string
+        description: A bare hostname
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - stable
+      operationId: get_corpus_host_host_json
+      tags:
+      - Corpus
+  /corpus/{sequence}/evidence/{host}.json:
+    get:
+      summary: Read the capture a sealed row's evidence_digest commits to
+      description: 'The probe''s raw capture for one host in one signed snapshot — the verbatim PAYMENT-REQUIRED bytes, curated headers, body digest — served as RFC 8785 canonical JSON so the bytes received hash to the row''s evidence_digest.sha256 (rows sealed from 2026-09-10). Rows sealed earlier carry the capture inline in the signed snapshot; the same door serves it and X-Evidence-Sealed-As says which. Content-addressed by the chain: cache forever.'
+      security: []
+      responses:
+        '200':
+          description: The canonical capture bytes; hash them and compare with the signed row
+          headers:
+            X-Evidence-SHA256:
+              schema:
+                type: string
+              description: sha256 of the body, hex
+            X-Evidence-Sealed-As:
+              schema:
+                type: string
+                enum:
+                - digest
+                - inline
+              description: Whether the row commits to the capture by digest or carries it inline
+            X-Evidence-Canonicalization:
+              schema:
+                type: string
+                enum:
+                - RFC8785
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - challenge_bytes
+                - headers
+                - body_sha256
+                - body_bytes
+                - body_truncated
+                - tls
+                properties:
+                  challenge_bytes:
+                    type:
+                    - string
+                    - 'null'
+                    description: The PAYMENT-REQUIRED header value, verbatim
+                  headers:
+                    type: object
+                    additionalProperties:
+                      type: string
+                  body_sha256:
+                    type:
+                    - string
+                    - 'null'
+                  body_bytes:
+                    type: integer
+                  body_truncated:
+                    type: boolean
+                  tls:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: No entry at that sequence, no row for that host, or a row with no capture (unreachable, or sealed before capture); reason names which
+        '409':
+          description: The bytes on hand do not recompute to the signed digest; both digests in the body
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        '503':
+          description: The row commits to a capture this store could not read back; the digest stands, the bytes are our gap
+      parameters:
+      - name: sequence
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The snapshot's chain position, 1-based
+      - name: host
+        in: path
+        required: true
+        schema:
+          type: string
+        description: A bare hostname the round carries a row for
+      operationId: get_corpus_sequence_evidence_host_json
+      tags:
+      - Corpus
+  /corpus/asked.json:
+    get:
+      summary: The asked-for queue
+      description: 'Every host a free surface was asked about that the signed chain had never probed, by name with a count of asks and nothing about who asked, and where each stands against this week''s walk: queued, swept with no door found, on the roster, or walked. The next weekly sweep reads the most-asked hosts'' own /.well-known/x402 for a door and walks what they declare. Alphabetical; the ask count is demand for the record, never a verdict on the door. Free.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  artifact:
+                    type: string
+                    const: asked_for_queue
+                  asked_at:
+                    type: string
+                    format: date-time
+                  hosts_asked:
+                    type: integer
+                  by_state:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  sweep_cap_per_week:
+                    type: integer
+                  store_cap:
+                    type: integer
+                  hosts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        host:
+                          type: string
+                        first_asked:
+                          type: string
+                          format: date-time
+                        last_asked:
+                          type: string
+                          format: date-time
+                        asks:
+                          type: integer
+                        surfaces:
+                          type: array
+                          items:
+                            type: string
+                        state:
+                          type: string
+                          enum:
+                          - queued
+                          - swept_no_door_found
+                          - on_roster
+                          - walked
+                        last_swept_week:
+                          type: string
+                        history_url:
+                          type: string
+                          format: uri
+                  how_it_works:
+                    type: string
+                  what_this_is_not:
+                    type: string
+                  corrections:
+                    type: string
+                  walk_week:
+                    type:
+                    - string
+                    - 'null'
+                  latest_signed_week:
+                    type:
+                    - string
+                    - 'null'
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_corpus_asked_json
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - Corpus
+  /corpus/tiers.json:
+    get:
+      summary: Every host's passport tier, with its fraction
+      description: Every host the signed chain has carried, each with the tier derived from its own rounds by the rule on /criteria (observed, established, standing, broken, indeterminate), printed with the fraction it came from and the weeks it spans. Alphabetical by host — ordered by tier would be a ranking. Derived at read, never stored; the rows behind every line are at each host's rows_url. Free.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  what_this_is:
+                    type: string
+                  what_this_is_not:
+                    type: string
+                  rule_url:
+                    type: string
+                    format: uri
+                  derived_at:
+                    type: string
+                    format: date-time
+                  weeks_read:
+                    type: integer
+                  latest_week:
+                    type: string
+                    nullable: true
+                  total_hosts:
+                    type: integer
+                  by_tier:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  hosts:
+                    type: array
+                    description: Alphabetical by host. No rank, no position, no ordering by tier.
+                    items:
+                      type: object
+                      properties:
+                        host:
+                          type: string
+                        tier:
+                          type: string
+                          enum:
+                          - observed
+                          - established
+                          - standing
+                          - broken
+                          - indeterminate
+                        line:
+                          type: string
+                          description: The tier with the fraction it came from, e.g. "established — 4 of 4, W33–W36". A tier never travels without this.
+                        fraction:
+                          type: object
+                          properties:
+                            ready:
+                              type: integer
+                            rounds:
+                              type: integer
+                            weeks:
+                              type: string
+                        latest:
+                          type: object
+                        coverage_suspect:
+                          type: boolean
+                        rows_url:
+                          type: string
+                          format: uri
+                        passport_url:
+                          type: string
+                          format: uri
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_corpus_tiers_json
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - Corpus
+  /corpus/trajectory.json:
+    get:
+      summary: The corpus read as time
+      description: 'One point per signed weekly snapshot, every count derived at read from the snapshot''s own rows: listed/probed denominators, verdict counts with observer-degraded ticks separated from anyone''s outage, offers seen, doors per rail, failure classes. No ratios anywhere — counts travel with their denominators. Each point names the digest it derives from. Free.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - weeks
+                - what_this_is
+                - nothing_claimed_between_snapshots
+                - how_to_rederive
+                properties:
+                  weeks:
+                    type: array
+                    items:
+                      type: object
+                    description: One point per signed week, each naming the snapshot digest it derives from. Empty before the first week.
+                  what_this_is:
+                    type: string
+                  nothing_claimed_between_snapshots:
+                    type: string
+                    description: 'The refusal that makes the series honest: these are dots, not a line, and nothing is asserted about the gaps.'
+                  corrections:
+                    type: string
+                    format: uri
+                  how_to_rederive:
+                    type: string
+                    description: How to recompute every number here from the entries.
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_corpus_trajectory_json
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - Corpus
+  /corpus/battery-delta.json:
+    get:
+      summary: What the stricter battery catches that the frozen one misses
+      description: 'Per signed week and overall: how many door rows both preflight batteries scored, how many they agreed on, and how many doors v1 would have called ready that v2 caught — broken out by which v2-only check did the catching. v2''s checks are v1''s plus four, so the disagreement runs one way only. Derived at read from the check names each signed row already carries, so it covers the whole history rather than starting a series; the answer names how to recount it yourself from the snapshots. A scorecard for our own instrument, published on the same terms as the gaps we count against ourselves. Free.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - what_this_is
+                - overall
+                properties:
+                  what_this_is:
+                    type: string
+                  overall:
+                    type: object
+                    properties:
+                      scored:
+                        type: integer
+                      agreed:
+                        type: integer
+                      caught_by_v2_only:
+                        type: integer
+                        description: Doors v1 would have called ready that v2 caught.
+                      by_check:
+                        type: object
+                      batteries:
+                        type: object
+                      what_this_does_not_settle:
+                        type: string
+                  weeks:
+                    type: array
+                    items:
+                      type: object
+                  v2_only_checks:
+                    type: array
+                    items:
+                      type: string
+                  the_open_question:
+                    type: string
+                    description: What the delta cannot answer, kept beside what it can.
+                  how_to_rederive:
+                    type: string
+                  corrections:
+                    type: string
+                    format: uri
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_corpus_battery_delta_json
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - Corpus
+  /corpus/wallet-facts.json:
+    get:
+      summary: Shared receiving addresses, counted
+      description: 'Latest signed week: how many receiving addresses the probed doors advertised, how many receive at more than one door, and the largest cluster — counts with denominators, no addresses, no names, no operator claims. The shared-wallet caveat rides inline: custodial and platform wallets make unrelated doors share an address, so the observation is served and the inference is yours. Free.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - week
+                - corrections
+                properties:
+                  week:
+                    type:
+                    - string
+                    - 'null'
+                    description: The signed week these counts come from. Null — not absent — before there is one, which is the flag a reader branches on.
+                  explanation:
+                    type: string
+                    description: Present ONLY before the first signed week, saying in words why there is nothing to count. Absent once there is a real reading.
+                  sequence:
+                    type: integer
+                    description: Absent before the first signed week.
+                  digest:
+                    type: string
+                    description: The snapshot these counts derive from, so you can recount exactly what we counted. Absent before the first signed week.
+                  hosts_probed:
+                    type: integer
+                    description: The denominator every count below is read against. Absent before the first signed week.
+                  hosts_with_offer:
+                    type: integer
+                    description: Absent before the first signed week.
+                  hosts_with_pay_to:
+                    type: integer
+                    description: Absent before the first signed week.
+                  distinct_addresses:
+                    type: integer
+                    description: Absent before the first signed week.
+                  addresses_at_multiple_doors:
+                    type: integer
+                    description: Absent before the first signed week.
+                  largest_cluster_doors:
+                    type: integer
+                    description: Absent before the first signed week.
+                  shared_wallet_caveat:
+                    type: string
+                    description: Why a shared receiving address is not an operator claim — custodial and platform wallets put unrelated doors behind one address. Rides with the counts and is absent only when there are none.
+                  what_this_is:
+                    type: string
+                    description: Absent before the first signed week.
+                  what_this_is_not:
+                    type: string
+                    description: Absent before the first signed week.
+                  corrections:
+                    type: string
+                    format: uri
+                  how_to_rederive:
+                    type: string
+                    description: How to recount this yourself from the snapshot. Absent before the first signed week.
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_corpus_wallet_facts_json
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - Corpus
+  /corpus/diff.json:
+    get:
+      summary: What changed since a signed week
+      description: '?since={week} names a week already in the chain; the answer compares it to the latest signed snapshot: doors appeared and disappeared, verdict transitions, and drift in a door''s own declared terms (price bounds, rails, schemes). A week the chain does not hold gets a 404 naming the weeks it does — no invented baselines; no week at all gets a 400 naming them too. The cheapest agent loop is polling this. Free.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - from
+                - to
+                - appeared
+                - disappeared
+                - transitions
+                properties:
+                  from:
+                    type: object
+                    description: The baseline snapshot, with its sequence and digest.
+                  to:
+                    type: object
+                    description: The latest signed snapshot.
+                  appeared:
+                    type: array
+                    items:
+                      type: object
+                    description: Doors present in the later week and not the earlier one.
+                  disappeared:
+                    type: array
+                    items:
+                      type: object
+                    description: Doors present in the earlier week and not the later one. An absence, never a verdict about the operator.
+                  transitions:
+                    type: array
+                    items:
+                      type: object
+                    description: Doors whose verdict moved between the two weeks.
+                  drift:
+                    type: object
+                  hosts_in_from:
+                    type: integer
+                  hosts_in_to:
+                    type: integer
+                  hosts_in_both:
+                    type: integer
+                  how_to_rederive:
+                    type: string
+                    description: Which two snapshots to fetch and how to recompute this diff yourself, so the surface is checkable rather than trusted.
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      parameters:
+      - name: since
+        in: query
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{4}-W\d{2}$
+        example: 2026-W34
+        description: 'The baseline: an ISO week the chain holds a signed snapshot for. The comparison is always against the latest snapshot. Omit it and the answer is a 400 listing the weeks the chain holds.'
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      operationId: get_corpus_diff_json
+      tags:
+      - Corpus
+components:
+  responses:
+    NotModified:
+      description: 'Not Modified: the ETag you sent still names these exact bytes. No body; every other header is as the 200 would carry it.'
+    BadRequest:
+      description: The request was malformed or a required parameter was missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    TooManyRequests:
+      description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying.
+    ServerError:
+      description: Something fell off a shelf. Nothing was charged.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Problem:
+      type: object
+      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
+        title:
+          type: string
+          description: A short, stable summary of the problem class.
+        status:
+          type: integer
+          description: The HTTP status code, repeated in the body.
+        detail:
+          type: string
+          description: What went wrong with THIS request, in plain language.
+        instance:
+          type: string
+          format: uri
+          description: The request path.
+        error:
+          type: string
+          description: The store's human-readable message. Always present, including on responses that predate the typed model.
+        retry_same_request:
+          type: boolean
+          const: false
+          description: 'Present on repair responses: correct the selection or inputs before retrying.'
+        next_step:
+          type: object
+          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
+          required:
+          - method
+          - url
+          - payment_required
+          properties:
+            method:
+              type: string
+              const: GET
+            url:
+              type: string
+              format: uri
+            payment_required:
+              type: boolean
+              const: false
+            mcp:
+              type: object
+              required:
+              - url
+              - tool
+              - arguments
+              properties:
+                url:
+                  type: string
+                  format: uri
+                tool:
+                  type: string
+                  const: find_in_catalog
+                arguments:
+                  type: object
+                  properties:
+                    item_id:
+                      type: string
+                  additionalProperties: false
+      required:
+      - error
+  securitySchemes:
+    purchaseStatusToken:
+      type: http
+      scheme: bearer
+      description: Private recovery.status_token returned by a catalogue purchase. This capability reads only its original purchase status.
+externalDocs:
+  url: https://scvd.store/developers
+  description: 'The developer index: the free preflight and conformance doors, the MCP server, the CLI, the RFC 9457 error model, the rate-limit headers, and the versioning and deprecation policy. The full agent briefing is at /llms.txt.'
+x-agentcash-provenance:
+  ownershipProofs:
+  - '0xd0716b334368fed445d000f12c7e586a6c86e13bd543333bab6c04695df236320c5dbfa4f0beb6807cc486c0ed4fd5a38892a8148d5aa80377db9f35ed4c4b151c'
+  - 4HduymBCHhwyLgtMyXRpDX3JHQR3oyqTSytsXqCamzCc4ed9fJeBSpDUDSLwfZ59mZaw9ggdMNURPNBi4P6BRU47
+x-scvd-ucp:
+  profile: https://scvd.store/.well-known/ucp
+  checkout: advertised
+x-scvd-native-checkout:
+  mcp:
+    protocol: mpp
+    payment_method: evm
+    intent: charge
+    transport: mcp
+    method: tools/call
+    path: /mcp
+    challenge_key: org.paymentauth/payment-required
+    challenge_location: error.data, or result._meta with ?payment=tool-result
+    credential_meta_key: org.paymentauth/credential
+    receipt_meta_key: org.paymentauth/receipt
+    idempotency_meta_key: x402/idempotency-key
+    terms: 'each item''s payment_capabilities row with transport http: same network, asset and amount_atomic'
+  webmcp:
+    protocol: mpp
+    payment_method: evm
+    intent: charge
+    transport: webmcp
+    script: /webmcp.js
+    quote_tool: quote_store_purchase
+    challenge_field: payment_challenge
+    complete_tool: complete_store_purchase
+    credential_argument: signed_credential
+    receipt_field: payment_receipt
+    terms: 'each item''s payment_capabilities row with transport http: same network, asset and amount_atomic'
+x-rate-limiting:
+  application_level_limit: true
+  limited_paths:
+  - /api/preflight/v1
+  - /api/preflight/v2
+  - /api/before-you-pay/v1
+  - /api/look/v1
+  - /api/preflight/batch
+  headers_returned:
+  - RateLimit-Limit
+  - RateLimit-Remaining
+  - RateLimit-Reset
+  - RateLimit-Policy
+  - RateLimit
+  note: 'The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+  policy_url: https://scvd.store/developers
+x-versioning:
+  scheme: url-path
+  note: 'Breaking changes arrive as a new version in the path (/api/preflight/v1 → /v2). A published version''s SHAPE never changes under a client: fields are added, never removed or retyped.'
+  deprecation: A version being retired serves the RFC 8594 Deprecation and Sunset headers on every response for at least 90 days before it stops answering, and the date is published at /developers before the headers appear.
+  sunset_headers:
+  - Deprecation
+  - Sunset
+  - Link; rel="successor-version"
+  policy_url: https://scvd.store/deprecation
+  currently_deprecated: []
+  versions:
+  - path: /api/preflight/v1
+    status: supported
+    since: '2026-08-03'
+    sunset: null
+    successor: /api/preflight/v2
+  - path: /api/preflight/v2
+    status: current
+    since: '2026-08-23'
+    sunset: null
+    successor: null
+  - path: /api/look/v1
+    status: current
+    since: '2026-09-02'
+    sunset: null
+    successor: null
+  - path: /api/conformance/v1
+    status: current
+    since: '2026-08-03'
+    sunset: null
+    successor: null

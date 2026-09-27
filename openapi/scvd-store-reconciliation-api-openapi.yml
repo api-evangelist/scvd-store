@@ -1,0 +1,297 @@
+openapi: 3.2.0
+info:
+  title: SCVD General Store Reconciliation API
+  version: 0.3.0
+  description: 'scvd.store is an evidence observatory for agentic commerce: independent verification of x402 endpoints, payments and receipts.'
+  contact:
+    url: https://scvd.store
+    email: sean@recordcreativeco.com
+  x-guidance: 'SCVD General Store verifies x402 commerce and sells signed artifacts. Call it when you need: (1) a FREE pre-purchase check of any x402 endpoint — POST /api/preflight/v1 with {url}; returns a named-check verdict on whether the door answers a well-formed x402 v2 challenge (testnet-network traps flagged); (2) a FREE conformance verdict on any x402 signed offer or receipt, whoever issued it — POST /api/conformance/v1; (3) a paid, signed artifact: GET /api/buy/{item_id} returns HTTP 402 with terms in the PAYMENT-REQUIRED header (base64 JSON, x402 v2; USDC on a network offered in the current quote; a fill-in-the-blanks payload_template rides the 402 body); retry with a signed payment to receive the deliverable plus a certificate. Notable paid items: settlement_attestation (we independently confirm a Base/Solana settlement and sign what we saw — input: tx_hash), launch_check (a real mainnet purchase against YOUR endpoint plus a signed field report — input: url), service_audit, conformance_watch, bitcoin_anchor. Inputs are query parameters, declared per item in /menu.json; outputs are JSON with a certificate id. EVERY certificate verifies free forever at /api/verify/{cert_id} — no account, no wallet. Starting prices run $0.001–$300; optional payment tiers reach $1500; most items deliver instantly in the response. Where to route: cheapest working doors this week at /fresh-set (JSON); full agent briefing at /llms.txt. Before you start: free instruments need only plain HTTPS (no account, key or SDK); a purchase needs an x402 v2 client and a wallet holding USDC on Base (eip155:8453), Polygon (eip155:137), Arbitrum (eip155:42161), World (eip155:480), Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), paid only on a network the 402 offers; the stock client refuses payments above $1 by default and 14 of 35 priced doors sit above it; optional tooling (scvd-tab, the MCP stdio bridge, the scvd CLI) is listed at https://scvd.store/agents.md and none of it is required.'
+servers:
+- url: https://scvd.store
+tags:
+- name: Reconciliation
+paths:
+  /api/reconciliation/{reconciliation_id}:
+    get:
+      summary: A settlement reconciliation, served forever
+      description: The authorized-vs-taken observation a purchase minted, with the signed statement of WHICH ceiling was observed — on-chain or asserted.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - reconciliation
+                - cert_id
+                - stored_at
+                - how_to_verify
+                properties:
+                  reconciliation:
+                    type: object
+                    description: 'The signed settlement reconciliation: what the chain said about a settlement this store was asked to confirm.'
+                    required:
+                    - signature
+                    - public_key
+                    - signature_covers
+                    properties:
+                      signature:
+                        type: string
+                        description: ed25519 over the canonical form of the fields this object declares.
+                      public_key:
+                        type: string
+                      signature_covers:
+                        type: string
+                        description: Which fields the signature actually covers — named on the artifact rather than assumed, because a field shown beside a signature that the signature does not cover is the defect /corrections was opened for.
+                      evidence_hash:
+                        type: string
+                      observed_at:
+                        type: string
+                        format: date-time
+                      criteria:
+                        type: string
+                        description: The published criteria this observation was rendered under.
+                      verdict:
+                        type: string
+                        enum:
+                        - no_settlement
+                        - no_discretion
+                        - within_cap
+                        - over_cap
+                        - cap_not_observable
+                  cert_id:
+                    type: string
+                    description: The certificate minted by the purchase. GET /api/verify/{cert_id} — free, forever, no account — and its attests field carries this record's evidence_hash.
+                  stored_at:
+                    type: string
+                    format: date-time
+                  how_to_verify:
+                    type: array
+                    items:
+                      type: string
+                    description: The steps a stranger runs without asking the buyer OR this store to be honest.
+                  what_this_is_not:
+                    type: string
+                    description: A dated observation against published criteria — never an endorsement, an uptime claim, or a score on whoever runs the endpoint. This store verifies artifacts; it does not rate actors.
+                  read_this_first:
+                    type: string
+                    description: The verdict a skimmer takes away, stated before the detail rather than left to be inferred from it.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      parameters:
+      - name: reconciliation_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: From the purchase response; starts srec_.
+      operationId: get_api_reconciliation_reconciliation_id
+      tags:
+      - Reconciliation
+components:
+  responses:
+    BadRequest:
+      description: The request was malformed or a required parameter was missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    TooManyRequests:
+      description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying.
+    ServerError:
+      description: Something fell off a shelf. Nothing was charged.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Problem:
+      type: object
+      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
+        title:
+          type: string
+          description: A short, stable summary of the problem class.
+        status:
+          type: integer
+          description: The HTTP status code, repeated in the body.
+        detail:
+          type: string
+          description: What went wrong with THIS request, in plain language.
+        instance:
+          type: string
+          format: uri
+          description: The request path.
+        error:
+          type: string
+          description: The store's human-readable message. Always present, including on responses that predate the typed model.
+        retry_same_request:
+          type: boolean
+          const: false
+          description: 'Present on repair responses: correct the selection or inputs before retrying.'
+        next_step:
+          type: object
+          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
+          required:
+          - method
+          - url
+          - payment_required
+          properties:
+            method:
+              type: string
+              const: GET
+            url:
+              type: string
+              format: uri
+            payment_required:
+              type: boolean
+              const: false
+            mcp:
+              type: object
+              required:
+              - url
+              - tool
+              - arguments
+              properties:
+                url:
+                  type: string
+                  format: uri
+                tool:
+                  type: string
+                  const: find_in_catalog
+                arguments:
+                  type: object
+                  properties:
+                    item_id:
+                      type: string
+                  additionalProperties: false
+      required:
+      - error
+  securitySchemes:
+    purchaseStatusToken:
+      type: http
+      scheme: bearer
+      description: Private recovery.status_token returned by a catalogue purchase. This capability reads only its original purchase status.
+externalDocs:
+  url: https://scvd.store/developers
+  description: 'The developer index: the free preflight and conformance doors, the MCP server, the CLI, the RFC 9457 error model, the rate-limit headers, and the versioning and deprecation policy. The full agent briefing is at /llms.txt.'
+x-agentcash-provenance:
+  ownershipProofs:
+  - '0xd0716b334368fed445d000f12c7e586a6c86e13bd543333bab6c04695df236320c5dbfa4f0beb6807cc486c0ed4fd5a38892a8148d5aa80377db9f35ed4c4b151c'
+  - 4HduymBCHhwyLgtMyXRpDX3JHQR3oyqTSytsXqCamzCc4ed9fJeBSpDUDSLwfZ59mZaw9ggdMNURPNBi4P6BRU47
+x-scvd-ucp:
+  profile: https://scvd.store/.well-known/ucp
+  checkout: advertised
+x-scvd-native-checkout:
+  mcp:
+    protocol: mpp
+    payment_method: evm
+    intent: charge
+    transport: mcp
+    method: tools/call
+    path: /mcp
+    challenge_key: org.paymentauth/payment-required
+    challenge_location: error.data, or result._meta with ?payment=tool-result
+    credential_meta_key: org.paymentauth/credential
+    receipt_meta_key: org.paymentauth/receipt
+    idempotency_meta_key: x402/idempotency-key
+    terms: 'each item''s payment_capabilities row with transport http: same network, asset and amount_atomic'
+  webmcp:
+    protocol: mpp
+    payment_method: evm
+    intent: charge
+    transport: webmcp
+    script: /webmcp.js
+    quote_tool: quote_store_purchase
+    challenge_field: payment_challenge
+    complete_tool: complete_store_purchase
+    credential_argument: signed_credential
+    receipt_field: payment_receipt
+    terms: 'each item''s payment_capabilities row with transport http: same network, asset and amount_atomic'
+x-rate-limiting:
+  application_level_limit: true
+  limited_paths:
+  - /api/preflight/v1
+  - /api/preflight/v2
+  - /api/before-you-pay/v1
+  - /api/look/v1
+  - /api/preflight/batch
+  headers_returned:
+  - RateLimit-Limit
+  - RateLimit-Remaining
+  - RateLimit-Reset
+  - RateLimit-Policy
+  - RateLimit
+  note: 'The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+  policy_url: https://scvd.store/developers
+x-versioning:
+  scheme: url-path
+  note: 'Breaking changes arrive as a new version in the path (/api/preflight/v1 → /v2). A published version''s SHAPE never changes under a client: fields are added, never removed or retyped.'
+  deprecation: A version being retired serves the RFC 8594 Deprecation and Sunset headers on every response for at least 90 days before it stops answering, and the date is published at /developers before the headers appear.
+  sunset_headers:
+  - Deprecation
+  - Sunset
+  - Link; rel="successor-version"
+  policy_url: https://scvd.store/deprecation
+  currently_deprecated: []
+  versions:
+  - path: /api/preflight/v1
+    status: supported
+    since: '2026-08-03'
+    sunset: null
+    successor: /api/preflight/v2
+  - path: /api/preflight/v2
+    status: current
+    since: '2026-08-23'
+    sunset: null
+    successor: null
+  - path: /api/look/v1
+    status: current
+    since: '2026-09-02'
+    sunset: null
+    successor: null
+  - path: /api/conformance/v1
+    status: current
+    since: '2026-08-03'
+    sunset: null
+    successor: null

@@ -1,0 +1,1122 @@
+openapi: 3.2.0
+info:
+  title: SCVD General Store .well Known API
+  version: 0.3.0
+  description: 'scvd.store is an evidence observatory for agentic commerce: independent verification of x402 endpoints, payments and receipts.'
+  contact:
+    url: https://scvd.store
+    email: sean@recordcreativeco.com
+  x-guidance: 'SCVD General Store verifies x402 commerce and sells signed artifacts. Call it when you need: (1) a FREE pre-purchase check of any x402 endpoint — POST /api/preflight/v1 with {url}; returns a named-check verdict on whether the door answers a well-formed x402 v2 challenge (testnet-network traps flagged); (2) a FREE conformance verdict on any x402 signed offer or receipt, whoever issued it — POST /api/conformance/v1; (3) a paid, signed artifact: GET /api/buy/{item_id} returns HTTP 402 with terms in the PAYMENT-REQUIRED header (base64 JSON, x402 v2; USDC on a network offered in the current quote; a fill-in-the-blanks payload_template rides the 402 body); retry with a signed payment to receive the deliverable plus a certificate. Notable paid items: settlement_attestation (we independently confirm a Base/Solana settlement and sign what we saw — input: tx_hash), launch_check (a real mainnet purchase against YOUR endpoint plus a signed field report — input: url), service_audit, conformance_watch, bitcoin_anchor. Inputs are query parameters, declared per item in /menu.json; outputs are JSON with a certificate id. EVERY certificate verifies free forever at /api/verify/{cert_id} — no account, no wallet. Starting prices run $0.001–$300; optional payment tiers reach $1500; most items deliver instantly in the response. Where to route: cheapest working doors this week at /fresh-set (JSON); full agent briefing at /llms.txt. Before you start: free instruments need only plain HTTPS (no account, key or SDK); a purchase needs an x402 v2 client and a wallet holding USDC on Base (eip155:8453), Polygon (eip155:137), Arbitrum (eip155:42161), World (eip155:480), Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), paid only on a network the 402 offers; the stock client refuses payments above $1 by default and 14 of 35 priced doors sit above it; optional tooling (scvd-tab, the MCP stdio bridge, the scvd CLI) is listed at https://scvd.store/agents.md and none of it is required.'
+servers:
+- url: https://scvd.store
+tags:
+- name: .well Known
+paths:
+  /.well-known/oauth-protected-resource:
+    get:
+      summary: Protected-resource metadata (RFC 9728)
+      description: 'What gates this resource, at the fixed path a client constructs without being told. `authorization_servers` is absent rather than empty: there is no OAuth issuer here, the field is optional, and naming one that does not exist would be a false claim in machine form. Carries an `agent_auth` block and the x402 particulars. Every 402 from this store points here in its WWW-Authenticate header.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - resource
+                - resource_documentation
+                - bearer_methods_supported
+                properties:
+                  resource:
+                    type: string
+                    format: uri
+                  resource_name:
+                    type: string
+                  resource_documentation:
+                    type: string
+                    format: uri
+                  resource_policy_uri:
+                    type: string
+                    format: uri
+                  resource_tos_uri:
+                    type: string
+                    format: uri
+                  bearer_methods_supported:
+                    type: array
+                    items:
+                      type: string
+                    description: 'Empty, and that is the answer: this store issues no bearer tokens, so it supports no way of presenting one. `authorization_servers` is absent entirely for the same reason — there is no OAuth issuer, the field is optional, and naming one that does not exist would be a false claim in machine form.'
+                  scopes_supported:
+                    type: array
+                    items:
+                      type: string
+                  x402:
+                    type: object
+                    description: What actually gates the paid doors.
+                    properties:
+                      supported:
+                        type: boolean
+                      version:
+                        type: integer
+                      request_header:
+                        type: string
+                      challenge_header:
+                        type: string
+                      discovery:
+                        type: string
+                        format: uri
+                  agent_auth:
+                    type: object
+                    description: The WorkOS auth.md block. register_uri, claim_uri and revocation_uri are null because no credential is ever issued here.
+                    properties:
+                      summary:
+                        type: string
+                      skill:
+                        type: string
+                        format: uri
+                      identity_types_supported:
+                        type: array
+                        items:
+                          type: string
+                          enum:
+                          - anonymous
+                      anonymous:
+                        type: object
+                        properties:
+                          credential_types_supported:
+                            type: array
+                            items:
+                              type: string
+                      register_uri:
+                        type: string
+                        nullable: true
+                      claim_uri:
+                        type: string
+                        nullable: true
+                      revocation_uri:
+                        type: string
+                        nullable: true
+                      why_no_endpoints:
+                        type: string
+                      documentation_url:
+                        type: string
+                        format: uri
+                      protected_resource_metadata:
+                        type: string
+                        format: uri
+                      contact:
+                        type: string
+                        format: uri
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_oauth_protected_resource
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - .well Known
+  /.well-known/api-catalog:
+    get:
+      summary: The API catalog (RFC 9727)
+      description: 'Every API surface this origin serves, as an RFC 9264 linkset: the HTTP API, the MCP server, each versioned free instrument with its lifecycle, and the CLI — each with its service-desc (the OpenAPI contract), service-doc, service-meta and status links. Served as application/linkset+json. Free.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - linkset
+                properties:
+                  linkset:
+                    type: array
+                    items:
+                      type: object
+                    description: One anchor per developer resource, each with its link relations, per RFC 9727.
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_api_catalog
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      x-collection:
+        bound: bounded
+        reason: The set of APIs this origin serves. Finite by construction and derived from the lifecycle rows, so it changes when an API does and never grows on its own.
+        bounded_by: the APIs this origin actually serves
+      tags:
+      - .well Known
+  /.well-known/ard.json:
+    get:
+      summary: Agentic Resource Discovery manifest
+      description: 'Every agentic resource this origin publishes, as ARD entries: the MCP server, the A2A agent card, the HTTP API and the store''s two skills, each with its IANA media type, its URL, the representative queries a registry indexes it by, and a trust manifest naming this store''s did:web. A DIFFERENT document from /.well-known/api-catalog, which is RFC 9727 and answers where the API is documented; this one answers what agentic resources exist here. Free.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - specVersion
+                - host
+                - entries
+                additionalProperties: false
+                properties:
+                  specVersion:
+                    type: string
+                    description: The catalog envelope version; distinct from the ARD proposal revision.
+                  host:
+                    type: object
+                    required:
+                    - displayName
+                    - identifier
+                    properties:
+                      displayName:
+                        type: string
+                      identifier:
+                        type: string
+                        description: The publisher's did:web identity.
+                      trustManifest:
+                        type: object
+                        description: Publisher identity and trust evidence; verification procedure at its governanceUri.
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                    description: The store's published resources, with per-entry timestamps and identity.
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_ard_json
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      x-collection:
+        bound: bounded
+        reason: 'The agentic resources this origin publishes: the MCP server, the A2A card, the HTTP API and the skills. Finite by construction, same as the API catalog.'
+        bounded_by: the agentic resources this origin publishes
+      tags:
+      - .well Known
+  /.well-known/ai-catalog.json:
+    get:
+      summary: ARD manifest (predecessor path)
+      description: Byte-for-byte the same document as /.well-known/ard.json. ARD §5.1 makes ard.json the path a consumer MUST fetch and names this one its predecessor, which a consumer MAY additionally consult; it is served because a scanner that knows only the old path and gets a 404 cannot tell this origin from one publishing nothing. The Link header on both paths points at ard.json, which is the canonical one.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - specVersion
+                - host
+                - entries
+                additionalProperties: false
+                properties:
+                  specVersion:
+                    type: string
+                    description: The catalog envelope version; distinct from the ARD proposal revision.
+                  host:
+                    type: object
+                    required:
+                    - displayName
+                    - identifier
+                    properties:
+                      displayName:
+                        type: string
+                      identifier:
+                        type: string
+                        description: The publisher's did:web identity.
+                      trustManifest:
+                        type: object
+                        description: Publisher identity and trust evidence; verification procedure at its governanceUri.
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                    description: The store's published resources, with per-entry timestamps and identity.
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_ai_catalog_json
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - .well Known
+  /.well-known/mcp.json:
+    get:
+      summary: The MCP server manifest (.json alias)
+      description: Byte-for-byte the same document as /.well-known/mcp. Two paths because a scanner either knows a fixed path or knows nothing, and a 404 at the one it guessed is indistinguishable from having no MCP server at all. Like its sibling, a POST here completes an MCP handshake against the same server behind /mcp.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - name
+                - version
+                - endpoint
+                - transport
+                - protocol_versions
+                properties:
+                  $schema:
+                    type: string
+                    description: The SEP-2127 schema URI. The draft's own URI does not resolve yet; it is published as the identifier the spec names, not as a fetchable document.
+                  name:
+                    type: string
+                  title:
+                    type: string
+                  version:
+                    type: string
+                    description: Derived from the server's one version constant.
+                  icons:
+                    type: array
+                    items:
+                      type: object
+                  description:
+                    type: string
+                  endpoint:
+                    type: string
+                    format: uri
+                  url:
+                    type: string
+                    format: uri
+                  transport:
+                    type: string
+                    description: Streamable HTTP.
+                  methods:
+                    type: array
+                    items:
+                      type: string
+                  protocol_versions:
+                    type: array
+                    items:
+                      type: string
+                  authentication:
+                    type: object
+                    description: 'There is nothing to issue: free tools are open and paid ones take a signed x402 payment per call.'
+                  handshake:
+                    type: object
+                  free_methods:
+                    type: array
+                    items:
+                      type: string
+                    description: The methods that never cost anything — tools/list among them, so a client can look before it pays.
+                  capabilities:
+                    type: object
+                  resources:
+                    type: array
+                    items:
+                      type: object
+                  documentation:
+                    type: string
+                    format: uri
+                  openapi:
+                    type: string
+                    format: uri
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_mcp_json
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - .well Known
+  /.well-known/http-message-signatures-directory:
+    get:
+      summary: This store's own Web Bot Auth key directory
+      description: The ed25519 key the store signs its outbound probes with, as a JWK Set with the directory draft's proof-of-possession signature over its own authority. Answers 404 rather than an empty key set when no egress key is configured — those are different statements.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - keys
+                properties:
+                  keys:
+                    type: array
+                    description: JWK entries for the key this store signs its outbound census requests with.
+                    items:
+                      type: object
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_http_message_signatures_directory
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - .well Known
+  /.well-known/x402:
+    get:
+      summary: x402 discovery (minimal)
+      description: The de-facto indexer entry point. Serves the same structured, priced resources as the full catalog — one builder renders both.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - name
+                - description
+                - resources
+                properties:
+                  version:
+                    type: integer
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                  network:
+                    type: string
+                    description: The single-rail field, kept for readers that learned it before the second rail existed.
+                  networks:
+                    type: array
+                    items:
+                      type: string
+                    description: Every rail a 402 from this store offers. The truth since the second rail shipped.
+                  resources:
+                    type: array
+                    description: Every paid door, with its price and terms.
+                    items:
+                      type: object
+                  when_to_use:
+                    type: object
+                  openapi:
+                    type: string
+                    format: uri
+                  catalog:
+                    type: string
+                    format: uri
+                  stats:
+                    type: string
+                    format: uri
+                  practice_counter:
+                    type: string
+                    format: uri
+                  listing_spec_schema:
+                    type: string
+                    format: uri
+                  signing_key:
+                    type: string
+                    format: uri
+                  attestation:
+                    type: string
+                    format: uri
+                  rights:
+                    type: string
+                    format: uri
+                  trust:
+                    type: string
+                    format: uri
+                  did:
+                    type: string
+                    format: uri
+                  liveness:
+                    type: string
+                    format: uri
+                  anchor_log:
+                    type: string
+                    format: uri
+                  a2a:
+                    type: string
+                    format: uri
+                  conformance:
+                    type: string
+                    format: uri
+                  conformance_landing:
+                    type: string
+                    format: uri
+                  corpus:
+                    type: string
+                    format: uri
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_x402
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - .well Known
+  /.well-known/x402.json:
+    get:
+      summary: x402 discovery (full)
+      description: The richer origin-hosted catalog of payable resources.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - name
+                - description
+                - resources
+                properties:
+                  version:
+                    type: integer
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                  network:
+                    type: string
+                    description: The single-rail field, kept for readers that learned it before the second rail existed.
+                  networks:
+                    type: array
+                    items:
+                      type: string
+                    description: Every rail a 402 from this store offers. The truth since the second rail shipped.
+                  resources:
+                    type: array
+                    description: Every paid door, with its price and terms.
+                    items:
+                      type: object
+                  when_to_use:
+                    type: object
+                  openapi:
+                    type: string
+                    format: uri
+                  catalog:
+                    type: string
+                    format: uri
+                  stats:
+                    type: string
+                    format: uri
+                  practice_counter:
+                    type: string
+                    format: uri
+                  listing_spec_schema:
+                    type: string
+                    format: uri
+                  signing_key:
+                    type: string
+                    format: uri
+                  attestation:
+                    type: string
+                    format: uri
+                  rights:
+                    type: string
+                    format: uri
+                  trust:
+                    type: string
+                    format: uri
+                  did:
+                    type: string
+                    format: uri
+                  liveness:
+                    type: string
+                    format: uri
+                  anchor_log:
+                    type: string
+                    format: uri
+                  a2a:
+                    type: string
+                    format: uri
+                  conformance:
+                    type: string
+                    format: uri
+                  conformance_landing:
+                    type: string
+                    format: uri
+                  corpus:
+                    type: string
+                    format: uri
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_x402_json
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - .well Known
+  /.well-known/mcp:
+    get:
+      summary: Where the MCP server is
+      description: 'A pointer, not a second transport: the endpoint (POST /mcp, streamable HTTP), the protocol versions it negotiates, the methods that answer without payment, the capabilities actually served, the readable resources on the shelf, and the exact initialize body that completes a handshake. Also served at /.well-known/mcp.json, because half of what probes a well-known path appends the extension. A POST here completes the handshake too, against the same server /mcp answers from — scanners POST their initialize at the manifest path, and a 405 they never read the body of reads to them as no MCP server at all. /mcp remains the canonical endpoint and the one this document names.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - name
+                - version
+                - endpoint
+                - transport
+                - protocol_versions
+                properties:
+                  $schema:
+                    type: string
+                    description: The SEP-2127 schema URI. The draft's own URI does not resolve yet; it is published as the identifier the spec names, not as a fetchable document.
+                  name:
+                    type: string
+                  title:
+                    type: string
+                  version:
+                    type: string
+                    description: Derived from the server's one version constant.
+                  icons:
+                    type: array
+                    items:
+                      type: object
+                  description:
+                    type: string
+                  endpoint:
+                    type: string
+                    format: uri
+                  url:
+                    type: string
+                    format: uri
+                  transport:
+                    type: string
+                    description: Streamable HTTP.
+                  methods:
+                    type: array
+                    items:
+                      type: string
+                  protocol_versions:
+                    type: array
+                    items:
+                      type: string
+                  authentication:
+                    type: object
+                    description: 'There is nothing to issue: free tools are open and paid ones take a signed x402 payment per call.'
+                  handshake:
+                    type: object
+                  free_methods:
+                    type: array
+                    items:
+                      type: string
+                    description: The methods that never cost anything — tools/list among them, so a client can look before it pays.
+                  capabilities:
+                    type: object
+                  resources:
+                    type: array
+                    items:
+                      type: object
+                  documentation:
+                    type: string
+                    format: uri
+                  openapi:
+                    type: string
+                    format: uri
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_mcp
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - .well Known
+  /.well-known/agent-instructions:
+    get:
+      summary: When to reach for this store
+      description: 'The situations this store is the right call for, each with the items that answer it and the exact request to make — plus the half nobody publishes: when you do not need us. Derived from the same list /llms.txt renders, so the two cannot disagree.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - name
+                - what_this_is
+                - when_to_use
+                - how_to_call
+                properties:
+                  name:
+                    type: string
+                  what_this_is:
+                    type: string
+                  when_to_use:
+                    type: array
+                    description: One entry per situation, with the items that answer it and a worked request.
+                    items:
+                      type: object
+                      properties:
+                        situation:
+                          type: string
+                        items:
+                          type: array
+                          items:
+                            type: string
+                        example_request:
+                          type: string
+                  when_not_to_use:
+                    type: string
+                    description: Named rather than left to be discovered, because the cheapest call is the one nobody had to make.
+                  how_to_call:
+                    type: object
+                    properties:
+                      free:
+                        type: string
+                      paid:
+                        type: string
+                      rails:
+                        type: array
+                        items:
+                          type: string
+                  full_briefing:
+                    type: string
+                    format: uri
+                  transaction_manual:
+                    type: string
+                    format: uri
+                  documentation:
+                    type: string
+                    format: uri
+                  contract:
+                    type: string
+                    format: uri
+                  catalog:
+                    type: string
+                    format: uri
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_agent_instructions
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - .well Known
+  /.well-known/scvd-signing-key:
+    get:
+      summary: The store's public key
+      description: ed25519, hex. Anything we sign, this key verifies.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - algorithm
+                - encoding
+                - public_key
+                properties:
+                  algorithm:
+                    type: string
+                  encoding:
+                    type: string
+                  public_key:
+                    type: string
+                  note:
+                    type: string
+                  identity_policy:
+                    type: string
+                  sample_artifact_id:
+                    type: string
+                  sample_verify_url:
+                    type: string
+                    format: uri
+                    description: A real artifact to check the key against, so the document is testable rather than assertable.
+                  did:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      document:
+                        type: string
+                        format: uri
+                      note:
+                        type: string
+                  key_history:
+                    type: object
+                    properties:
+                      current:
+                        type: object
+                      retired:
+                        type: array
+                        items:
+                          type: object
+                      rotations_performed:
+                        type: integer
+                  continuity:
+                    type: object
+                    description: Whether this key has ever changed, whether a successor exists, and where the externally anchored history lives. It proves WHEN a key state was committed, never WHO SHOULD HAVE held it.
+                    properties:
+                      key_count:
+                        type: integer
+                      rotations_performed:
+                        type: integer
+                      successor_key_exists:
+                        type: boolean
+                      if_this_key_ever_changes:
+                        type: string
+                      externally_anchored_history:
+                        type: string
+                      full_policy:
+                        type: string
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_well_known_scvd_signing_key
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - .well Known
+components:
+  responses:
+    NotModified:
+      description: 'Not Modified: the ETag you sent still names these exact bytes. No body; every other header is as the 200 would carry it.'
+    BadRequest:
+      description: The request was malformed or a required parameter was missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    TooManyRequests:
+      description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying.
+    ServerError:
+      description: Something fell off a shelf. Nothing was charged.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Problem:
+      type: object
+      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
+        title:
+          type: string
+          description: A short, stable summary of the problem class.
+        status:
+          type: integer
+          description: The HTTP status code, repeated in the body.
+        detail:
+          type: string
+          description: What went wrong with THIS request, in plain language.
+        instance:
+          type: string
+          format: uri
+          description: The request path.
+        error:
+          type: string
+          description: The store's human-readable message. Always present, including on responses that predate the typed model.
+        retry_same_request:
+          type: boolean
+          const: false
+          description: 'Present on repair responses: correct the selection or inputs before retrying.'
+        next_step:
+          type: object
+          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
+          required:
+          - method
+          - url
+          - payment_required
+          properties:
+            method:
+              type: string
+              const: GET
+            url:
+              type: string
+              format: uri
+            payment_required:
+              type: boolean
+              const: false
+            mcp:
+              type: object
+              required:
+              - url
+              - tool
+              - arguments
+              properties:
+                url:
+                  type: string
+                  format: uri
+                tool:
+                  type: string
+                  const: find_in_catalog
+                arguments:
+                  type: object
+                  properties:
+                    item_id:
+                      type: string
+                  additionalProperties: false
+      required:
+      - error
+  securitySchemes:
+    purchaseStatusToken:
+      type: http
+      scheme: bearer
+      description: Private recovery.status_token returned by a catalogue purchase. This capability reads only its original purchase status.
+externalDocs:
+  url: https://scvd.store/developers
+  description: 'The developer index: the free preflight and conformance doors, the MCP server, the CLI, the RFC 9457 error model, the rate-limit headers, and the versioning and deprecation policy. The full agent briefing is at /llms.txt.'
+x-agentcash-provenance:
+  ownershipProofs:
+  - '0xd0716b334368fed445d000f12c7e586a6c86e13bd543333bab6c04695df236320c5dbfa4f0beb6807cc486c0ed4fd5a38892a8148d5aa80377db9f35ed4c4b151c'
+  - 4HduymBCHhwyLgtMyXRpDX3JHQR3oyqTSytsXqCamzCc4ed9fJeBSpDUDSLwfZ59mZaw9ggdMNURPNBi4P6BRU47
+x-scvd-ucp:
+  profile: https://scvd.store/.well-known/ucp
+  checkout: advertised
+x-scvd-native-checkout:
+  mcp:
+    protocol: mpp
+    payment_method: evm
+    intent: charge
+    transport: mcp
+    method: tools/call
+    path: /mcp
+    challenge_key: org.paymentauth/payment-required
+    challenge_location: error.data, or result._meta with ?payment=tool-result
+    credential_meta_key: org.paymentauth/credential
+    receipt_meta_key: org.paymentauth/receipt
+    idempotency_meta_key: x402/idempotency-key
+    terms: 'each item''s payment_capabilities row with transport http: same network, asset and amount_atomic'
+  webmcp:
+    protocol: mpp
+    payment_method: evm
+    intent: charge
+    transport: webmcp
+    script: /webmcp.js
+    quote_tool: quote_store_purchase
+    challenge_field: payment_challenge
+    complete_tool: complete_store_purchase
+    credential_argument: signed_credential
+    receipt_field: payment_receipt
+    terms: 'each item''s payment_capabilities row with transport http: same network, asset and amount_atomic'
+x-rate-limiting:
+  application_level_limit: true
+  limited_paths:
+  - /api/preflight/v1
+  - /api/preflight/v2
+  - /api/before-you-pay/v1
+  - /api/look/v1
+  - /api/preflight/batch
+  headers_returned:
+  - RateLimit-Limit
+  - RateLimit-Remaining
+  - RateLimit-Reset
+  - RateLimit-Policy
+  - RateLimit
+  note: 'The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+  policy_url: https://scvd.store/developers
+x-versioning:
+  scheme: url-path
+  note: 'Breaking changes arrive as a new version in the path (/api/preflight/v1 → /v2). A published version''s SHAPE never changes under a client: fields are added, never removed or retyped.'
+  deprecation: A version being retired serves the RFC 8594 Deprecation and Sunset headers on every response for at least 90 days before it stops answering, and the date is published at /developers before the headers appear.
+  sunset_headers:
+  - Deprecation
+  - Sunset
+  - Link; rel="successor-version"
+  policy_url: https://scvd.store/deprecation
+  currently_deprecated: []
+  versions:
+  - path: /api/preflight/v1
+    status: supported
+    since: '2026-08-03'
+    sunset: null
+    successor: /api/preflight/v2
+  - path: /api/preflight/v2
+    status: current
+    since: '2026-08-23'
+    sunset: null
+    successor: null
+  - path: /api/look/v1
+    status: current
+    since: '2026-09-02'
+    sunset: null
+    successor: null
+  - path: /api/conformance/v1
+    status: current
+    since: '2026-08-03'
+    sunset: null
+    successor: null

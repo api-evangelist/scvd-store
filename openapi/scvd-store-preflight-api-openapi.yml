@@ -1,0 +1,1137 @@
+openapi: 3.2.0
+info:
+  title: SCVD General Store Preflight API
+  version: 0.3.0
+  description: 'scvd.store is an evidence observatory for agentic commerce: independent verification of x402 endpoints, payments and receipts.'
+  contact:
+    url: https://scvd.store
+    email: sean@recordcreativeco.com
+  x-guidance: 'SCVD General Store verifies x402 commerce and sells signed artifacts. Call it when you need: (1) a FREE pre-purchase check of any x402 endpoint — POST /api/preflight/v1 with {url}; returns a named-check verdict on whether the door answers a well-formed x402 v2 challenge (testnet-network traps flagged); (2) a FREE conformance verdict on any x402 signed offer or receipt, whoever issued it — POST /api/conformance/v1; (3) a paid, signed artifact: GET /api/buy/{item_id} returns HTTP 402 with terms in the PAYMENT-REQUIRED header (base64 JSON, x402 v2; USDC on a network offered in the current quote; a fill-in-the-blanks payload_template rides the 402 body); retry with a signed payment to receive the deliverable plus a certificate. Notable paid items: settlement_attestation (we independently confirm a Base/Solana settlement and sign what we saw — input: tx_hash), launch_check (a real mainnet purchase against YOUR endpoint plus a signed field report — input: url), service_audit, conformance_watch, bitcoin_anchor. Inputs are query parameters, declared per item in /menu.json; outputs are JSON with a certificate id. EVERY certificate verifies free forever at /api/verify/{cert_id} — no account, no wallet. Starting prices run $0.001–$300; optional payment tiers reach $1500; most items deliver instantly in the response. Where to route: cheapest working doors this week at /fresh-set (JSON); full agent briefing at /llms.txt. Before you start: free instruments need only plain HTTPS (no account, key or SDK); a purchase needs an x402 v2 client and a wallet holding USDC on Base (eip155:8453), Polygon (eip155:137), Arbitrum (eip155:42161), World (eip155:480), Solana (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), paid only on a network the 402 offers; the stock client refuses payments above $1 by default and 14 of 35 priced doors sit above it; optional tooling (scvd-tab, the MCP stdio bridge, the scvd CLI) is listed at https://scvd.store/agents.md and none of it is required.'
+servers:
+- url: https://scvd.store
+tags:
+- name: Preflight
+paths:
+  /api/preflight/batch:
+    post:
+      summary: Preflight several x402 doors in one call
+      description: 'The same probe as /api/preflight, run over up to 10 URLs, sequentially, each metered as its own probe — batching saves you connections, not outbound requests. Each entry carries the status its own probe returned, so a bad URL beside a good one does not fail the call. A batch over the ceiling is refused whole rather than truncated: a report on doors nobody looked at is the exact defect this instrument exists to catch. Free.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - battery
+                - count
+                - results
+                properties:
+                  battery:
+                    type: string
+                  count:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - url
+                      - status
+                      - result
+                      properties:
+                        url:
+                          type: string
+                          nullable: true
+                        status:
+                          type: integer
+                          description: The status this entry's own probe returned.
+                        result:
+                          allOf:
+                          - $ref: '#/components/schemas/PreflightVerdict'
+                          description: The same verdict body a single-URL probe returns.
+                  not_a_discount:
+                    type: string
+                    description: Says plainly that each entry was metered as its own probe, so a caller learns it here rather than from a 429 halfway down their list.
+                  one_moment_each:
+                    type: string
+                  single_door:
+                    type: string
+                    format: uri
+                  defect_vocabulary:
+                    type: string
+                    format: uri
+          headers:
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            RateLimit-Policy:
+              $ref: '#/components/headers/RateLimit-Policy'
+            RateLimit:
+              $ref: '#/components/headers/RateLimit'
+        '400':
+          description: The request was malformed or a required parameter was missing.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: No such resource. The body names where to look instead.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsMetered'
+        '500':
+          description: Something fell off a shelf. Nothing was charged.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      requestBody:
+        required: true
+        description: The x402 doors to walk, at most 10.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - urls
+              additionalProperties: false
+              properties:
+                urls:
+                  type: array
+                  minItems: 1
+                  maxItems: 10
+                  items:
+                    type: string
+                    format: uri
+                    description: An https URL on a public host, same rules as the single-URL door.
+      operationId: post_api_preflight_batch
+      tags:
+      - Preflight
+  /api/preflight/checks:
+    get:
+      summary: The battery manifest
+      description: Stable check IDs, what each battery folds into its verdict, the dated changelog, and a ruleset digest recomputable from the document alone. Derived from the same registries the battery runs, so criteria and verdicts cannot disagree. Free.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - core_checks
+                - conditional_checks
+                - verdict_fold_checks
+                - advisories
+                - batteries
+                - ruleset_digest
+                - ruleset_digest_covers
+                - how_to_recompute
+                properties:
+                  core_checks:
+                    type: array
+                    items:
+                      type: string
+                    description: Check IDs every battery runs against every door.
+                  conditional_checks:
+                    type: array
+                    items:
+                      type: string
+                    description: Check IDs that only apply when the door's shape invites them.
+                  verdict_fold_checks:
+                    type: array
+                    items:
+                      type: string
+                    description: The subset whose failure changes the verdict rather than riding as an advisory.
+                  advisories:
+                    type: array
+                    items:
+                      type: string
+                    description: Checks reported beside the verdict and never folded into it.
+                  batteries:
+                    type: object
+                    description: Each published battery version and what it folds, so a dated verdict stays readable after the next one ships.
+                  changelog:
+                    type: array
+                    items:
+                      type: object
+                    description: Dated ruleset changes, newest first.
+                  ruleset_digest:
+                    type: string
+                    description: SHA-256 over the covered fields, recomputable from this document alone.
+                  ruleset_digest_covers:
+                    type: string
+                    description: Exactly which fields the digest is taken over.
+                  how_to_recompute:
+                    type: string
+                    description: The recipe for checking the digest without asking us.
+                  note:
+                    type: string
+                    description: What this manifest does not claim.
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_api_preflight_checks
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - Preflight
+  /api/preflight/v1:
+    get:
+      summary: The preflight criteria, v1
+      description: Every check this battery runs and what falsifies each one, as JSON — the published criteria a v1 verdict cites. Free.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - title
+                - version
+                - summary
+                - method
+                - url
+                - what_it_checks
+                - what_it_cannot_check
+                - the_ladder
+                properties:
+                  title:
+                    type: string
+                  version:
+                    type: string
+                  summary:
+                    type: string
+                  method:
+                    type: string
+                    description: The verb that runs it.
+                  url:
+                    type: string
+                    format: uri
+                  request:
+                    type: object
+                    description: The body shape, stated where a caller is already looking.
+                  rate_limit:
+                    type: string
+                    description: What is metered and what is not, in words — the RateLimit headers say it again on every answer.
+                  what_it_checks:
+                    type: array
+                    items:
+                      type: string
+                    description: Every named check, so a verdict can be read against them.
+                  batteries:
+                    type: object
+                    description: Every published battery and what each folds into its verdict, so a dated verdict stays readable after the next battery ships.
+                  common_failures_this_catches:
+                    type: object
+                  what_it_cannot_check:
+                    type: array
+                    items:
+                      type: string
+                    description: The limits, published beside the criteria. One probe is one moment; this list is what that buys and what it does not.
+                  the_ladder:
+                    type: object
+                    description: The assurance rungs, including the ones this instrument never climbs.
+                  try_it_against_a_live_endpoint:
+                    type: string
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_api_preflight_v1
+      parameters:
+      - name: Accept
+        in: header
+        required: false
+        schema:
+          type: string
+          enum:
+          - application/json
+          - text/markdown
+        description: 'This door negotiates: application/json, text/markdown, parsed with q-values (RFC 9110 §12.5.1). A bare wildcard or no header gets application/json; a named AI reader that states no preference gets markdown where it is offered. The answer carries Vary.'
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - Preflight
+    post:
+      summary: Check an x402 endpoint's payment challenge shape (v1)
+      description: 'One probe, one moment: 402 status, parseable PAYMENT-REQUIRED header, signable accepts, testnet networks flagged. A shape check, never an uptime claim. Free, and metered — the RFC RateLimit fields ride every answer. Reports the Solana rail read as an advisory rather than folding it into the verdict, so a verdict recorded today means what one recorded in week 34 meant.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreflightVerdict'
+          headers:
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            RateLimit-Policy:
+              $ref: '#/components/headers/RateLimit-Policy'
+            RateLimit:
+              $ref: '#/components/headers/RateLimit'
+        '400':
+          description: The request was malformed or a required parameter was missing.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: No such resource. The body names where to look instead.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsMetered'
+        '500':
+          description: Something fell off a shelf. Nothing was charged.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      requestBody:
+        required: true
+        description: The x402 door to walk.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - url
+              additionalProperties: false
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: An https URL on a public host. Private, loopback, link-local and reserved-internal targets are refused, and so is this store's own hostname (a Worker cannot fetch itself).
+      operationId: post_api_preflight_v1
+      tags:
+      - Preflight
+  /api/preflight/v2:
+    get:
+      summary: The preflight criteria, v2
+      description: Every check this battery runs and what falsifies each one, as JSON — the published criteria a v2 verdict cites. Free.
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - title
+                - version
+                - summary
+                - method
+                - url
+                - what_it_checks
+                - what_it_cannot_check
+                - the_ladder
+                properties:
+                  title:
+                    type: string
+                  version:
+                    type: string
+                  summary:
+                    type: string
+                  method:
+                    type: string
+                    description: The verb that runs it.
+                  url:
+                    type: string
+                    format: uri
+                  request:
+                    type: object
+                    description: The body shape, stated where a caller is already looking.
+                  rate_limit:
+                    type: string
+                    description: What is metered and what is not, in words — the RateLimit headers say it again on every answer.
+                  what_it_checks:
+                    type: array
+                    items:
+                      type: string
+                    description: Every named check, so a verdict can be read against them.
+                  batteries:
+                    type: object
+                    description: Every published battery and what each folds into its verdict, so a dated verdict stays readable after the next battery ships.
+                  common_failures_this_catches:
+                    type: object
+                  what_it_cannot_check:
+                    type: array
+                    items:
+                      type: string
+                    description: The limits, published beside the criteria. One probe is one moment; this list is what that buys and what it does not.
+                  the_ladder:
+                    type: object
+                    description: The assurance rungs, including the ones this instrument never climbs.
+                  try_it_against_a_live_endpoint:
+                    type: string
+        '304':
+          $ref: '#/components/responses/NotModified'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      operationId: get_api_preflight_v2
+      parameters:
+      - name: Accept
+        in: header
+        required: false
+        schema:
+          type: string
+          enum:
+          - application/json
+          - text/markdown
+        description: 'This door negotiates: application/json, text/markdown, parsed with q-values (RFC 9110 §12.5.1). A bare wildcard or no header gets application/json; a named AI reader that states no preference gets markdown where it is offered. The answer carries Vary.'
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+        description: Conditional GET. Send the ETag a previous answer carried (a SHA-256 of the exact bytes served, not a version somebody maintains) and an unchanged document answers 304 with no body. Send it on a schedule instead of re-downloading what you already hold.
+      tags:
+      - Preflight
+    post:
+      summary: Check an x402 endpoint's payment challenge shape (v2)
+      description: 'One probe, one moment: 402 status, parseable PAYMENT-REQUIRED header, signable accepts, testnet networks flagged. A shape check, never an uptime claim. Free, and metered — the RFC RateLimit fields ride every answer. Folds the Solana rail-receivability read into the verdict; call this one from a new integration.'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreflightVerdict'
+          headers:
+            RateLimit-Limit:
+              $ref: '#/components/headers/RateLimit-Limit'
+            RateLimit-Remaining:
+              $ref: '#/components/headers/RateLimit-Remaining'
+            RateLimit-Reset:
+              $ref: '#/components/headers/RateLimit-Reset'
+            RateLimit-Policy:
+              $ref: '#/components/headers/RateLimit-Policy'
+            RateLimit:
+              $ref: '#/components/headers/RateLimit'
+        '400':
+          description: The request was malformed or a required parameter was missing.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '404':
+          description: No such resource. The body names where to look instead.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsMetered'
+        '500':
+          description: Something fell off a shelf. Nothing was charged.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      requestBody:
+        required: true
+        description: The x402 door to walk.
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - url
+              additionalProperties: false
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: An https URL on a public host. Private, loopback, link-local and reserved-internal targets are refused, and so is this store's own hostname (a Worker cannot fetch itself).
+      operationId: post_api_preflight_v2
+      tags:
+      - Preflight
+components:
+  headers:
+    RateLimit-Limit:
+      schema:
+        type: integer
+      description: The binding bucket's ceiling per 60-second window.
+    RateLimit:
+      schema:
+        type: string
+      description: 'Both policies'' live state: "isolate";r=N;t=N, "global";r=N;t=N.'
+    RateLimit-Policy:
+      schema:
+        type: string
+      description: 'Both policies as structured fields: "isolate";q=N;w=60, "global";q=N;w=60.'
+    RateLimit-Reset:
+      schema:
+        type: integer
+      description: Seconds until both buckets roll, at the wall-clock minute.
+    RateLimit-Remaining:
+      schema:
+        type: integer
+      description: What is left in the binding bucket. The global backstop is a read-modify-write on eventually consistent storage, so this can read slightly high — never low.
+  responses:
+    NotModified:
+      description: 'Not Modified: the ETag you sent still names these exact bytes. No body; every other header is as the 200 would carry it.'
+    BadRequest:
+      description: The request was malformed or a required parameter was missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    TooManyRequestsMetered:
+      description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying.
+        RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit-Limit'
+        RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimit-Remaining'
+        RateLimit-Reset:
+          $ref: '#/components/headers/RateLimit-Reset'
+        RateLimit-Policy:
+          $ref: '#/components/headers/RateLimit-Policy'
+        RateLimit:
+          $ref: '#/components/headers/RateLimit'
+    TooManyRequests:
+      description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying.
+    ServerError:
+      description: Something fell off a shelf. Nothing was charged.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    PreflightVerdict:
+      type: object
+      required:
+      - version
+      - verdict
+      - reached_level
+      - checks_vector
+      - checks
+      - advisories
+      - remediation
+      - protocols_spoken
+      - mpp
+      - probe_method
+      - single_probe_note
+      - what_this_cannot_tell_you
+      - our_conflict_of_interest
+      properties:
+        version:
+          type: string
+          description: The battery that scored this probe.
+        verdict:
+          type: string
+          enum:
+          - ready
+          - not_ready
+          - unreachable
+          - method_unresolved
+          description: ready = every structural check passed. not_ready = reachable but failed at least one. unreachable = the probe itself could not complete, which says nothing about their code — the detail says whose side the failure was on. method_unresolved = the door refused every HTTP method this probe sends (405/501), so NO check ran and nothing was observed about the challenge; it is a statement about our reach, never a finding against the endpoint, and it is deliberately not scorable as ready or not_ready.
+        reached_level:
+          type: string
+          enum:
+          - none
+          - L1
+          - L2
+          - L3a
+          description: The rung this probe reached before it stopped.
+        reached_level_meaning:
+          type: string
+        network_failure:
+          type: string
+          enum:
+          - unlocalized
+          description: Present only when reached_level is "none".
+        checks_vector:
+          type: array
+          description: 'The per-check view: a check that never ran is not a check that passed. not_reached means an earlier check failed and blocked_by names it; not_exercised means the door refused every method the probe sends as a method (405/501), so nothing was asked — a wrong verb, never a defect — and refused_methods names them.'
+          items:
+            type: object
+            required:
+            - name
+            - state
+            - detail
+            properties:
+              name:
+                type: string
+              state:
+                type: string
+                enum:
+                - pass
+                - fail
+                - not_reached
+                - not_exercised
+              blocked_by:
+                type: string
+                description: Set only on not_reached.
+              refused_methods:
+                type: array
+                items:
+                  type: string
+                description: 'Set only on not_exercised: every method the door refused, in the order sent.'
+              detail:
+                type: string
+        checks:
+          type: array
+          description: The legacy two-state list, unchanged, for consumers that read the old shape.
+          items:
+            type: object
+            required:
+            - name
+            - ok
+            - detail
+            properties:
+              name:
+                type: string
+              ok:
+                type: boolean
+              detail:
+                type: string
+        advisories:
+          type: array
+          description: True and worth knowing, never folded into the verdict.
+          items:
+            type: object
+            required:
+            - name
+            - detail
+            properties:
+              name:
+                type: string
+              detail:
+                type: string
+        also_under:
+          type: object
+          description: The SAME probe scored under the other battery, so a reader comparing verdicts never has to guess whether the doors differed or the rules did.
+          properties:
+            version:
+              type: string
+            verdict:
+              type: string
+              enum:
+              - ready
+              - not_ready
+              - unreachable
+            difference:
+              type: string
+        protocols_spoken:
+          type: array
+          items:
+            type: string
+            enum:
+            - x402
+            - mpp
+          description: 'Which protocols the 402 speaks, derived from its headers: x402 when PAYMENT-REQUIRED is present, mpp when a WWW-Authenticate: Payment challenge parses. The verdict keeps meaning x402-ready, permanently; read this for the union.'
+        mpp_core:
+          type: object
+          description: The additive mpp-core-v1 observable core reading under draft-01. Separates failed checks from unmeasured requirements; never changes the x402 verdict or historical MPP battery.
+          properties:
+            battery:
+              type: string
+              enum:
+              - mpp-core-v1
+            spec:
+              type: object
+            state:
+              type: string
+            observed_at:
+              type: string
+              format: date-time
+            checks:
+              type: array
+              items:
+                type: object
+            challenges:
+              type: array
+              items:
+                type: object
+            counts:
+              type: object
+            problem:
+              type: object
+            gaps:
+              type: array
+              items:
+                type: string
+        mpp:
+          type: object
+          required:
+          - battery
+          - spec
+          - spoken
+          - challenges
+          - checks
+          - advisories
+          - what_this_cannot_tell_you
+          description: 'The MPP battery''s reading of the same bytes (mpp-v1, draft-00): whether the door speaks it, its challenges summarised, its named checks when it does (none when it does not — a check against no challenge is not an observation), its advisories outside any verdict, and what one unpaid GET cannot tell you.'
+          properties:
+            battery:
+              type: string
+            spec:
+              type: string
+            spoken:
+              type: boolean
+            challenges:
+              type: array
+              items:
+                type: object
+            checks:
+              type: array
+              items:
+                type: object
+                required:
+                - name
+                - ok
+                - detail
+                properties:
+                  name:
+                    type: string
+                  ok:
+                    type: boolean
+                  detail:
+                    type: string
+            advisories:
+              type: array
+              items:
+                type: object
+                required:
+                - name
+                - detail
+                properties:
+                  name:
+                    type: string
+                  detail:
+                    type: string
+            the_x402_verdict_above:
+              type: string
+            what_this_cannot_tell_you:
+              type: array
+              items:
+                type: string
+        remediation:
+          type: array
+          description: 'What to do about it, both sides: one row per failed check or raised advisory that a vocabulary class explains — the class, its definition URL, what the operator does, what the buyer does. Derived from /defects.json through the signal already reported; never part of the verdict; empty on a clean door.'
+          items:
+            type: object
+            required:
+            - signal
+            - kind
+            - defect_class
+            - definition_url
+            - operator
+            - buyer
+            properties:
+              signal:
+                type: string
+              kind:
+                type: string
+                enum:
+                - check
+                - advisory
+              defect_class:
+                type: string
+              title:
+                type: string
+              detectable:
+                type: string
+                enum:
+                - unpaid
+                - paid
+              definition_url:
+                type: string
+                format: uri
+              operator:
+                type: string
+              buyer:
+                type: string
+              falsified_by:
+                type: string
+        probe_method:
+          type: object
+          description: Which question the door actually answered. The probe sends GET first (or the method a catalog declared for the resource) and, if that is refused AS a method with 405 or 501, sends exactly one more — the method named in Allow when the 405 carries one, POST otherwise. At most two requests per call, to the same URL, and only ever about the verb.
+          required:
+          - used
+          - attempted
+          - source
+          - note
+          properties:
+            used:
+              type: string
+              enum:
+              - GET
+              - POST
+              description: The method whose response produced the checks below.
+            attempted:
+              type: array
+              items:
+                type: string
+                enum:
+                - GET
+                - POST
+              description: Every method sent, in order. More than one means the first was refused as a method.
+            source:
+              type: string
+              enum:
+              - declared
+              - allow-header
+              - fallback
+              - default
+              description: 'Where the method came from: declared = a catalog or challenge declared it for this resource and nothing was guessed; allow-header = the door''s own 405 named it; fallback = POST, tried once after a method refusal that named nothing; default = GET, what a buyer''s client sends first.'
+            note:
+              type: string
+              description: The same story in plain English, for a human reading the readout.
+        single_probe_note:
+          type: string
+          description: One moment. A passing preflight quoted as an uptime claim is a misquote, and this field is where the response says so. It also says when the reading took two requests rather than one, which happens only on a method refusal.
+        what_this_cannot_tell_you:
+          type: array
+          items:
+            type: string
+        our_conflict_of_interest:
+          type: string
+          description: Published in the verdict itself rather than in a policy nobody fetches.
+        rate_limit:
+          type: object
+        store_identity:
+          type: object
+        the_rest_of_the_ladder:
+          type: object
+          description: 'The rungs this probe did not climb, and what climbs each one. Replaced next_steps 2026-09-16: the reading named the missing rungs in one place and the paid instruments in another, and a buyer had to join them. Each unclimbed rung carries the item, its price in USDC, the tool that calls it and the URL; a rung nothing can buy today says so rather than being sold a near-miss.'
+          properties:
+            current_reading:
+              type: object
+              description: The unsigned preflight's evidence and spending limits.
+              properties:
+                signed:
+                  type: boolean
+                proves_payment_or_delivery:
+                  type: boolean
+                scope:
+                  type: string
+            free_signed_history:
+              type: object
+              description: 'Free historical evidence: the lookup is unsigned; verify its cited signed originals, exact subject and observation age separately.'
+              properties:
+                history_url_template:
+                  type: string
+                  description: Replace {host} with the endpoint's hostname.
+                issuer_key_url:
+                  type: string
+                guide_url:
+                  type: string
+                requires_spend_authorization:
+                  type: boolean
+                scope:
+                  type: string
+            climbed:
+              type: array
+              items:
+                type: string
+            unclimbed:
+              type: array
+              items:
+                type: object
+                properties:
+                  rung:
+                    type: string
+                  what_it_is:
+                    type: string
+                  climbs_it:
+                    type:
+                    - object
+                    - 'null'
+                    description: Null when nothing on the shelf climbs this rung.
+                    properties:
+                      item_id:
+                        type: string
+                      price_usdc:
+                        type: number
+                      tool:
+                        type: string
+                      tool_door:
+                        type: string
+                        description: The MCP door that tool is on. This reading is served from more than one, and the verifier door at /mcp/verifier lists no buy tool at all.
+                      url:
+                        type: string
+                      what_you_get:
+                        type: string
+                  why_not:
+                    type: string
+            already_free:
+              type: string
+            signed_copy_of_this_reading:
+              type:
+              - object
+              - 'null'
+        this_is_not_advice:
+          type: string
+          description: That the reading is an observation and the spending decision is the reader's, whose risk appetite they know better than this store does.
+    Problem:
+      type: object
+      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
+        title:
+          type: string
+          description: A short, stable summary of the problem class.
+        status:
+          type: integer
+          description: The HTTP status code, repeated in the body.
+        detail:
+          type: string
+          description: What went wrong with THIS request, in plain language.
+        instance:
+          type: string
+          format: uri
+          description: The request path.
+        error:
+          type: string
+          description: The store's human-readable message. Always present, including on responses that predate the typed model.
+        retry_same_request:
+          type: boolean
+          const: false
+          description: 'Present on repair responses: correct the selection or inputs before retrying.'
+        next_step:
+          type: object
+          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
+          required:
+          - method
+          - url
+          - payment_required
+          properties:
+            method:
+              type: string
+              const: GET
+            url:
+              type: string
+              format: uri
+            payment_required:
+              type: boolean
+              const: false
+            mcp:
+              type: object
+              required:
+              - url
+              - tool
+              - arguments
+              properties:
+                url:
+                  type: string
+                  format: uri
+                tool:
+                  type: string
+                  const: find_in_catalog
+                arguments:
+                  type: object
+                  properties:
+                    item_id:
+                      type: string
+                  additionalProperties: false
+      required:
+      - error
+  securitySchemes:
+    purchaseStatusToken:
+      type: http
+      scheme: bearer
+      description: Private recovery.status_token returned by a catalogue purchase. This capability reads only its original purchase status.
+externalDocs:
+  url: https://scvd.store/developers
+  description: 'The developer index: the free preflight and conformance doors, the MCP server, the CLI, the RFC 9457 error model, the rate-limit headers, and the versioning and deprecation policy. The full agent briefing is at /llms.txt.'
+x-agentcash-provenance:
+  ownershipProofs:
+  - '0xd0716b334368fed445d000f12c7e586a6c86e13bd543333bab6c04695df236320c5dbfa4f0beb6807cc486c0ed4fd5a38892a8148d5aa80377db9f35ed4c4b151c'
+  - 4HduymBCHhwyLgtMyXRpDX3JHQR3oyqTSytsXqCamzCc4ed9fJeBSpDUDSLwfZ59mZaw9ggdMNURPNBi4P6BRU47
+x-scvd-ucp:
+  profile: https://scvd.store/.well-known/ucp
+  checkout: advertised
+x-scvd-native-checkout:
+  mcp:
+    protocol: mpp
+    payment_method: evm
+    intent: charge
+    transport: mcp
+    method: tools/call
+    path: /mcp
+    challenge_key: org.paymentauth/payment-required
+    challenge_location: error.data, or result._meta with ?payment=tool-result
+    credential_meta_key: org.paymentauth/credential
+    receipt_meta_key: org.paymentauth/receipt
+    idempotency_meta_key: x402/idempotency-key
+    terms: 'each item''s payment_capabilities row with transport http: same network, asset and amount_atomic'
+  webmcp:
+    protocol: mpp
+    payment_method: evm
+    intent: charge
+    transport: webmcp
+    script: /webmcp.js
+    quote_tool: quote_store_purchase
+    challenge_field: payment_challenge
+    complete_tool: complete_store_purchase
+    credential_argument: signed_credential
+    receipt_field: payment_receipt
+    terms: 'each item''s payment_capabilities row with transport http: same network, asset and amount_atomic'
+x-rate-limiting:
+  application_level_limit: true
+  limited_paths:
+  - /api/preflight/v1
+  - /api/preflight/v2
+  - /api/before-you-pay/v1
+  - /api/look/v1
+  - /api/preflight/batch
+  headers_returned:
+  - RateLimit-Limit
+  - RateLimit-Remaining
+  - RateLimit-Reset
+  - RateLimit-Policy
+  - RateLimit
+  note: 'The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+  policy_url: https://scvd.store/developers
+x-versioning:
+  scheme: url-path
+  note: 'Breaking changes arrive as a new version in the path (/api/preflight/v1 → /v2). A published version''s SHAPE never changes under a client: fields are added, never removed or retyped.'
+  deprecation: A version being retired serves the RFC 8594 Deprecation and Sunset headers on every response for at least 90 days before it stops answering, and the date is published at /developers before the headers appear.
+  sunset_headers:
+  - Deprecation
+  - Sunset
+  - Link; rel="successor-version"
+  policy_url: https://scvd.store/deprecation
+  currently_deprecated: []
+  versions:
+  - path: /api/preflight/v1
+    status: supported
+    since: '2026-08-03'
+    sunset: null
+    successor: /api/preflight/v2
+  - path: /api/preflight/v2
+    status: current
+    since: '2026-08-23'
+    sunset: null
+    successor: null
+  - path: /api/look/v1
+    status: current
+    since: '2026-09-02'
+    sunset: null
+    successor: null
+  - path: /api/conformance/v1
+    status: current
+    since: '2026-08-03'
+    sunset: null
+    successor: null
