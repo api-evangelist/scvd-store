@@ -99,6 +99,15 @@ paths:
       - Purchase Status
 components:
   responses:
+    ServerError:
+      description: Something fell off a shelf. Nothing was charged.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     BadRequest:
       description: The request was malformed or a required parameter was missing.
       content:
@@ -122,15 +131,6 @@ components:
           schema:
             type: integer
           description: Seconds to wait before retrying.
-    ServerError:
-      description: Something fell off a shelf. Nothing was charged.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
   schemas:
     Problem:
       type: object

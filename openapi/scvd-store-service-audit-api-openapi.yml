@@ -100,17 +100,8 @@ paths:
       - Service Audit
 components:
   responses:
-    BadRequest:
-      description: The request was malformed or a required parameter was missing.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-    NotFound:
-      description: No such resource. The body names where to look instead.
+    ServerError:
+      description: Something fell off a shelf. Nothing was charged.
       content:
         application/problem+json:
           schema:
@@ -132,8 +123,17 @@ components:
           schema:
             type: integer
           description: Seconds to wait before retrying.
-    ServerError:
-      description: Something fell off a shelf. Nothing was charged.
+    BadRequest:
+      description: The request was malformed or a required parameter was missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: No such resource. The body names where to look instead.
       content:
         application/problem+json:
           schema:

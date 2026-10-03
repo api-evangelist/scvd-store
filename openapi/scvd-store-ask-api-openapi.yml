@@ -221,19 +221,8 @@ paths:
       - Ask
 components:
   responses:
-    NotModified:
-      description: 'Not Modified: the ETag you sent still names these exact bytes. No body; every other header is as the 200 would carry it.'
-    BadRequest:
-      description: The request was malformed or a required parameter was missing.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-    NotFound:
-      description: No such resource. The body names where to look instead.
+    ServerError:
+      description: Something fell off a shelf. Nothing was charged.
       content:
         application/problem+json:
           schema:
@@ -255,8 +244,19 @@ components:
           schema:
             type: integer
           description: Seconds to wait before retrying.
-    ServerError:
-      description: Something fell off a shelf. Nothing was charged.
+    NotModified:
+      description: 'Not Modified: the ETag you sent still names these exact bytes. No body; every other header is as the 200 would carry it.'
+    BadRequest:
+      description: The request was malformed or a required parameter was missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: No such resource. The body names where to look instead.
       content:
         application/problem+json:
           schema:
@@ -265,72 +265,6 @@ components:
           schema:
             $ref: '#/components/schemas/Problem'
   schemas:
-    Problem:
-      type: object
-      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
-      properties:
-        type:
-          type: string
-          format: uri
-          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
-        title:
-          type: string
-          description: A short, stable summary of the problem class.
-        status:
-          type: integer
-          description: The HTTP status code, repeated in the body.
-        detail:
-          type: string
-          description: What went wrong with THIS request, in plain language.
-        instance:
-          type: string
-          format: uri
-          description: The request path.
-        error:
-          type: string
-          description: The store's human-readable message. Always present, including on responses that predate the typed model.
-        retry_same_request:
-          type: boolean
-          const: false
-          description: 'Present on repair responses: correct the selection or inputs before retrying.'
-        next_step:
-          type: object
-          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
-          required:
-          - method
-          - url
-          - payment_required
-          properties:
-            method:
-              type: string
-              const: GET
-            url:
-              type: string
-              format: uri
-            payment_required:
-              type: boolean
-              const: false
-            mcp:
-              type: object
-              required:
-              - url
-              - tool
-              - arguments
-              properties:
-                url:
-                  type: string
-                  format: uri
-                tool:
-                  type: string
-                  const: find_in_catalog
-                arguments:
-                  type: object
-                  properties:
-                    item_id:
-                      type: string
-                  additionalProperties: false
-      required:
-      - error
     AskAnswer:
       type: object
       required:
@@ -424,6 +358,72 @@ components:
         nothing_matched:
           type: string
           description: Present only when the index matched nothing.
+    Problem:
+      type: object
+      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
+        title:
+          type: string
+          description: A short, stable summary of the problem class.
+        status:
+          type: integer
+          description: The HTTP status code, repeated in the body.
+        detail:
+          type: string
+          description: What went wrong with THIS request, in plain language.
+        instance:
+          type: string
+          format: uri
+          description: The request path.
+        error:
+          type: string
+          description: The store's human-readable message. Always present, including on responses that predate the typed model.
+        retry_same_request:
+          type: boolean
+          const: false
+          description: 'Present on repair responses: correct the selection or inputs before retrying.'
+        next_step:
+          type: object
+          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
+          required:
+          - method
+          - url
+          - payment_required
+          properties:
+            method:
+              type: string
+              const: GET
+            url:
+              type: string
+              format: uri
+            payment_required:
+              type: boolean
+              const: false
+            mcp:
+              type: object
+              required:
+              - url
+              - tool
+              - arguments
+              properties:
+                url:
+                  type: string
+                  format: uri
+                tool:
+                  type: string
+                  const: find_in_catalog
+                arguments:
+                  type: object
+                  properties:
+                    item_id:
+                      type: string
+                  additionalProperties: false
+      required:
+      - error
   securitySchemes:
     purchaseStatusToken:
       type: http

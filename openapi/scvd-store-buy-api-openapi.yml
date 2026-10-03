@@ -7675,17 +7675,8 @@ paths:
       - Buy
 components:
   responses:
-    NotFound:
-      description: No such resource. The body names where to look instead.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-    BadRequest:
-      description: The request was malformed or a required parameter was missing.
+    ServerError:
+      description: Something fell off a shelf. Nothing was charged.
       content:
         application/problem+json:
           schema:
@@ -7707,8 +7698,17 @@ components:
           schema:
             type: integer
           description: Seconds to wait before retrying.
-    ServerError:
-      description: Something fell off a shelf. Nothing was charged.
+    BadRequest:
+      description: The request was malformed or a required parameter was missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: No such resource. The body names where to look instead.
       content:
         application/problem+json:
           schema:
@@ -7717,224 +7717,6 @@ components:
           schema:
             $ref: '#/components/schemas/Problem'
   schemas:
-    BuyerProof:
-      type: object
-      description: 'ed25519 proof: verify exact UTF-8 signed_payload, then its identities and hashes. RFC 8785 JSON.'
-      properties:
-        signed_payload:
-          type: string
-        signature:
-          type: string
-        public_key:
-          type: string
-        signature_covers:
-          type: string
-      required:
-      - signed_payload
-      - signature
-      - public_key
-      - signature_covers
-    PaymentRequiredChallenge:
-      type: object
-      description: The x402 v2 challenge, in the response body. The canonical, signable copy of the same terms rides base64-encoded in the PAYMENT-REQUIRED header; this body is the readable twin plus the things a first-time payer needs — a fill-in-the-blanks payload template, the atomic-vs-decimal amount check, and a suggested idempotency key.
-      required:
-      - error
-      - note
-      - payload_template
-      properties:
-        error:
-          type: string
-          description: The counter's own sentence about what is being asked for.
-        note:
-          type: string
-          description: 'Where the signable requirements are and what to retry with: sign one of the accepts and resend with the PAYMENT-SIGNATURE header. The v1 X-PAYMENT header is still honoured.'
-        item_id:
-          type: string
-          description: The shelf being bought. Present on the /api/buy/* doors; a penny page has no menu item and sends none.
-        min_price_usdc:
-          type: number
-          description: The cheapest tier on offer, in USDC, on the /api/buy/* doors. Paying above it is a tip and is recorded as one, never required.
-        price_usdc:
-          type: number
-          description: The minimum page price. Publication doors send this instead of min_price_usdc; higher offered tiers buy the same page and add a tip.
-        pay_more_if_you_like:
-          type: string
-          description: The penny pages' note that the higher tiers in the header buy exactly the same page and are recorded as a tip.
-        pricing:
-          type: string
-          description: fixed, or tiered where the item offers more than one price.
-        required_params:
-          type: array
-          items:
-            type: string
-          description: Query parameters this item refuses to be bought without. Asking the price without them is free; buying without them is refused before any money moves, and a supplied invalid value is refused before terms. Absent where the door takes none.
-        required_params_note:
-          type: string
-        input_contract_url:
-          type: string
-          format: uri
-          description: 'The free compact item contract: price tiers and the full input schema. Present where required_params is.'
-        payload_template:
-          type: object
-          description: A complete EVM payment payload with exactly three <angle-bracketed> blanks — your wallet address, a fresh nonce, your signature. Everything else is already correct for THIS challenge; `accepted` in particular must stay byte-identical to what was offered.
-        payload_template_note:
-          type: string
-          description: How to fill the template in, including the EIP-712 domain wall that otherwise fails silently.
-        hand_rolling_url:
-          type: string
-          format: uri
-          description: The worked example, for a client being written by hand.
-        amount_check:
-          type: object
-          description: The decimal USDC price and the atomic string beside it, stated together — a six-decimal mismatch is the most common way a first payment fails.
-        idempotency:
-          type: object
-          description: A ready-to-use suggested_key and what it does. Sending it back as Idempotency-Key makes a retry loop safe from a second charge.
-        spec:
-          type: object
-          description: What this call does and what comes back, machine-readable.
-        spec_note:
-          type: string
-          description: The same, as one sentence.
-        guarantee:
-          type: string
-          description: What is promised and — the half that matters — what is not.
-        verification:
-          type: object
-          description: Everything about this offer that is checkable before signing, from this response and public URLs, without asking the store.
-        wallet_safety:
-          type: object
-          description: The two mechanisms that protect a payer from their own retry loop, both free and live on every paid door.
-        house_rule:
-          type: string
-          description: 'The standing refusal: nothing here acts without your decision, and the store never asks for credentials, keys, or wallet secrets.'
-        want_something_else:
-          type: string
-        extensions:
-          type: object
-          description: x402 extension blocks. `offer-receipt` carries a JWS-signed copy of each accepts entry, so the offer is verifiable against the store's published key before a payment is signed.
-    WatchCommission:
-      type: object
-      description: Signed original purchase terms. URL watches bind the target and service dates; Operator Statement also binds the wallet, chain, asset and opening position; Recurring Patronage grants bind each purchased extension separately. Decode signed_payload for the certificate ID and exact terms. Present on new purchases and their public records; absent on legacy records. Observations carry their own signatures.
-      required:
-      - signed_payload
-      - signature
-      - public_key
-      - signature_covers
-      properties:
-        signed_payload:
-          type: string
-          description: RFC 8785 canonical JSON. Verify the ed25519 signature over these exact UTF-8 bytes.
-        signature:
-          type: string
-        public_key:
-          type: string
-        signature_covers:
-          type: string
-    Problem:
-      type: object
-      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
-      properties:
-        type:
-          type: string
-          format: uri
-          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
-        title:
-          type: string
-          description: A short, stable summary of the problem class.
-        status:
-          type: integer
-          description: The HTTP status code, repeated in the body.
-        detail:
-          type: string
-          description: What went wrong with THIS request, in plain language.
-        instance:
-          type: string
-          format: uri
-          description: The request path.
-        error:
-          type: string
-          description: The store's human-readable message. Always present, including on responses that predate the typed model.
-        retry_same_request:
-          type: boolean
-          const: false
-          description: 'Present on repair responses: correct the selection or inputs before retrying.'
-        next_step:
-          type: object
-          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
-          required:
-          - method
-          - url
-          - payment_required
-          properties:
-            method:
-              type: string
-              const: GET
-            url:
-              type: string
-              format: uri
-            payment_required:
-              type: boolean
-              const: false
-            mcp:
-              type: object
-              required:
-              - url
-              - tool
-              - arguments
-              properties:
-                url:
-                  type: string
-                  format: uri
-                tool:
-                  type: string
-                  const: find_in_catalog
-                arguments:
-                  type: object
-                  properties:
-                    item_id:
-                      type: string
-                  additionalProperties: false
-      required:
-      - error
-    OrderReceipt:
-      type: object
-      required:
-      - message
-      - order_id
-      - status
-      - order_url
-      - paid_usdc
-      properties:
-        commission:
-          $ref: '#/components/schemas/BuyerProof'
-        completion_proof:
-          $ref: '#/components/schemas/BuyerProof'
-        message:
-          type: string
-        order_id:
-          type: string
-        status:
-          type: string
-          description: queued until a human does the work; completed once they have.
-        sla_hours:
-          type: integer
-          description: The promised window. Miss it and the money comes back — the commitment this number exists to make checkable.
-        deliverable:
-          description: The goods, present ONLY when the work was finished inside this request. Absent while the order is still queued, which is the normal case for a human shelf.
-        order_url:
-          type: string
-          format: uri
-          description: Where to poll it.
-        paid_usdc:
-          type: number
-        tip_usdc:
-          type: number
-        patron_number:
-          type: integer
-        badge_url:
-          type: string
-          format: uri
     DeliveryEnvelope:
       type: object
       required:
@@ -8054,6 +7836,151 @@ components:
         which_check_is_worth_doing:
           type: string
           description: The store naming the one check worth running on what it just sold you.
+    PaymentRequiredChallenge:
+      type: object
+      description: The x402 v2 challenge, in the response body. The canonical, signable copy of the same terms rides base64-encoded in the PAYMENT-REQUIRED header; this body is the readable twin plus the things a first-time payer needs — a fill-in-the-blanks payload template, the atomic-vs-decimal amount check, and a suggested idempotency key.
+      required:
+      - error
+      - note
+      - payload_template
+      properties:
+        error:
+          type: string
+          description: The counter's own sentence about what is being asked for.
+        note:
+          type: string
+          description: 'Where the signable requirements are and what to retry with: sign one of the accepts and resend with the PAYMENT-SIGNATURE header. The v1 X-PAYMENT header is still honoured.'
+        item_id:
+          type: string
+          description: The shelf being bought. Present on the /api/buy/* doors; a penny page has no menu item and sends none.
+        min_price_usdc:
+          type: number
+          description: The cheapest tier on offer, in USDC, on the /api/buy/* doors. Paying above it is a tip and is recorded as one, never required.
+        price_usdc:
+          type: number
+          description: The minimum page price. Publication doors send this instead of min_price_usdc; higher offered tiers buy the same page and add a tip.
+        pay_more_if_you_like:
+          type: string
+          description: The penny pages' note that the higher tiers in the header buy exactly the same page and are recorded as a tip.
+        pricing:
+          type: string
+          description: fixed, or tiered where the item offers more than one price.
+        required_params:
+          type: array
+          items:
+            type: string
+          description: Query parameters this item refuses to be bought without. Asking the price without them is free; buying without them is refused before any money moves, and a supplied invalid value is refused before terms. Absent where the door takes none.
+        required_params_note:
+          type: string
+        input_contract_url:
+          type: string
+          format: uri
+          description: 'The free compact item contract: price tiers and the full input schema. Present where required_params is.'
+        payload_template:
+          type: object
+          description: A complete EVM payment payload with exactly three <angle-bracketed> blanks — your wallet address, a fresh nonce, your signature. Everything else is already correct for THIS challenge; `accepted` in particular must stay byte-identical to what was offered.
+        payload_template_note:
+          type: string
+          description: How to fill the template in, including the EIP-712 domain wall that otherwise fails silently.
+        hand_rolling_url:
+          type: string
+          format: uri
+          description: The worked example, for a client being written by hand.
+        amount_check:
+          type: object
+          description: The decimal USDC price and the atomic string beside it, stated together — a six-decimal mismatch is the most common way a first payment fails.
+        idempotency:
+          type: object
+          description: A ready-to-use suggested_key and what it does. Sending it back as Idempotency-Key makes a retry loop safe from a second charge.
+        spec:
+          type: object
+          description: What this call does and what comes back, machine-readable.
+        spec_note:
+          type: string
+          description: The same, as one sentence.
+        guarantee:
+          type: string
+          description: What is promised and — the half that matters — what is not.
+        verification:
+          type: object
+          description: Everything about this offer that is checkable before signing, from this response and public URLs, without asking the store.
+        wallet_safety:
+          type: object
+          description: The two mechanisms that protect a payer from their own retry loop, both free and live on every paid door.
+        house_rule:
+          type: string
+          description: 'The standing refusal: nothing here acts without your decision, and the store never asks for credentials, keys, or wallet secrets.'
+        want_something_else:
+          type: string
+        extensions:
+          type: object
+          description: x402 extension blocks. `offer-receipt` carries a JWS-signed copy of each accepts entry, so the offer is verifiable against the store's published key before a payment is signed.
+    Problem:
+      type: object
+      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
+        title:
+          type: string
+          description: A short, stable summary of the problem class.
+        status:
+          type: integer
+          description: The HTTP status code, repeated in the body.
+        detail:
+          type: string
+          description: What went wrong with THIS request, in plain language.
+        instance:
+          type: string
+          format: uri
+          description: The request path.
+        error:
+          type: string
+          description: The store's human-readable message. Always present, including on responses that predate the typed model.
+        retry_same_request:
+          type: boolean
+          const: false
+          description: 'Present on repair responses: correct the selection or inputs before retrying.'
+        next_step:
+          type: object
+          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
+          required:
+          - method
+          - url
+          - payment_required
+          properties:
+            method:
+              type: string
+              const: GET
+            url:
+              type: string
+              format: uri
+            payment_required:
+              type: boolean
+              const: false
+            mcp:
+              type: object
+              required:
+              - url
+              - tool
+              - arguments
+              properties:
+                url:
+                  type: string
+                  format: uri
+                tool:
+                  type: string
+                  const: find_in_catalog
+                arguments:
+                  type: object
+                  properties:
+                    item_id:
+                      type: string
+                  additionalProperties: false
+      required:
+      - error
     DisclosureBlock:
       type: object
       title: Disclosure block
@@ -8087,15 +8014,88 @@ components:
           type: string
           maxLength: 64
           description: Optional. A cert_ id from an earlier purchase here. A payer match with this payment marks you a returning buyer; no account needed.
+    BuyerProof:
+      type: object
+      description: 'ed25519 proof: verify exact UTF-8 signed_payload, then its identities and hashes. RFC 8785 JSON.'
+      properties:
+        signed_payload:
+          type: string
+        signature:
+          type: string
+        public_key:
+          type: string
+        signature_covers:
+          type: string
+      required:
+      - signed_payload
+      - signature
+      - public_key
+      - signature_covers
+    WatchCommission:
+      type: object
+      description: Signed original purchase terms. URL watches bind the target and service dates; Operator Statement also binds the wallet, chain, asset and opening position; Recurring Patronage grants bind each purchased extension separately. Decode signed_payload for the certificate ID and exact terms. Present on new purchases and their public records; absent on legacy records. Observations carry their own signatures.
+      required:
+      - signed_payload
+      - signature
+      - public_key
+      - signature_covers
+      properties:
+        signed_payload:
+          type: string
+          description: RFC 8785 canonical JSON. Verify the ed25519 signature over these exact UTF-8 bytes.
+        signature:
+          type: string
+        public_key:
+          type: string
+        signature_covers:
+          type: string
+    OrderReceipt:
+      type: object
+      required:
+      - message
+      - order_id
+      - status
+      - order_url
+      - paid_usdc
+      properties:
+        commission:
+          $ref: '#/components/schemas/BuyerProof'
+        completion_proof:
+          $ref: '#/components/schemas/BuyerProof'
+        message:
+          type: string
+        order_id:
+          type: string
+        status:
+          type: string
+          description: queued until a human does the work; completed once they have.
+        sla_hours:
+          type: integer
+          description: The promised window. Miss it and the money comes back — the commitment this number exists to make checkable.
+        deliverable:
+          description: The goods, present ONLY when the work was finished inside this request. Absent while the order is still queued, which is the normal case for a human shelf.
+        order_url:
+          type: string
+          format: uri
+          description: Where to poll it.
+        paid_usdc:
+          type: number
+        tip_usdc:
+          type: number
+        patron_number:
+          type: integer
+        badge_url:
+          type: string
+          format: uri
   headers:
-    PAYMENT-REQUIRED:
-      schema:
-        type: string
-      description: 'Base64-encoded x402 v2 payment requirements: the accepts[] array, one entry per rail per price tier, mirroring x-payment-info.accepts on this operation.'
     WWW-Authenticate:
       schema:
         type: string
       description: X402 resource_metadata="<origin>/.well-known/oauth-protected-resource" — what gates this resource, at the fixed path a client constructs without being told.
+    PAYMENT-REQUIRED:
+      schema:
+        type: string
+      description: 'Base64-encoded x402 v2 payment requirements: the accepts[] array, one entry per rail per price tier, mirroring x-payment-info.accepts on this operation.'
   securitySchemes:
     purchaseStatusToken:
       type: http
