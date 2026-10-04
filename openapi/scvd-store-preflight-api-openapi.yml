@@ -525,6 +525,15 @@ paths:
       - Preflight
 components:
   responses:
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     ServerError:
       description: Something fell off a shelf. Nothing was charged.
       content:
@@ -534,22 +543,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Problem'
-    TooManyRequests:
-      description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying.
-    NotModified:
-      description: 'Not Modified: the ETag you sent still names these exact bytes. No body; every other header is as the 200 would carry it.'
     TooManyRequestsMetered:
       description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
       content:
@@ -574,6 +567,22 @@ components:
           $ref: '#/components/headers/RateLimit-Policy'
         RateLimit:
           $ref: '#/components/headers/RateLimit'
+    TooManyRequests:
+      description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying.
+    NotModified:
+      description: 'Not Modified: the ETag you sent still names these exact bytes. No body; every other header is as the 200 would carry it.'
     BadRequest:
       description: The request was malformed or a required parameter was missing.
       content:
@@ -583,16 +592,94 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Problem'
-    NotFound:
-      description: No such resource. The body names where to look instead.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
+  headers:
+    RateLimit:
+      schema:
+        type: string
+      description: 'Both policies'' live state: "isolate";r=N;t=N, "global";r=N;t=N.'
+    RateLimit-Remaining:
+      schema:
+        type: integer
+      description: What is left in the binding bucket. The global backstop is a read-modify-write on eventually consistent storage, so this can read slightly high — never low.
+    RateLimit-Limit:
+      schema:
+        type: integer
+      description: The binding bucket's ceiling per 60-second window.
+    RateLimit-Policy:
+      schema:
+        type: string
+      description: 'Both policies as structured fields: "isolate";q=N;w=60, "global";q=N;w=60.'
+    RateLimit-Reset:
+      schema:
+        type: integer
+      description: Seconds until both buckets roll, at the wall-clock minute.
   schemas:
+    Problem:
+      type: object
+      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
+        title:
+          type: string
+          description: A short, stable summary of the problem class.
+        status:
+          type: integer
+          description: The HTTP status code, repeated in the body.
+        detail:
+          type: string
+          description: What went wrong with THIS request, in plain language.
+        instance:
+          type: string
+          format: uri
+          description: The request path.
+        error:
+          type: string
+          description: The store's human-readable message. Always present, including on responses that predate the typed model.
+        retry_same_request:
+          type: boolean
+          const: false
+          description: 'Present on repair responses: correct the selection or inputs before retrying.'
+        next_step:
+          type: object
+          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
+          required:
+          - method
+          - url
+          - payment_required
+          properties:
+            method:
+              type: string
+              const: GET
+            url:
+              type: string
+              format: uri
+            payment_required:
+              type: boolean
+              const: false
+            mcp:
+              type: object
+              required:
+              - url
+              - tool
+              - arguments
+              properties:
+                url:
+                  type: string
+                  format: uri
+                tool:
+                  type: string
+                  const: find_in_catalog
+                arguments:
+                  type: object
+                  properties:
+                    item_id:
+                      type: string
+                  additionalProperties: false
+      required:
+      - error
     PreflightVerdict:
       type: object
       required:
@@ -960,93 +1047,6 @@ components:
         this_is_not_advice:
           type: string
           description: That the reading is an observation and the spending decision is the reader's, whose risk appetite they know better than this store does.
-    Problem:
-      type: object
-      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
-      properties:
-        type:
-          type: string
-          format: uri
-          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
-        title:
-          type: string
-          description: A short, stable summary of the problem class.
-        status:
-          type: integer
-          description: The HTTP status code, repeated in the body.
-        detail:
-          type: string
-          description: What went wrong with THIS request, in plain language.
-        instance:
-          type: string
-          format: uri
-          description: The request path.
-        error:
-          type: string
-          description: The store's human-readable message. Always present, including on responses that predate the typed model.
-        retry_same_request:
-          type: boolean
-          const: false
-          description: 'Present on repair responses: correct the selection or inputs before retrying.'
-        next_step:
-          type: object
-          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
-          required:
-          - method
-          - url
-          - payment_required
-          properties:
-            method:
-              type: string
-              const: GET
-            url:
-              type: string
-              format: uri
-            payment_required:
-              type: boolean
-              const: false
-            mcp:
-              type: object
-              required:
-              - url
-              - tool
-              - arguments
-              properties:
-                url:
-                  type: string
-                  format: uri
-                tool:
-                  type: string
-                  const: find_in_catalog
-                arguments:
-                  type: object
-                  properties:
-                    item_id:
-                      type: string
-                  additionalProperties: false
-      required:
-      - error
-  headers:
-    RateLimit-Reset:
-      schema:
-        type: integer
-      description: Seconds until both buckets roll, at the wall-clock minute.
-    RateLimit-Policy:
-      schema:
-        type: string
-      description: 'Both policies as structured fields: "isolate";q=N;w=60, "global";q=N;w=60.'
-    RateLimit:
-      schema:
-        type: string
-      description: 'Both policies'' live state: "isolate";r=N;t=N, "global";r=N;t=N.'
-    RateLimit-Limit:
-      schema:
-        type: integer
-      description: The binding bucket's ceiling per 60-second window.
-    RateLimit-Remaining:
-      schema:
-        type: integer
-      description: What is left in the binding bucket. The global backstop is a read-modify-write on eventually consistent storage, so this can read slightly high — never low.
   securitySchemes:
     purchaseStatusToken:
       type: http

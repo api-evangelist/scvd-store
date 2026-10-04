@@ -227,6 +227,15 @@ paths:
       - Bounties
 components:
   responses:
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     ServerError:
       description: Something fell off a shelf. Nothing was charged.
       content:
@@ -254,15 +263,6 @@ components:
       description: 'Not Modified: the ETag you sent still names these exact bytes. No body; every other header is as the 200 would carry it.'
     BadRequest:
       description: The request was malformed or a required parameter was missing.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-    NotFound:
-      description: No such resource. The body names where to look instead.
       content:
         application/problem+json:
           schema:

@@ -96,6 +96,15 @@ paths:
       - Good Buyer
 components:
   responses:
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     ServerError:
       description: Something fell off a shelf. Nothing was charged.
       content:
@@ -121,15 +130,6 @@ components:
           description: Seconds to wait before retrying.
     BadRequest:
       description: The request was malformed or a required parameter was missing.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-    NotFound:
-      description: No such resource. The body names where to look instead.
       content:
         application/problem+json:
           schema:

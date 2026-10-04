@@ -551,7 +551,25 @@ paths:
       tags:
       - Almanac
 components:
+  headers:
+    PAYMENT-REQUIRED:
+      schema:
+        type: string
+      description: 'Base64-encoded x402 v2 payment requirements: the accepts[] array, one entry per rail per price tier, mirroring x-payment-info.accepts on this operation.'
+    WWW-Authenticate:
+      schema:
+        type: string
+      description: X402 resource_metadata="<origin>/.well-known/oauth-protected-resource" — what gates this resource, at the fixed path a client constructs without being told.
   responses:
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     ServerError:
       description: Something fell off a shelf. Nothing was charged.
       content:
@@ -579,15 +597,6 @@ components:
       description: 'Not Modified: the ETag you sent still names these exact bytes. No body; every other header is as the 200 would carry it.'
     BadRequest:
       description: The request was malformed or a required parameter was missing.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-    NotFound:
-      description: No such resource. The body names where to look instead.
       content:
         application/problem+json:
           schema:
@@ -741,15 +750,6 @@ components:
                   additionalProperties: false
       required:
       - error
-  headers:
-    WWW-Authenticate:
-      schema:
-        type: string
-      description: X402 resource_metadata="<origin>/.well-known/oauth-protected-resource" — what gates this resource, at the fixed path a client constructs without being told.
-    PAYMENT-REQUIRED:
-      schema:
-        type: string
-      description: 'Base64-encoded x402 v2 payment requirements: the accepts[] array, one entry per rail per price tier, mirroring x-payment-info.accepts on this operation.'
   securitySchemes:
     purchaseStatusToken:
       type: http

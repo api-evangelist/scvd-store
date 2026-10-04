@@ -1135,6 +1135,15 @@ paths:
       - Trade
 components:
   responses:
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
     ServerError:
       description: Something fell off a shelf. Nothing was charged.
       content:
@@ -1169,16 +1178,73 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Problem'
-    NotFound:
-      description: No such resource. The body names where to look instead.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
   schemas:
+    Problem:
+      type: object
+      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
+        title:
+          type: string
+          description: A short, stable summary of the problem class.
+        status:
+          type: integer
+          description: The HTTP status code, repeated in the body.
+        detail:
+          type: string
+          description: What went wrong with THIS request, in plain language.
+        instance:
+          type: string
+          format: uri
+          description: The request path.
+        error:
+          type: string
+          description: The store's human-readable message. Always present, including on responses that predate the typed model.
+        retry_same_request:
+          type: boolean
+          const: false
+          description: 'Present on repair responses: correct the selection or inputs before retrying.'
+        next_step:
+          type: object
+          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
+          required:
+          - method
+          - url
+          - payment_required
+          properties:
+            method:
+              type: string
+              const: GET
+            url:
+              type: string
+              format: uri
+            payment_required:
+              type: boolean
+              const: false
+            mcp:
+              type: object
+              required:
+              - url
+              - tool
+              - arguments
+              properties:
+                url:
+                  type: string
+                  format: uri
+                tool:
+                  type: string
+                  const: find_in_catalog
+                arguments:
+                  type: object
+                  properties:
+                    item_id:
+                      type: string
+                  additionalProperties: false
+      required:
+      - error
     TradeRefusal:
       type: object
       required:
@@ -1199,70 +1265,6 @@ components:
           type: string
         error:
           type: string
-    TradeDelivery:
-      type: object
-      required:
-      - item_id
-      - deliverable
-      - settled_via
-      - trade
-      - certificate
-      - signature
-      - public_key
-      - verify_url
-      properties:
-        message:
-          type: string
-        item_id:
-          type: string
-        deliverable:
-          type: string
-        settled_via:
-          type: string
-          enum:
-          - trade_account
-          - trade_account_test
-        trade:
-          type: object
-          properties:
-            account:
-              type: string
-            partner_name:
-              type: string
-            trade_price_usd:
-              type: number
-            partner_share_bps:
-              type: integer
-            net_usd:
-              type: number
-            instruction_digest:
-              type: string
-            order_ref:
-              type: string
-            what_this_settles:
-              type: string
-        patron_number:
-          type: integer
-        certificate:
-          type: object
-        signature:
-          type: string
-        signature_jcs:
-          type: string
-        public_key:
-          type: string
-        signed_payload:
-          type: string
-        verify_url:
-          type: string
-          format: uri
-        signed_with:
-          type: string
-          enum:
-          - current
-          - previous
-        replayed_order_ref:
-          type: boolean
     TradeCheck:
       type: object
       required:
@@ -1416,72 +1418,70 @@ components:
                 type: string
               what_to_do:
                 type: string
-    Problem:
+    TradeDelivery:
       type: object
-      description: An RFC 9457 problem object. `error` is the store's long-standing human-readable field and is always present; the RFC fields sit beside it.
-      properties:
-        type:
-          type: string
-          format: uri
-          description: A URI identifying the problem class. Dereferenceable at this origin where one exists.
-        title:
-          type: string
-          description: A short, stable summary of the problem class.
-        status:
-          type: integer
-          description: The HTTP status code, repeated in the body.
-        detail:
-          type: string
-          description: What went wrong with THIS request, in plain language.
-        instance:
-          type: string
-          format: uri
-          description: The request path.
-        error:
-          type: string
-          description: The store's human-readable message. Always present, including on responses that predate the typed model.
-        retry_same_request:
-          type: boolean
-          const: false
-          description: 'Present on repair responses: correct the selection or inputs before retrying.'
-        next_step:
-          type: object
-          description: Optional free read after a refusal. Catalog and input repairs also include an equivalent MCP read. No payment or buyer arguments are forwarded.
-          required:
-          - method
-          - url
-          - payment_required
-          properties:
-            method:
-              type: string
-              const: GET
-            url:
-              type: string
-              format: uri
-            payment_required:
-              type: boolean
-              const: false
-            mcp:
-              type: object
-              required:
-              - url
-              - tool
-              - arguments
-              properties:
-                url:
-                  type: string
-                  format: uri
-                tool:
-                  type: string
-                  const: find_in_catalog
-                arguments:
-                  type: object
-                  properties:
-                    item_id:
-                      type: string
-                  additionalProperties: false
       required:
-      - error
+      - item_id
+      - deliverable
+      - settled_via
+      - trade
+      - certificate
+      - signature
+      - public_key
+      - verify_url
+      properties:
+        message:
+          type: string
+        item_id:
+          type: string
+        deliverable:
+          type: string
+        settled_via:
+          type: string
+          enum:
+          - trade_account
+          - trade_account_test
+        trade:
+          type: object
+          properties:
+            account:
+              type: string
+            partner_name:
+              type: string
+            trade_price_usd:
+              type: number
+            partner_share_bps:
+              type: integer
+            net_usd:
+              type: number
+            instruction_digest:
+              type: string
+            order_ref:
+              type: string
+            what_this_settles:
+              type: string
+        patron_number:
+          type: integer
+        certificate:
+          type: object
+        signature:
+          type: string
+        signature_jcs:
+          type: string
+        public_key:
+          type: string
+        signed_payload:
+          type: string
+        verify_url:
+          type: string
+          format: uri
+        signed_with:
+          type: string
+          enum:
+          - current
+          - previous
+        replayed_order_ref:
+          type: boolean
   securitySchemes:
     purchaseStatusToken:
       type: http

@@ -7674,168 +7674,72 @@ paths:
       tags:
       - Buy
 components:
-  responses:
-    ServerError:
-      description: Something fell off a shelf. Nothing was charged.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-    TooManyRequests:
-      description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-      headers:
-        Retry-After:
-          schema:
-            type: integer
-          description: Seconds to wait before retrying.
-    BadRequest:
-      description: The request was malformed or a required parameter was missing.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-    NotFound:
-      description: No such resource. The body names where to look instead.
-      content:
-        application/problem+json:
-          schema:
-            $ref: '#/components/schemas/Problem'
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Problem'
+  headers:
+    PAYMENT-REQUIRED:
+      schema:
+        type: string
+      description: 'Base64-encoded x402 v2 payment requirements: the accepts[] array, one entry per rail per price tier, mirroring x-payment-info.accepts on this operation.'
+    WWW-Authenticate:
+      schema:
+        type: string
+      description: X402 resource_metadata="<origin>/.well-known/oauth-protected-resource" — what gates this resource, at the fixed path a client constructs without being told.
   schemas:
-    DeliveryEnvelope:
+    OrderReceipt:
       type: object
       required:
       - message
-      - item_id
-      - deliverable
+      - order_id
+      - status
+      - order_url
       - paid_usdc
-      - certificate
-      - signature
-      - public_key
-      - algorithm
-      - verify_url
-      - verification
       properties:
+        commission:
+          $ref: '#/components/schemas/BuyerProof'
+        completion_proof:
+          $ref: '#/components/schemas/BuyerProof'
         message:
           type: string
-          description: The counter's own words.
-        item_id:
+        order_id:
           type: string
+        status:
+          type: string
+          description: queued until a human does the work; completed once they have.
+        sla_hours:
+          type: integer
+          description: The promised window. Miss it and the money comes back — the commitment this number exists to make checkable.
         deliverable:
-          description: The goods. Its shape is the item's own — a note, a reading, a record — which is why this field is deliberately untyped here rather than falsely narrowed to one item's payload.
+          description: The goods, present ONLY when the work was finished inside this request. Absent while the order is still queued, which is the normal case for a human shelf.
+        order_url:
+          type: string
+          format: uri
+          description: Where to poll it.
         paid_usdc:
           type: number
         tip_usdc:
           type: number
-          description: What was paid above the ask, where anything was.
         patron_number:
           type: integer
-        commission:
-          $ref: '#/components/schemas/WatchCommission'
-        purchased_text:
-          $ref: '#/components/schemas/BuyerProof'
-        confession_receipt:
-          type: object
-          description: Confession only. Private proof binding the stored text to this purchase. Absent from public certificates and verification. Share only by choice.
-          required:
-          - receipt
-          - signed_payload
-          - signature
-          - public_key
-          - signature_covers
-          properties:
-            receipt:
-              type: object
-              required:
-              - type
-              - cert_id
-              - confession_id
-              - confession
-              - recorded_at
-              properties:
-                type:
-                  type: string
-                  const: scvd.confession-receipt.v1
-                cert_id:
-                  type: string
-                confession_id:
-                  type: string
-                confession:
-                  type: string
-                recorded_at:
-                  type: string
-                  format: date-time
-                sign_as:
-                  type: string
-            signed_payload:
-              type: string
-              description: JCS of receipt. Verify the ed25519 signature over these exact UTF-8 bytes.
-            signature:
-              type: string
-            public_key:
-              type: string
-            signature_covers:
-              type: string
         badge_url:
           type: string
           format: uri
-        certificate:
-          type: object
-          description: The signed record of this purchase.
+    WatchCommission:
+      type: object
+      description: Signed original purchase terms. URL watches bind the target and service dates; Operator Statement also binds the wallet, chain, asset and opening position; Recurring Patronage grants bind each purchased extension separately. Decode signed_payload for the certificate ID and exact terms. Present on new purchases and their public records; absent on legacy records. Observations carry their own signatures.
+      required:
+      - signed_payload
+      - signature
+      - public_key
+      - signature_covers
+      properties:
+        signed_payload:
+          type: string
+          description: RFC 8785 canonical JSON. Verify the ed25519 signature over these exact UTF-8 bytes.
         signature:
           type: string
         public_key:
           type: string
-        algorithm:
-          type: string
-          description: ed25519.
-        signed_payload:
-          type: string
         signature_covers:
           type: string
-          description: Exactly which bytes were signed.
-        signature_jcs:
-          type: string
-        signature_jcs_discipline:
-          type: string
-        signature_jcs_covers:
-          type: string
-        verify_url:
-          type: string
-          format: uri
-          description: Where this purchase verifies — free, forever, by anyone, including people who did not buy it.
-        store_identity:
-          type: object
-        verification:
-          type: object
-          description: How to check the signature without asking us.
-        attest_this_purchase:
-          type: object
-        store_credit:
-          type: object
-          description: What banked back to the paying wallet.
-        show_your_human:
-          type: string
-        receipt_for_your_human:
-          type: string
-        which_check_is_worth_doing:
-          type: string
-          description: The store naming the one check worth running on what it just sold you.
     PaymentRequiredChallenge:
       type: object
       description: The x402 v2 challenge, in the response body. The canonical, signable copy of the same terms rides base64-encoded in the PAYMENT-REQUIRED header; this body is the readable twin plus the things a first-time payer needs — a fill-in-the-blanks payload template, the atomic-vs-decimal amount check, and a suggested idempotency key.
@@ -7981,6 +7885,142 @@ components:
                   additionalProperties: false
       required:
       - error
+    DeliveryEnvelope:
+      type: object
+      required:
+      - message
+      - item_id
+      - deliverable
+      - paid_usdc
+      - certificate
+      - signature
+      - public_key
+      - algorithm
+      - verify_url
+      - verification
+      properties:
+        message:
+          type: string
+          description: The counter's own words.
+        item_id:
+          type: string
+        deliverable:
+          description: The goods. Its shape is the item's own — a note, a reading, a record — which is why this field is deliberately untyped here rather than falsely narrowed to one item's payload.
+        paid_usdc:
+          type: number
+        tip_usdc:
+          type: number
+          description: What was paid above the ask, where anything was.
+        patron_number:
+          type: integer
+        commission:
+          $ref: '#/components/schemas/WatchCommission'
+        purchased_text:
+          $ref: '#/components/schemas/BuyerProof'
+        confession_receipt:
+          type: object
+          description: Confession only. Private proof binding the stored text to this purchase. Absent from public certificates and verification. Share only by choice.
+          required:
+          - receipt
+          - signed_payload
+          - signature
+          - public_key
+          - signature_covers
+          properties:
+            receipt:
+              type: object
+              required:
+              - type
+              - cert_id
+              - confession_id
+              - confession
+              - recorded_at
+              properties:
+                type:
+                  type: string
+                  const: scvd.confession-receipt.v1
+                cert_id:
+                  type: string
+                confession_id:
+                  type: string
+                confession:
+                  type: string
+                recorded_at:
+                  type: string
+                  format: date-time
+                sign_as:
+                  type: string
+            signed_payload:
+              type: string
+              description: JCS of receipt. Verify the ed25519 signature over these exact UTF-8 bytes.
+            signature:
+              type: string
+            public_key:
+              type: string
+            signature_covers:
+              type: string
+        badge_url:
+          type: string
+          format: uri
+        certificate:
+          type: object
+          description: The signed record of this purchase.
+        signature:
+          type: string
+        public_key:
+          type: string
+        algorithm:
+          type: string
+          description: ed25519.
+        signed_payload:
+          type: string
+        signature_covers:
+          type: string
+          description: Exactly which bytes were signed.
+        signature_jcs:
+          type: string
+        signature_jcs_discipline:
+          type: string
+        signature_jcs_covers:
+          type: string
+        verify_url:
+          type: string
+          format: uri
+          description: Where this purchase verifies — free, forever, by anyone, including people who did not buy it.
+        store_identity:
+          type: object
+        verification:
+          type: object
+          description: How to check the signature without asking us.
+        attest_this_purchase:
+          type: object
+        store_credit:
+          type: object
+          description: What banked back to the paying wallet.
+        show_your_human:
+          type: string
+        receipt_for_your_human:
+          type: string
+        which_check_is_worth_doing:
+          type: string
+          description: The store naming the one check worth running on what it just sold you.
+    BuyerProof:
+      type: object
+      description: 'ed25519 proof: verify exact UTF-8 signed_payload, then its identities and hashes. RFC 8785 JSON.'
+      properties:
+        signed_payload:
+          type: string
+        signature:
+          type: string
+        public_key:
+          type: string
+        signature_covers:
+          type: string
+      required:
+      - signed_payload
+      - signature
+      - public_key
+      - signature_covers
     DisclosureBlock:
       type: object
       title: Disclosure block
@@ -8014,88 +8054,48 @@ components:
           type: string
           maxLength: 64
           description: Optional. A cert_ id from an earlier purchase here. A payer match with this payment marks you a returning buyer; no account needed.
-    BuyerProof:
-      type: object
-      description: 'ed25519 proof: verify exact UTF-8 signed_payload, then its identities and hashes. RFC 8785 JSON.'
-      properties:
-        signed_payload:
-          type: string
-        signature:
-          type: string
-        public_key:
-          type: string
-        signature_covers:
-          type: string
-      required:
-      - signed_payload
-      - signature
-      - public_key
-      - signature_covers
-    WatchCommission:
-      type: object
-      description: Signed original purchase terms. URL watches bind the target and service dates; Operator Statement also binds the wallet, chain, asset and opening position; Recurring Patronage grants bind each purchased extension separately. Decode signed_payload for the certificate ID and exact terms. Present on new purchases and their public records; absent on legacy records. Observations carry their own signatures.
-      required:
-      - signed_payload
-      - signature
-      - public_key
-      - signature_covers
-      properties:
-        signed_payload:
-          type: string
-          description: RFC 8785 canonical JSON. Verify the ed25519 signature over these exact UTF-8 bytes.
-        signature:
-          type: string
-        public_key:
-          type: string
-        signature_covers:
-          type: string
-    OrderReceipt:
-      type: object
-      required:
-      - message
-      - order_id
-      - status
-      - order_url
-      - paid_usdc
-      properties:
-        commission:
-          $ref: '#/components/schemas/BuyerProof'
-        completion_proof:
-          $ref: '#/components/schemas/BuyerProof'
-        message:
-          type: string
-        order_id:
-          type: string
-        status:
-          type: string
-          description: queued until a human does the work; completed once they have.
-        sla_hours:
-          type: integer
-          description: The promised window. Miss it and the money comes back — the commitment this number exists to make checkable.
-        deliverable:
-          description: The goods, present ONLY when the work was finished inside this request. Absent while the order is still queued, which is the normal case for a human shelf.
-        order_url:
-          type: string
-          format: uri
-          description: Where to poll it.
-        paid_usdc:
-          type: number
-        tip_usdc:
-          type: number
-        patron_number:
-          type: integer
-        badge_url:
-          type: string
-          format: uri
-  headers:
-    WWW-Authenticate:
-      schema:
-        type: string
-      description: X402 resource_metadata="<origin>/.well-known/oauth-protected-resource" — what gates this resource, at the fixed path a client constructs without being told.
-    PAYMENT-REQUIRED:
-      schema:
-        type: string
-      description: 'Base64-encoded x402 v2 payment requirements: the accepts[] array, one entry per rail per price tier, mirroring x-payment-info.accepts on this operation.'
+  responses:
+    NotFound:
+      description: No such resource. The body names where to look instead.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ServerError:
+      description: Something fell off a shelf. Nothing was charged.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    TooManyRequests:
+      description: 'Too many requests, from the edge rather than from the store''s own logic. Retry after the interval named in Retry-After; the store does not charge for a refusal. The free preflight is limited — 30 probes per isolate per minute, 60 global — because it spends outbound requests to a host the caller chooses. Every answer the limiter METERED carries the IETF RateLimit fields — the 200 and the 429 — so you can pace against the live number instead of discovering the ceiling by being refused: RateLimit-Limit / -Remaining / -Reset report whichever of the two buckets is closer to binding, and RateLimit / RateLimit-Policy name both. Past either ceiling it returns 429 with Retry-After. A validation refusal (400, e.g. a missing or unprobeable URL) returns BEFORE either bucket is touched and carries no RateLimit fields, because a malformed request never spent a probe; this contract used to declare them on those responses too, which described a header that had never been sent. No other operation enforces an application-level ceiling, and so returns no RateLimit headers: declaring a ceiling nothing enforces would be worse than declaring none. A 429 can also arrive from the edge under abuse conditions. A refused request is never charged for. The two figures above are read from the limiter''s own constants, not restated here — this string asserted that NO limit existed for a day after one shipped.'
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying.
+    BadRequest:
+      description: The request was malformed or a required parameter was missing.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Problem'
   securitySchemes:
     purchaseStatusToken:
       type: http
