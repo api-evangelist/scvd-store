@@ -1,0 +1,34 @@
+slug: scvd-store
+provider: SCVD General Store
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 2
+edges:
+- tag: Deprecation
+  spec_file: scvd-store-deprecation-api-openapi.yml
+  capability_id: BC-4270.10
+  capability_id_l1: BC-4270
+  capability_name: Public API Lifecycle Management
+  confidence: 0.8
+  evidence: GET /deprecation — "API versioning and deprecation policy"
+  reason: Explicitly publishes the versioning and deprecation policy of the vendor's public API, which
+    is Public API Lifecycle Management. Slight ambiguity only because it is a documentation endpoint rather
+    than a management surface.
+- tag: Developers
+  spec_file: scvd-store-developers-api-openapi.yml
+  capability_id: BC-4270.30
+  capability_id_l1: BC-4270
+  capability_name: Developer Portal Management
+  confidence: 0.8
+  evidence: GET /developers — "Developer documentation"
+  reason: Serves developer documentation for integrating with the platform's public APIs, matching Developer
+    Portal Management. Confidence 0.8 given it is a single documentation endpoint.
