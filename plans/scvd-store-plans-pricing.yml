@@ -422,3 +422,255 @@ charter:
   - scarcity_is_labor
   - no_gate_on_the_door
   - trade_channel
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - subscription
+  units: []
+  plans:
+  - name: Spot Check
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Settlement Attestation
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: A Small Blessing
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Settlement Reconciliation
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Daily Fortune
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Confession
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: A Sheaf of Attestations
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Mandate
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Case File
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: a window pick
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: A Signed Hello
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Good Buyer
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Calling Card
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Statement
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: a lucky
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: a pack of cards
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Coffee's for Closers
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: A Bitcoin Anchor
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Context Anchor
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Refresh
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Graffiti on a Train
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The A2A Repair Kit
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Night Watch
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - term
+  - name: The Once-Over
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Conformance Watch
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - term
+  - name: The Shop Window
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Launch Check
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Opening Day
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - term
+  - name: The Company an Address Keeps
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Recurring Patronage
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - term
+  - name: The Hosted Profile
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - term
+  - name: The Operator's Statement
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - term
+  - name: Certificate of Patronage
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Aura Walk
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: The Collab
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
