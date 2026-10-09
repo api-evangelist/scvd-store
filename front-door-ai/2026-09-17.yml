@@ -1,0 +1,35 @@
+# Front Door AI Index — scvd-store — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: scvd-store
+  lexicon_version: '1.0'
+  probed_at: '2026-09-25'
+  host: scvd.store
+  final_host: scvd.store
+  ownership: own
+  owner: scvd-store
+  shares_host_with: null
+  inherited_from: null
+  alias_of: null
+  verdict: scored
+  score: 14
+  band: 5
+  band_label: prominent
+  host_score: 14
+  density: 7.6
+  words: 1843
+  tiers:
+    agentic: 11
+    core: 2
+    model: 1
+  ambiguous: 13
+  top_terms:
+    agent: 12
+    agentic: 4
+    llms.txt: 3
+    AI agent: 2
+    AI: 2
+    MCP: 2
+    Claude: 1
+    smart: 1
