@@ -14,7 +14,7 @@ edges:
     registered_name: store.scvd/general-store
     register_id: store.scvd/general-store
     detected_by: sweep-agent-tools.py
-    detected: '2026-10-14'
+    detected: '2026-10-15'
   mcp_registry:
     servers:
     - store.scvd/general-store
