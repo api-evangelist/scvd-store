@@ -296,3 +296,9 @@ x-versioning:
     since: '2026-08-03'
     sunset: null
     successor: null
+x-provenance:
+  method: harvested
+  publisher: SCVD General Store
+  source: https://scvd.store/openapi.json
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
