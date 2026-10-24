@@ -18,6 +18,9 @@ artifacts:
   authentication/scvd-store-authentication.yml:
     method: searched
     evidence: declared in the artifact
+  capabilities/scvd-store-capability-edges.yml:
+    method: unknown
+    evidence: no authorship recorded
   changelog/scvd-store-changelog.yml:
     method: searched
     evidence: declared in the artifact
@@ -45,7 +48,13 @@ artifacts:
   front-door-ai/2026-09-17.yml:
     method: unknown
     evidence: no authorship recorded
-  kin/checks-2026-09-24T161608.yml:
+  integrations/_index.yml:
+    method: generated
+    evidence: carries an API Evangelist house phrase
+  integrations/scvd-store-integration-edges.yml:
+    method: unknown
+    evidence: no authorship recorded
+  kin/checks-2026-10-11T110117.yml:
     method: generated
     evidence: Kin Score snapshot written by score.rb
   kin/score-2026-09-19T193153.yml:
@@ -78,6 +87,21 @@ artifacts:
   kin/score-2026-09-24T161608.yml:
     method: generated
     evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-25T210408.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-25T232841.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-03T000835.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-03T024842.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-11T110117.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
   lifecycle/scvd-store-lifecycle.yml:
     method: searched
     evidence: declared in the artifact
@@ -108,10 +132,544 @@ artifacts:
   mcp/scvd-store-tool-crosswalk.yml:
     method: derived
     evidence: declared in the artifact
-  openapi/scvd-store-openapi.json:
-    method: unknown
-    evidence: no authorship recorded
+  openapi/_original/scvd-store-openapi.json:
+    method: harvested
+    evidence: the same operations as https://scvd.store/openapi.json (sha256 f03d86a19088, fetched 2026-10-04)
+  openapi/scvd-store-a2a-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-a2a-desk-json-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-almanac-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-anchor-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-ask-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-attestation-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-auth-md-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-before-you-pay-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-bell-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-bitcoin-anchor-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-bot-auth-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-bot-auth-card-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-bounties-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-buy-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-card-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-case-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-catalog-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-claims-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-conformance-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-conformance-watch-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-corpus-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-corpus-json-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-corrections-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-credit-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-declare-door-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-defects-json-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-deprecation-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-developers-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-directory-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-doors-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-doors-json-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-fresh-set-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-gazette-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-good-buyer-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-guestbook-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-health-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-launch-check-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-ledger-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-letter-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-look-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-lucky-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-mandate-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-mcp-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-mcp-ward-json-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-menu-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-menu-json-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-onpage-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-onpage-audit-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-open-for-business-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-operator-statement-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-order-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-pack-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-passport-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-patronage-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-paywall-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-phantom-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-porch-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-practice-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-preflight-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-pricing-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-pricing-md-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-profiles-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-pulse-json-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-purchase-status-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-reconciliation-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-refund-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-registry-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-replay-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-request-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-rights-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-samples-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-service-audit-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-sites-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-sources-json-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-stamp-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-standing-note-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-statement-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-tab-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-tip-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-trade-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-trade-md-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-trust-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-verify-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-verify-receipt-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-watch-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-well-known-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-what-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-wind-down-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/scvd-store-zodiac-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  overlays/scvd-store-a2a-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-a2a-desk-json-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-almanac-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-anchor-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-ask-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-attestation-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-auth-md-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-before-you-pay-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-bell-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-bitcoin-anchor-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-bot-auth-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-bot-auth-card-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-bounties-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-buy-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-card-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-case-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-catalog-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-claims-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-conformance-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-conformance-watch-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-corpus-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-corpus-json-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-corrections-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-credit-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-declare-door-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-defects-json-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-deprecation-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-developers-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-directory-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-doors-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-doors-json-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-fresh-set-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-gazette-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-good-buyer-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-guestbook-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-health-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-launch-check-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-ledger-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-letter-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-look-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-lucky-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-mandate-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-mcp-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-mcp-ward-json-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-menu-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-menu-json-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-onpage-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-onpage-audit-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-open-for-business-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
   overlays/scvd-store-openapi-overlay.yaml:
+    method: derived
+    evidence: an API Evangelist overlay (title) over the provider's contract
+  overlays/scvd-store-operator-statement-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-order-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-pack-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-passport-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-patronage-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-paywall-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-phantom-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-porch-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-practice-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-preflight-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-pricing-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-pricing-md-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-profiles-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-pulse-json-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-purchase-status-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-reconciliation-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-refund-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-registry-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-replay-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-request-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-rights-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-samples-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-service-audit-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-sites-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-sources-json-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-stamp-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-standing-note-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-statement-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-tab-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-tip-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-trade-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-trade-md-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-trust-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-verify-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-verify-receipt-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-watch-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-well-known-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-what-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-wind-down-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/scvd-store-zodiac-api-phrasing-overlay.yaml:
     method: generated
     evidence: declared in the artifact
   packages/scvd-store-packages.yml:
